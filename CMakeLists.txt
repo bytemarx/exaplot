@@ -50,14 +50,16 @@ string(REGEX MATCH "^[0-9]+\.[0-9]+" PYTHON_VER_MAJ_MIN ${PYTHON_VERSION})
 if("${PYTHON_VER_MAJ_MIN}" STREQUAL "")
     message(FATAL_ERROR "Failed to parse Python version")
 endif()
-set(PYTHON_DOWNLOAD_URL "https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz")
+# set(PYTHON_DOWNLOAD_URL "https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz")
+set(PYTHON_SOURCE "${CMAKE_SOURCE_DIR}/cpython")
 
 set(PYTHON_INSTALL_DIR "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PYTHON_TARGET}")
 set(PYTHON_LIB_DIR "lib")
 set(PYTHON_NATIVE_LIB_DIR "lib-dynload")
 set(PYTHON_SITE_PACKAGES_DIR "site-packages")
 set(CPYTHON_PROJ "${PYTHON_TARGET}-${PYTHON_VERSION}")
-set(CPYTHON_SRC_DIR "${CMAKE_BINARY_DIR}/${CPYTHON_PROJ}/src/${PYTHON_TARGET}")
+# set(CPYTHON_SRC_DIR "${CMAKE_BINARY_DIR}/${CPYTHON_PROJ}/src/${PYTHON_TARGET}")
+set(CPYTHON_SRC_DIR "${PYTHON_SOURCE}")
 set(PYTHON_ENV_DIR "${CMAKE_BINARY_DIR}/${PYTHON_TARGET}-env")
 
 set(PYTHON_PROJECT_DIR "${CMAKE_SOURCE_DIR}/python")
@@ -86,7 +88,7 @@ else()
 endif()
 
 message("Targeted Python version: ${PYTHON_VERSION}")
-message("Python download URL: ${PYTHON_DOWNLOAD_URL}")
+# message("Python download URL: ${PYTHON_DOWNLOAD_URL}")
 
 message("CMake output directory: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 message("Library build output directory: ${OUTPUT_LIB_DIRECTORY}")
@@ -100,8 +102,11 @@ message("Python project directory: ${PYTHON_PROJECT_DIR}")
 ExternalProject_Add(
     ${PYTHON_TARGET}
     PREFIX ${CPYTHON_PROJ}
-    URL ${PYTHON_DOWNLOAD_URL}
-    DOWNLOAD_NO_PROGRESS TRUE
+    # URL ${PYTHON_DOWNLOAD_URL}
+    # DOWNLOAD_NO_PROGRESS TRUE
+    # GIT_REPOSITORY https://github.com/bytemarx/cpython.git
+    SOURCE_DIR ${PYTHON_SOURCE}
+    GIT_SUBMODULES cpython
     CONFIGURE_COMMAND
         ./configure ${CPYTHON_CONFIGURE_FLAGS}
     BUILD_COMMAND
@@ -117,11 +122,11 @@ add_custom_command(
     TARGET ${PYTHON_TARGET}
     POST_BUILD
     COMMAND
-        bash -c "cp -rL $(cat pybuilddir.txt) ${PYTHON_NATIVE_LIB_DIR}"
-    COMMENT "Copying the interpreter's native libraries to ${CPYTHON_SRC_DIR}/${PYTHON_NATIVE_LIB_DIR}"
+        bash -c "cp -rL $(cat pybuilddir.txt) ${CMAKE_BINARY_DIR}/${PYTHON_NATIVE_LIB_DIR}"
+    COMMENT "Copying the interpreter's native libraries to ${CMAKE_BINARY_DIR}/${PYTHON_NATIVE_LIB_DIR}"
     WORKING_DIRECTORY ${CPYTHON_SRC_DIR}
     VERBATIM
-    BYPRODUCTS ${PYTHON_NATIVE_LIB_DIR}
+    BYPRODUCTS ${CMAKE_BINARY_DIR}/${PYTHON_NATIVE_LIB_DIR}
 )
 
 # Build Python project & install into isolated environment workspace
@@ -163,7 +168,7 @@ add_custom_command(
         "${CPYTHON_SRC_DIR}/Lib"
         "${PYTHON_INSTALL_DIR}/${PYTHON_LIB_DIR}"
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${CPYTHON_SRC_DIR}/${PYTHON_NATIVE_LIB_DIR}"
+        "${CMAKE_BINARY_DIR}/${PYTHON_NATIVE_LIB_DIR}"
         "${PYTHON_INSTALL_DIR}/${PYTHON_NATIVE_LIB_DIR}"
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${PYTHON_ENV_DIR}/lib/python${PYTHON_VER_MAJ_MIN}/site-packages"
