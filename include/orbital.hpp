@@ -35,6 +35,7 @@ struct OrbitalError
         NONE,
         IMPORT,
         RUNTIME,
+        SYSTEM,
         UNDEFINED
     };
 
@@ -117,11 +118,8 @@ private:
     ScriptModule(const std::filesystem::path& file);
     OrbitalError load();
 
-    // PyObject* m_pyOwned_file;
     std::filesystem::path m_file;
-    PyObject* m_pyOwned_globals;
-    PyObject* m_pyOwned_locals;
-    // PyObject* m_pyOwned_module;
+    PyObject* m_pyOwned_module;
 };
 
 

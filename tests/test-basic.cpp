@@ -26,7 +26,7 @@ protected:
     void run(const char* file)
     {
         std::unique_ptr<ScriptModule> mod;
-        auto status = this->core.load(this->scriptsDir / file, mod);
+        auto status = this->core.load(this->scriptsDir / "basic" / file, mod);
         ASSERT_TRUE(status == OrbitalError::NONE);
     }
 };
