@@ -110,7 +110,7 @@ ExternalProject_Add(
     CONFIGURE_COMMAND
         ./configure ${CPYTHON_CONFIGURE_FLAGS}
     BUILD_COMMAND
-        make -s -j $(nproc)
+        CFLAGS=-w make -s -j $(nproc)
     BUILD_IN_SOURCE TRUE
     BUILD_ALWAYS TRUE
     INSTALL_COMMAND
@@ -185,7 +185,7 @@ set_target_properties(pythonlib10 PROPERTIES IMPORTED_LOCATION "${OUTPUT_LIB_DIR
 set(PYTHON_INCLUDES
     "${CPYTHON_SRC_DIR}"
     "${CPYTHON_SRC_DIR}/Include"
-    "${CPYTHON_SRC_DIR}/Include/internal"
+    # "${CPYTHON_SRC_DIR}/Include/internal"
 )
 
 ################################
@@ -200,6 +200,7 @@ configure_file(config.h.in config.h)
 set(SOURCES
     source/core.cpp
     source/module.cpp
+    source/script.cpp
 )
 
 set(CFLAGS

@@ -15,24 +15,26 @@ FetchContent_MakeAvailable(googletest)
 
 set(TEST_SOURCES
     test.cpp
+    test-basic.cpp
 )
 
 set(TEST_LIBRARIES
     gtest
 )
 
+configure_file(test-config.h.in test-config.h)
+
+# set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--verbose")
+
 enable_testing()
 
 add_executable(tests ${TEST_SOURCES})
-
-add_definitions(
-    -DTEST_DIRECTORY="${CMAKE_CURRENT_SOURCE_DIR}"
-)
 
 target_include_directories(
 	tests PUBLIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/../include"
     "${PYTHON_INCLUDES}"
+    "${CMAKE_BINARY_DIR}/tests"
 )
 
 target_link_libraries(tests PRIVATE orbital ${TEST_LIBRARIES})

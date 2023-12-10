@@ -60,13 +60,18 @@ private:
 class OrbitalInterface
 {
 public:
-    virtual ~OrbitalInterface() {}
-    virtual PyObject* init(const std::vector<std::string>& params, const std::vector<GridPoint>& plots) const;
-    virtual PyObject* msg(const std::string& message, bool append) const;
-    virtual PyObject* plot(long dataSet, const std::vector<double>& data) const;
-    virtual PyObject* plotVec(long dataSet, const std::vector<std::vector<double>>& data) const;
-    virtual PyObject* clear(long dataSet) const;
+    virtual ~OrbitalInterface();
+    virtual PyObject* init(const std::vector<std::string>& params, const std::vector<GridPoint>& plots) const = 0;
+    virtual PyObject* msg(const std::string& message, bool append) const = 0;
+    virtual PyObject* plot(long dataSet, const std::vector<double>& data) const = 0;
+    virtual PyObject* plotVec(long dataSet, const std::vector<std::vector<double>>& data) const = 0;
+    virtual PyObject* clear(long dataSet) const = 0;
 };
+
+
+typedef struct s_orbital_state {
+    const OrbitalInterface* iface;
+} orbital_state;
 
 
 class ScriptModule;
@@ -76,7 +81,7 @@ class OrbitalCore
 {
 public:
     static PyStatus init(
-        const std::wstring& executable,
+        const std::filesystem::path& executable,
         const std::filesystem::path& prefix);
     static int deinit();
 
@@ -103,6 +108,7 @@ class ScriptModule
     friend class OrbitalCore;
 
 public:
+    ~ScriptModule();
     OrbitalError reload();
     OrbitalError init();
     OrbitalError run();
@@ -110,6 +116,12 @@ public:
 private:
     ScriptModule(const std::filesystem::path& file);
     OrbitalError load();
+
+    // PyObject* m_pyOwned_file;
+    std::filesystem::path m_file;
+    PyObject* m_pyOwned_globals;
+    PyObject* m_pyOwned_locals;
+    // PyObject* m_pyOwned_module;
 };
 
 
