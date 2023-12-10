@@ -1,4 +1,5 @@
 #include "test.hpp"
+#include "test-config.h"
 
 #include <filesystem>
 #include <fstream>
@@ -34,6 +35,68 @@ void
 OrbitalEnvironment::TearDown()
 {
     // ASSERT_EQ(OrbitalCore::deinit(), 0);
+}
+
+
+ModuleTest::ModuleTest()
+    : iface{new ModuleTest::Interface{this}}
+    , core{this->iface}
+    , scriptsDir{TEST_SCRIPTS_DIR}
+{
+}
+
+
+ModuleTest::~ModuleTest()
+{
+    delete this->iface;
+}
+
+
+ModuleTest::Interface::Interface(ModuleTest* tester)
+    : m_tester{tester}
+{
+}
+
+
+PyObject*
+ModuleTest::Interface::init(
+    const std::vector<std::string>& params,
+    const std::vector<orbital::GridPoint>& plots) const
+{
+    this->m_tester->init(params, plots);
+    Py_RETURN_NONE;
+}
+
+
+PyObject*
+ModuleTest::Interface::msg(const std::string& message, bool append) const
+{
+    this->m_tester->msg(message, append);
+    Py_RETURN_NONE;
+}
+
+
+PyObject*
+ModuleTest::Interface::plot(long dataSet, const std::vector<double>& data) const
+{
+    this->m_tester->plot(dataSet, data);
+    Py_RETURN_NONE;
+}
+
+
+PyObject*
+ModuleTest::Interface::plotVec(long dataSet, const std::vector<std::vector<double>>& data) const
+{
+    this->m_tester->plotVec(dataSet, data);
+    Py_RETURN_NONE;
+}
+
+
+PyObject*
+ModuleTest::Interface::clear(long dataSet) const
+{
+    this->m_tester->clear(dataSet);
+    Py_RETURN_NONE;
 }
 
 

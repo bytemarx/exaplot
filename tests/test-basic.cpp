@@ -1,5 +1,4 @@
 #include "test.hpp"
-#include "test-config.h"
 
 #include <filesystem>
 #include <fstream>
@@ -13,46 +12,29 @@
 namespace orbital {
 namespace testing {
 
-
-ModuleTest::ModuleTest()
-    : iface{new Interface{this}}
-    , core{this->iface}
-    , scriptsDir{TEST_SCRIPTS_DIR}
+class BasicTest : public ModuleTest
 {
-}
-
-
-ModuleTest::~ModuleTest()
-{
-    delete this->iface;
-}
-
-
-Interface::Interface(ModuleTest* tester)
-    : m_tester{tester}
-{
-}
+public:
+    void init(const std::vector<std::string>& params, const std::vector<orbital::GridPoint>& plots) override;
+    void msg(const std::string& message, bool append) override;
+    void plot(long dataSet, const std::vector<double>& data) override;
+    void plotVec(long dataSet, const std::vector<std::vector<double>>& data) override;
+    void clear(long dataSet) override;
+protected:
+    BasicTest() {}
+};
 
 // orbital.init("a", "b", "c", "d")
 
-TEST_F(ModuleTest, TestInit)
+TEST_F(BasicTest, TestInit)
 {
     std::unique_ptr<ScriptModule> mod;
     auto status = this->core.load(this->scriptsDir / "test-basic-init.py", mod);
     ASSERT_TRUE(status == OrbitalError::NONE);
 }
 
-PyObject*
-Interface::init(
-    const std::vector<std::string>& params,
-    const std::vector<orbital::GridPoint>& plots) const
-{
-    this->m_tester->init(params, plots);
-    Py_RETURN_NONE;
-}
-
 void
-ModuleTest::init(
+BasicTest::init(
     const std::vector<std::string>& params,
     const std::vector<orbital::GridPoint>& plots)
 {
@@ -71,22 +53,15 @@ ModuleTest::init(
 
 // orbital.msg("test", append=False)
 
-TEST_F(ModuleTest, TestMsg)
+TEST_F(BasicTest, TestMsg)
 {
     std::unique_ptr<ScriptModule> mod;
     auto status = this->core.load(this->scriptsDir / "test-basic-msg.py", mod);
     ASSERT_TRUE(status == OrbitalError::NONE);
 }
 
-PyObject*
-Interface::msg(const std::string& message, bool append) const
-{
-    this->m_tester->msg(message, append);
-    Py_RETURN_NONE;
-}
-
 void
-ModuleTest::msg(const std::string& message, bool append)
+BasicTest::msg(const std::string& message, bool append)
 {
     ASSERT_STREQ(message.c_str(), "test");
     ASSERT_FALSE(append);
@@ -94,26 +69,23 @@ ModuleTest::msg(const std::string& message, bool append)
 
 // orbital.plot
 
-PyObject*
-Interface::plot(long dataSet, const std::vector<double>& data) const
+void
+BasicTest::plot(long dataSet, const std::vector<double>& data)
 {
-    Py_RETURN_NONE;
 }
 
 // orbital.plotVec
 
-PyObject*
-Interface::plotVec(long dataSet, const std::vector<std::vector<double>>& data) const
+void
+BasicTest::plotVec(long dataSet, const std::vector<std::vector<double>>& data)
 {
-    Py_RETURN_NONE;
 }
 
 // orbital.clear
 
-PyObject*
-Interface::clear(long dataSet) const
+void
+BasicTest::clear(long dataSet)
 {
-    Py_RETURN_NONE;
 }
 
 

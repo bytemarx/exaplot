@@ -13,10 +13,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 
-set(TEST_SOURCES
-    test.cpp
-    test-basic.cpp
-)
+file(GLOB TEST_SOURCES *.cpp)
 
 set(TEST_LIBRARIES
     gtest
