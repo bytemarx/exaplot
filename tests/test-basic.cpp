@@ -12,6 +12,7 @@
 namespace orbital {
 namespace testing {
 
+
 class BasicTest : public ModuleTest
 {
 public:
@@ -22,15 +23,19 @@ public:
     void clear(long dataSet) override;
 protected:
     BasicTest() {}
+    void run(const char* file)
+    {
+        std::unique_ptr<ScriptModule> mod;
+        auto status = this->core.load(this->scriptsDir / file, mod);
+        ASSERT_TRUE(status == OrbitalError::NONE);
+    }
 };
 
 // orbital.init("a", "b", "c", "d")
 
 TEST_F(BasicTest, TestInit)
 {
-    std::unique_ptr<ScriptModule> mod;
-    auto status = this->core.load(this->scriptsDir / "test-basic-init.py", mod);
-    ASSERT_TRUE(status == OrbitalError::NONE);
+    this->run("test-basic-init.py");
 }
 
 void
@@ -55,9 +60,7 @@ BasicTest::init(
 
 TEST_F(BasicTest, TestMsg)
 {
-    std::unique_ptr<ScriptModule> mod;
-    auto status = this->core.load(this->scriptsDir / "test-basic-msg.py", mod);
-    ASSERT_TRUE(status == OrbitalError::NONE);
+    this->run("test-basic-msg.py");
 }
 
 void
@@ -67,25 +70,47 @@ BasicTest::msg(const std::string& message, bool append)
     ASSERT_FALSE(append);
 }
 
-// orbital.plot
+// orbital.plot(1, 1, 2, 3, 4.4, 5.5)
+
+TEST_F(BasicTest, TestPlot)
+{
+    this->run("test-basic-plot.py");
+}
 
 void
 BasicTest::plot(long dataSet, const std::vector<double>& data)
 {
+    ASSERT_EQ(dataSet, 1);
+    std::vector<double> expected{1, 2, 3, 4.4, 5.5};
+    ASSERT_EQ(data, expected);
 }
 
-// orbital.plotVec
+// orbital.plotVec(2, [0, 1, 2, 3], [1, 2, 3.3, 4.4])
+
+TEST_F(BasicTest, TestPlotVec)
+{
+    this->run("test-basic-plotVec.py");
+}
 
 void
 BasicTest::plotVec(long dataSet, const std::vector<std::vector<double>>& data)
 {
+    ASSERT_EQ(dataSet, 2);
+    std::vector<std::vector<double>> expected{{0, 1, 2, 3}, {1, 2, 3.3, 4.4}};
+    ASSERT_EQ(data, expected);
 }
 
-// orbital.clear
+// orbital.plot(3)
+
+TEST_F(BasicTest, TestClear)
+{
+    this->run("test-basic-clear.py");
+}
 
 void
 BasicTest::clear(long dataSet)
 {
+    ASSERT_EQ(dataSet, 3);
 }
 
 
