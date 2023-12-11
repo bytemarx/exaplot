@@ -45,7 +45,7 @@ ScriptModule::load()
     this->m_pyOwned_module = PyImport_ExecCodeModule("__orbital__", codeObject);
     Py_DECREF(codeObject);
     if (this->m_pyOwned_module == NULL)
-        return OrbitalError{OrbitalError::IMPORT};
+        return OrbitalError::pyerror(OrbitalError::IMPORT);
 
     return OrbitalError{OrbitalError::NONE};
 }

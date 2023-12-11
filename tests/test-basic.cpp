@@ -22,13 +22,7 @@ public:
     void plotVec(long dataSet, const std::vector<std::vector<double>>& data) override;
     void clear(long dataSet) override;
 protected:
-    BasicTest() {}
-    void run(const char* file)
-    {
-        std::unique_ptr<ScriptModule> mod;
-        auto status = this->core.load(this->scriptsDir / "basic" / file, mod);
-        ASSERT_TRUE(status == OrbitalError::NONE);
-    }
+    BasicTest() { this->scriptsDir = this->scriptsDir / "basic"; }
 };
 
 // orbital.init("a", "b", "c", "d")

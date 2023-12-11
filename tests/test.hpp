@@ -45,6 +45,7 @@ private:
 protected:
     ModuleTest();
     virtual ~ModuleTest();
+    void run(const char* file);
 
     Interface* iface;
     OrbitalCore core;

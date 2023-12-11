@@ -39,17 +39,17 @@ struct OrbitalError
         UNDEFINED
     };
 
+    static OrbitalError pyerror(Type);
+
     OrbitalError(
         const Type type = UNDEFINED,
         const std::string& msg = "",
-        const std::string& tb = "")
-        : m_type(type)
-        , m_message(msg)
-        , m_traceback(tb)
-    {}
+        const std::string& tb = "");
 
     bool operator==(const OrbitalError::Type& type) const { return this->m_type == type; }
     bool operator!=(const OrbitalError::Type& type) const { return !this->operator==(type); }
+    std::string message() const { return this->m_message; }
+    std::string traceback() const { return this->m_traceback; }
 
 private:
     Type m_type;
@@ -68,11 +68,6 @@ public:
     virtual PyObject* plotVec(long dataSet, const std::vector<std::vector<double>>& data) const = 0;
     virtual PyObject* clear(long dataSet) const = 0;
 };
-
-
-typedef struct s_orbital_state {
-    const OrbitalInterface* iface;
-} orbital_state;
 
 
 class ScriptModule;
@@ -99,7 +94,6 @@ private:
     std::string traceback(PyObject* tb) const;
 
     const OrbitalInterface* const m_interface;
-    PyObject* m_pyOwned_formatTraceback;
     PyThreadState* m_tState;
 };
 

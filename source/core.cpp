@@ -1,4 +1,3 @@
-#include "orbital.hpp"
 #include "internal.hpp"
 
 #include <cstdarg>
@@ -9,13 +8,6 @@
 
 
 namespace orbital {
-
-
-extern "C" {
-    PyObject* orbital_init(PyObject*, PyObject* const*, Py_ssize_t, PyObject*);
-    PyObject* orbital_msg(PyObject*, PyObject*, PyObject*);
-    PyObject* orbital_plot(PyObject*, PyObject* const*, Py_ssize_t);
-}
 
 
 static PyMethodDef
@@ -43,7 +35,7 @@ moduleMethods[] =
 };
 
 
-extern int orbitalExec(PyObject*);
+// extern int orbitalExec(PyObject*);
 
 
 static PyModuleDef_Slot
@@ -88,38 +80,122 @@ preinit(void)
 
 
 static PyObject*
-getModuleAttr(PyObject* pyModule, const char* attrName)
+traceback(PyObject* pyBorrowed_traceback)
 {
-    PyObject* pyModuleAttr = PyObject_GetAttrString(pyModule, attrName);
-    if (pyModuleAttr == NULL || !PyCallable_Check(pyModuleAttr)) {
-        Py_XDECREF(pyModuleAttr);
+    PyObject* pyOwned_module = NULL;
+    PyObject* pyOwned_formatTb = NULL;
+    PyObject* pyOwned_tracebackList = NULL;
+    PyObject* pyOwned_emptyStr = NULL;
+    PyObject* pyOwned_tracebackStr = NULL;
+
+    if (pyBorrowed_traceback == NULL)
         return NULL;
-    }
-    return pyModuleAttr;
+
+    pyOwned_module = PyImport_ImportModule("traceback");
+    if (pyOwned_module == NULL) goto error;
+
+    pyOwned_formatTb = PyObject_GetAttrString(pyOwned_module, "format_tb");
+    if (pyOwned_formatTb == NULL) goto error;
+
+    pyOwned_tracebackList = PyObject_CallFunctionObjArgs(pyOwned_formatTb, pyBorrowed_traceback, NULL);
+    if (pyOwned_tracebackList == NULL) goto error;
+
+    pyOwned_emptyStr = PyUnicode_FromString("");
+    if (pyOwned_emptyStr == NULL) goto error;
+
+    pyOwned_tracebackStr = PyUnicode_Join(pyOwned_emptyStr, pyOwned_tracebackList);
+
+    Py_DECREF(pyOwned_emptyStr);
+    Py_DECREF(pyOwned_tracebackList);
+    Py_DECREF(pyOwned_formatTb);
+    Py_DECREF(pyOwned_module);
+    return pyOwned_tracebackStr;
+
+error:
+    Py_XDECREF(pyOwned_emptyStr);
+    Py_XDECREF(pyOwned_tracebackList);
+    Py_XDECREF(pyOwned_formatTb);
+    Py_XDECREF(pyOwned_module);
+    return NULL;
 }
 
 
-/**
- * @brief Returns the `traceback.format_tb` function. Throws a runtime error on failure.
- * 
- * @return PyObject* 
- */
-static PyObject*
-pyErrBootstrap()
+OrbitalError
+OrbitalError::pyerror(OrbitalError::Type type)
 {
-    PyObject* tracebackModule = PyImport_ImportModule("traceback");
-    if (tracebackModule == NULL) {
-        throw std::runtime_error("Failed to import traceback module");
+    PyObject* pyOwned_type = NULL;
+    PyObject* pyOwned_value = NULL;
+    PyObject* pyOwned_traceback = NULL;
+    OrbitalError error{type};
+
+    if (PyErr_Occurred() == NULL)
+        return OrbitalError{OrbitalError::NONE};
+
+    PyErr_Fetch(&pyOwned_type, &pyOwned_value, &pyOwned_traceback);
+    Py_DECREF(pyOwned_type);
+
+    // msg = str(e)
+    // * look what they need to mimic a fraction of our power *
+    if (pyOwned_value != NULL) {
+        PyObject* pyOwned_msg = PyObject_Str(pyOwned_value);
+        if (pyOwned_msg == NULL) {
+            Py_DECREF(pyOwned_value);
+            goto error;
+        }
+
+        Py_ssize_t size;
+        const char* msg = PyUnicode_AsUTF8AndSize(pyOwned_msg, &size);
+        if (msg == NULL) {
+            Py_DECREF(pyOwned_msg);
+            Py_DECREF(pyOwned_value);
+            goto error;
+        }
+
+        error.m_message = std::string{msg, static_cast<std::string::size_type>(size)};
+        Py_DECREF(pyOwned_msg);
+        Py_DECREF(pyOwned_value);
     }
 
-    PyObject* format_tb = getModuleAttr(tracebackModule, "format_tb");
-    Py_DECREF(tracebackModule);
-    if (format_tb == NULL) {
-        throw std::runtime_error("Failed to load traceback.format_tb function");
+    if (pyOwned_traceback != NULL) {
+        PyObject* pyOwned_tracebackStr = orbital::traceback(pyOwned_traceback);
+        if (pyOwned_tracebackStr == NULL) {
+            Py_DECREF(pyOwned_traceback);
+            goto error;
+        }
+
+        Py_ssize_t size;
+        const char* tracebackStr = PyUnicode_AsUTF8AndSize(pyOwned_tracebackStr, &size);
+        if (tracebackStr == NULL) {
+            Py_DECREF(pyOwned_tracebackStr);
+            Py_DECREF(pyOwned_traceback);
+            goto error;
+        }
+
+        error.m_traceback = std::string{tracebackStr, static_cast<std::string::size_type>(size)};
+        Py_DECREF(pyOwned_tracebackStr);
+        Py_DECREF(pyOwned_traceback);
     }
 
-    return format_tb;
+    assert(!PyErr_Occurred());
+    goto done;
+error:
+    if (PyErr_Occurred()) {
+        PyErr_Print();
+        throw std::runtime_error{"Fatal error parsing Python error"};
+    }
+done:
+    return error;
 }
+
+
+OrbitalError::OrbitalError(
+    const Type type,
+    const std::string& msg,
+    const std::string& tb)
+    : m_type{type}
+    , m_message{msg}
+    , m_traceback{tb}
+{}
 
 
 ssize_t OrbitalCore::coreCount = 0;
@@ -152,7 +228,7 @@ OrbitalCore::init(
     PyConfig_InitIsolatedConfig(&config);
 
     status = PyConfig_Read(&config);
-    if (PyStatus_Exception(status)) goto exit;
+    if (PyStatus_Exception(status)) goto done;
 
     config.module_search_paths_set = 1;
 
@@ -162,28 +238,28 @@ OrbitalCore::init(
         &config.program_name,
         executable.c_str()
     );
-    if (PyStatus_Exception(status)) goto exit;
+    if (PyStatus_Exception(status)) goto done;
 
     // stdlib modules
     status = PyWideStringList_Append(
         &config.module_search_paths,
         (prefix / "lib").wstring().c_str()
     );
-    if (PyStatus_Exception(status)) goto exit;
+    if (PyStatus_Exception(status)) goto done;
 
     // stdlib extension modules
     status = PyWideStringList_Append(
         &config.module_search_paths,
         (prefix / "lib-dynload").wstring().c_str()
     );
-    if (PyStatus_Exception(status)) goto exit;
+    if (PyStatus_Exception(status)) goto done;
 
     // third-party modules
     status = PyWideStringList_Append(
         &config.module_search_paths,
         (prefix / "site-packages").wstring().c_str()
     );
-    if (PyStatus_Exception(status)) goto exit;
+    if (PyStatus_Exception(status)) goto done;
 
     // Python home
     status = PyConfig_SetBytesString(
@@ -191,12 +267,12 @@ OrbitalCore::init(
         &config.home,
         prefix.c_str()
     );
-    if (PyStatus_Exception(status)) goto exit;
+    if (PyStatus_Exception(status)) goto done;
 
     status = Py_InitializeFromConfig(&config);
-    if (PyStatus_Exception(status)) goto exit;
+    if (PyStatus_Exception(status)) goto done;
 
-exit:
+done:
     PyConfig_Clear(&config);
     return status;
 }
@@ -214,7 +290,6 @@ OrbitalInterface::~OrbitalInterface() = default;
 
 OrbitalCore::OrbitalCore(const OrbitalInterface* interface)
     : m_interface{interface}
-    // , m_pyOwned_formatTraceback{pyErrBootstrap()}
     , m_tState{NULL}
 {
     assert(Py_IsInitialized());
@@ -243,7 +318,6 @@ OrbitalCore::OrbitalCore(const OrbitalInterface* interface)
 OrbitalCore::~OrbitalCore()
 {
     Py_EndInterpreter(this->m_tState);
-    // Py_DECREF(this->m_pyOwned_formatTraceback);
     this->coreCount--;
 }
 

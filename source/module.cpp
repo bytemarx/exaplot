@@ -1,4 +1,3 @@
-#include "orbital.hpp"
 #include "internal.hpp"
 
 
@@ -10,6 +9,9 @@ getModuleState(PyObject* module)
 {
     return static_cast<orbital_state*>(PyModule_GetState(module));
 }
+
+
+extern "C" {
 
 
 int
@@ -30,9 +32,6 @@ orbitalExec(PyObject* module)
 error:
     return -1;
 }
-
-
-extern "C" {
 
 
 PyObject*

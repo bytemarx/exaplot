@@ -1,7 +1,6 @@
 #pragma once
 
-#define PY_SSIZE_T_CLEAN
-#include <Python.h>
+#include "orbital.hpp"
 
 
 typedef struct _is {
@@ -25,3 +24,17 @@ typedef struct _is {
     const void *orb_passthrough;
 
 } PyInterpreterState;
+
+typedef struct s_orbital_state {
+    const orbital::OrbitalInterface* iface;
+} orbital_state;
+
+
+extern "C" {
+
+int orbitalExec(PyObject* module);
+PyObject* orbital_init(PyObject*, PyObject* const*, Py_ssize_t, PyObject*);
+PyObject* orbital_msg(PyObject*, PyObject*, PyObject*);
+PyObject* orbital_plot(PyObject*, PyObject* const*, Py_ssize_t);
+
+}

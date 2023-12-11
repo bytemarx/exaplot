@@ -52,6 +52,15 @@ ModuleTest::~ModuleTest()
 }
 
 
+void
+ModuleTest::run(const char* file)
+{
+    std::unique_ptr<ScriptModule> mod;
+    auto status = this->core.load(this->scriptsDir / file, mod);
+    ASSERT_TRUE(status == OrbitalError::NONE) << status.message() << '\n' << status.traceback();
+}
+
+
 ModuleTest::Interface::Interface(ModuleTest* tester)
     : m_tester{tester}
 {
