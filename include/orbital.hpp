@@ -95,6 +95,7 @@ private:
 
     const OrbitalInterface* const m_interface;
     PyThreadState* m_tState;
+    PyThreadState* m_mState;
 };
 
 

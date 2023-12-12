@@ -34,7 +34,7 @@ OrbitalEnvironment::SetUp()
 void
 OrbitalEnvironment::TearDown()
 {
-    // ASSERT_EQ(OrbitalCore::deinit(), 0);
+    ASSERT_EQ(OrbitalCore::deinit(), 0);
 }
 
 
@@ -106,6 +106,40 @@ ModuleTest::Interface::clear(long dataSet) const
 {
     this->m_tester->clear(dataSet);
     Py_RETURN_NONE;
+}
+
+
+class BaselineTest : public ::testing::Test
+{
+protected:
+    class Interface : public OrbitalInterface
+    {
+    public:
+        PyObject* init(const std::vector<std::string>& params, const std::vector<orbital::GridPoint>& plots) const override { Py_RETURN_NONE; }
+        PyObject* msg(const std::string& message, bool append) const override { Py_RETURN_NONE; }
+        PyObject* plot(long dataSet, const std::vector<double>& data) const override { Py_RETURN_NONE; }
+        PyObject* plotVec(long dataSet, const std::vector<std::vector<double>>& data) const override { Py_RETURN_NONE; }
+        PyObject* clear(long dataSet) const override { Py_RETURN_NONE; }
+
+    private:
+        ModuleTest* m_tester;
+    };
+    BaselineTest() {};
+};
+
+
+TEST_F(BaselineTest, Init)
+{
+    ASSERT_TRUE(true);
+}
+
+
+TEST_F(BaselineTest, Instantiate)
+{
+    Interface* iface = new Interface;
+    OrbitalCore* core = new OrbitalCore{iface};
+    delete core;
+    delete iface;
 }
 
 

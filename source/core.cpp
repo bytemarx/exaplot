@@ -177,14 +177,11 @@ OrbitalError::pyerror(OrbitalError::Type type)
     }
 
     assert(!PyErr_Occurred());
-    goto done;
-error:
-    if (PyErr_Occurred()) {
-        PyErr_Print();
-        throw std::runtime_error{"Fatal error parsing Python error"};
-    }
-done:
     return error;
+error:
+    if (PyErr_Occurred())
+        PyErr_Print();
+    throw std::runtime_error{"Fatal error parsing Python error"};
 }
 
 
@@ -291,8 +288,10 @@ OrbitalInterface::~OrbitalInterface() = default;
 OrbitalCore::OrbitalCore(const OrbitalInterface* interface)
     : m_interface{interface}
     , m_tState{NULL}
+    , m_mState{NULL}
 {
     assert(Py_IsInitialized());
+    this->m_mState = PyThreadState_Get();
     if (this->coreCount == 0) {
         this->m_tState = Py_NewInterpreter();
     } else {
@@ -318,6 +317,7 @@ OrbitalCore::OrbitalCore(const OrbitalInterface* interface)
 OrbitalCore::~OrbitalCore()
 {
     Py_EndInterpreter(this->m_tState);
+    assert(PyThreadState_Swap(this->m_mState) == NULL);
     this->coreCount--;
 }
 
