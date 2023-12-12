@@ -90,12 +90,12 @@ public:
 
 private:
     static ssize_t coreCount;
+    static PyThreadState* mainThreadState;
 
     std::string traceback(PyObject* tb) const;
 
     const OrbitalInterface* const m_interface;
     PyThreadState* m_tState;
-    PyThreadState* m_mState;
 };
 
 
@@ -110,9 +110,11 @@ public:
     OrbitalError run();
 
 private:
-    ScriptModule(const std::filesystem::path& file);
+    ScriptModule(PyThreadState* tState, const std::filesystem::path& file);
+    void ensureThreadState();
     OrbitalError load();
 
+    PyThreadState* m_tState;
     std::filesystem::path m_file;
     PyObject* m_pyOwned_module;
 };

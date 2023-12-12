@@ -143,6 +143,40 @@ TEST_F(BaselineTest, Instantiate)
 }
 
 
+TEST_F(BaselineTest, DoubleInstantiate)
+{
+    Interface* iface = new Interface;
+    OrbitalCore* core0 = new OrbitalCore{iface};
+    OrbitalCore* core1 = new OrbitalCore{iface};
+    delete core0;
+    delete core1;
+    delete iface;
+}
+
+
+TEST_F(BaselineTest, InterleaveLoads)
+{
+    Interface* iface = new Interface;
+    OrbitalCore* core0 = new OrbitalCore{iface};
+    OrbitalCore* core1 = new OrbitalCore{iface};
+    for (int i = 0; i < 2; ++i) {
+        std::unique_ptr<ScriptModule> mod0;
+        std::unique_ptr<ScriptModule> mod1;
+        {
+            auto status = core0->load(TEST_SCRIPTS_DIR "/baseline/isolated-interp-0.py", mod0);
+            ASSERT_TRUE(status == OrbitalError::NONE) << status.message() << '\n' << status.traceback();
+        }
+        {
+            auto status = core1->load(TEST_SCRIPTS_DIR "/baseline/isolated-interp-1.py", mod1);
+            ASSERT_TRUE(status == OrbitalError::NONE) << status.message() << '\n' << status.traceback();
+        }
+    }
+    delete core0;
+    delete core1;
+    delete iface;
+}
+
+
 }
 }
 

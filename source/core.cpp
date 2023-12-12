@@ -196,6 +196,7 @@ OrbitalError::OrbitalError(
 
 
 ssize_t OrbitalCore::coreCount = 0;
+PyThreadState* OrbitalCore::mainThreadState = NULL;
 
 
 /**
@@ -269,6 +270,8 @@ OrbitalCore::init(
     status = Py_InitializeFromConfig(&config);
     if (PyStatus_Exception(status)) goto done;
 
+    mainThreadState = PyThreadState_Get();
+
 done:
     PyConfig_Clear(&config);
     return status;
@@ -288,10 +291,8 @@ OrbitalInterface::~OrbitalInterface() = default;
 OrbitalCore::OrbitalCore(const OrbitalInterface* interface)
     : m_interface{interface}
     , m_tState{NULL}
-    , m_mState{NULL}
 {
     assert(Py_IsInitialized());
-    this->m_mState = PyThreadState_Get();
     if (this->coreCount == 0) {
         this->m_tState = Py_NewInterpreter();
     } else {
@@ -316,8 +317,10 @@ OrbitalCore::OrbitalCore(const OrbitalInterface* interface)
 
 OrbitalCore::~OrbitalCore()
 {
+    if (this->m_tState != PyThreadState_Get())
+        PyThreadState_Swap(this->m_tState);
     Py_EndInterpreter(this->m_tState);
-    assert(PyThreadState_Swap(this->m_mState) == NULL);
+    assert(PyThreadState_Swap(this->mainThreadState) == NULL);
     this->coreCount--;
 }
 
@@ -325,7 +328,7 @@ OrbitalCore::~OrbitalCore()
 OrbitalError
 OrbitalCore::load(const std::filesystem::path& file, std::unique_ptr<ScriptModule>& module)
 {
-    module = std::unique_ptr<ScriptModule>(new ScriptModule{file});
+    module = std::unique_ptr<ScriptModule>(new ScriptModule{this->m_tState, file});
     return module->load();
 }
 
