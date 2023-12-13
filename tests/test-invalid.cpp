@@ -46,7 +46,9 @@ TEST_F(InvalidTest, TestMsg)
 }
 
 void
-InvalidTest::msg([[maybe_unused]] const std::string& message, [[maybe_unused]] bool append)
+InvalidTest::msg(
+    [[maybe_unused]] const std::string& message,
+    [[maybe_unused]] bool append)
 {
     ASSERT_FALSE(true);
 }
@@ -58,13 +60,17 @@ TEST_F(InvalidTest, TestPlot)
 }
 
 void
-InvalidTest::plot([[maybe_unused]] long dataSet, [[maybe_unused]] const std::vector<double>& data)
+InvalidTest::plot(
+    [[maybe_unused]] long dataSet,
+    [[maybe_unused]] const std::vector<double>& data)
 {
     ASSERT_FALSE(true);
 }
 
 void
-InvalidTest::plotVec([[maybe_unused]] long dataSet, [[maybe_unused]] const std::vector<std::vector<double>>& data)
+InvalidTest::plotVec(
+    [[maybe_unused]] long dataSet,
+    [[maybe_unused]] const std::vector<std::vector<double>>& data)
 {
     ASSERT_FALSE(true);
 }

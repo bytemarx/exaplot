@@ -15,3 +15,8 @@ try:
     orbital.msg("", foo=None)
 except TypeError as e:
     assert(str(e) == "'foo' is an invalid keyword argument for msg()")
+
+try:
+    orbital.msg("", False, None)
+except TypeError as e:
+    assert(str(e) == "msg() takes at most 2 arguments (3 given)")
