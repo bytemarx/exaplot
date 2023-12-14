@@ -177,6 +177,32 @@ TEST_F(BaselineTest, InterleaveLoads)
 }
 
 
+TEST_F(BaselineTest, Reload)
+{
+    Interface* iface = new Interface;
+    OrbitalCore* core = new OrbitalCore{iface};
+    std::unique_ptr<ScriptModule> mod;
+    {
+        std::ofstream file(TEST_SCRIPTS_DIR "/baseline/reload.py");
+        file << "";
+        file.close();
+        auto status = core->load(TEST_SCRIPTS_DIR "/baseline/reload.py", mod);
+        ASSERT_TRUE(status == OrbitalError::NONE) << status.message() << '\n' << status.traceback();
+    }
+    {
+        std::ofstream file;
+        file.open(TEST_SCRIPTS_DIR "/baseline/reload.py");
+        file << "assert(False)";
+        file.close();
+        auto status = mod->reload();
+        ASSERT_TRUE(status == OrbitalError::IMPORT);
+        ASSERT_STREQ(status.traceback().c_str(), "  File \"" TEST_SCRIPTS_DIR "/baseline/reload.py\", line 1, in <module>\n    assert(False)\n");
+    }
+    delete core;
+    delete iface;
+}
+
+
 }
 }
 
