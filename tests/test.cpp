@@ -55,7 +55,7 @@ ModuleTest::~ModuleTest()
 void
 ModuleTest::run(const char* file)
 {
-    std::unique_ptr<ScriptModule> mod;
+    std::shared_ptr<ScriptModule> mod;
     auto status = this->core.load(this->scriptsDir / file, mod);
     ASSERT_TRUE(status == OrbitalError::NONE) << status.message() << '\n' << status.traceback();
 }
@@ -160,8 +160,8 @@ TEST_F(BaselineTest, InterleaveLoads)
     OrbitalCore* core0 = new OrbitalCore{iface};
     OrbitalCore* core1 = new OrbitalCore{iface};
     for (int i = 0; i < 2; ++i) {
-        std::unique_ptr<ScriptModule> mod0;
-        std::unique_ptr<ScriptModule> mod1;
+        std::shared_ptr<ScriptModule> mod0;
+        std::shared_ptr<ScriptModule> mod1;
         {
             auto status = core0->load(TEST_SCRIPTS_DIR "/baseline/isolated-interp-0.py", mod0);
             ASSERT_TRUE(status == OrbitalError::NONE) << status.message() << '\n' << status.traceback();
@@ -181,7 +181,7 @@ TEST_F(BaselineTest, Reload)
 {
     Interface* iface = new Interface;
     OrbitalCore* core = new OrbitalCore{iface};
-    std::unique_ptr<ScriptModule> mod;
+    std::shared_ptr<ScriptModule> mod;
     {
         std::ofstream file(TEST_SCRIPTS_DIR "/baseline/reload.py");
         file << "";

@@ -319,6 +319,18 @@ OrbitalCore::~OrbitalCore()
 {
     if (this->m_tState != PyThreadState_Get())
         PyThreadState_Swap(this->m_tState);
+    for (const auto& script : this->m_scripts) {
+        if (auto h_script = script.lock()) {
+            // If the core is deleted while a script is still alive,
+            //   manually decrement its reference and nullify its
+            //   contents (use of a script with a destroyed core is
+            //   a fatal error).
+            assert(h_script.get()->m_pyOwned_module->ob_refcnt > 0);
+            Py_DECREF(h_script.get()->m_pyOwned_module);
+            h_script.get()->m_pyOwned_module = NULL;
+            h_script.get()->m_tState = NULL;
+        }
+    }
     Py_EndInterpreter(this->m_tState);
     assert(PyThreadState_Swap(this->mainThreadState) == NULL);
     this->coreCount--;
@@ -326,9 +338,10 @@ OrbitalCore::~OrbitalCore()
 
 
 OrbitalError
-OrbitalCore::load(const std::filesystem::path& file, std::unique_ptr<ScriptModule>& module)
+OrbitalCore::load(const std::filesystem::path& file, std::shared_ptr<ScriptModule>& module)
 {
-    module = std::unique_ptr<ScriptModule>(new ScriptModule{this->m_tState, file});
+    module = std::shared_ptr<ScriptModule>(new ScriptModule{this->m_tState, file});
+    this->m_scripts.push_back(module);
     return module->load();
 }
 

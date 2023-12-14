@@ -5,6 +5,7 @@
 
 #include <filesystem>
 #include <functional>
+#include <map>
 #include <memory>
 #include <string>
 
@@ -35,6 +36,7 @@ struct OrbitalError
         NONE,
         IMPORT,
         RUNTIME,
+        RELOAD,
         SYSTEM,
         UNDEFINED
     };
@@ -86,7 +88,7 @@ public:
     OrbitalCore(const OrbitalCore&) = delete;
     OrbitalCore(OrbitalCore&&) = delete;
 
-    OrbitalError load(const std::filesystem::path& file, std::unique_ptr<ScriptModule>& module);
+    OrbitalError load(const std::filesystem::path& file, std::shared_ptr<ScriptModule>& module);
 
 private:
     static ssize_t coreCount;
@@ -96,6 +98,7 @@ private:
 
     const OrbitalInterface* const m_interface;
     PyThreadState* m_tState;
+    std::vector<std::weak_ptr<ScriptModule>> m_scripts;
 };
 
 
@@ -106,7 +109,7 @@ class ScriptModule
 public:
     ~ScriptModule();
     OrbitalError reload();
-    OrbitalError init();
+    OrbitalError init(const std::map<std::string, std::string>& kwargs = {});
     OrbitalError run();
 
 private:
