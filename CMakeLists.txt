@@ -50,7 +50,6 @@ string(REGEX MATCH "^[0-9]+\.[0-9]+" PYTHON_VER_MAJ_MIN ${PYTHON_VERSION})
 if("${PYTHON_VER_MAJ_MIN}" STREQUAL "")
     message(FATAL_ERROR "Failed to parse Python version")
 endif()
-# set(PYTHON_DOWNLOAD_URL "https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz")
 set(PYTHON_SOURCE "${CMAKE_SOURCE_DIR}/cpython")
 
 set(PYTHON_INSTALL_DIR "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PYTHON_TARGET}")
@@ -58,7 +57,6 @@ set(PYTHON_LIB_DIR "lib")
 set(PYTHON_NATIVE_LIB_DIR "lib-dynload")
 set(PYTHON_SITE_PACKAGES_DIR "site-packages")
 set(CPYTHON_PROJ "${PYTHON_TARGET}-${PYTHON_VERSION}")
-# set(CPYTHON_SRC_DIR "${CMAKE_BINARY_DIR}/${CPYTHON_PROJ}/src/${PYTHON_TARGET}")
 set(CPYTHON_SRC_DIR "${PYTHON_SOURCE}")
 set(PYTHON_ENV_DIR "${CMAKE_BINARY_DIR}/${PYTHON_TARGET}-env")
 
@@ -88,7 +86,6 @@ else()
 endif()
 
 message("Targeted Python version: ${PYTHON_VERSION}")
-# message("Python download URL: ${PYTHON_DOWNLOAD_URL}")
 
 message("CMake output directory: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 message("Library build output directory: ${OUTPUT_LIB_DIRECTORY}")
@@ -102,9 +99,6 @@ message("Python project directory: ${PYTHON_PROJECT_DIR}")
 ExternalProject_Add(
     ${PYTHON_TARGET}
     PREFIX ${CPYTHON_PROJ}
-    # URL ${PYTHON_DOWNLOAD_URL}
-    # DOWNLOAD_NO_PROGRESS TRUE
-    # GIT_REPOSITORY https://github.com/bytemarx/cpython.git
     SOURCE_DIR ${PYTHON_SOURCE}
     GIT_SUBMODULES cpython
     CONFIGURE_COMMAND
@@ -121,47 +115,27 @@ ExternalProject_Add(
 add_custom_command(
     TARGET ${PYTHON_TARGET}
     POST_BUILD
-    COMMAND
-        bash -c "cp -rL $(cat pybuilddir.txt) ${CMAKE_BINARY_DIR}/${PYTHON_NATIVE_LIB_DIR}"
+    COMMAND bash -c "cp -rL $(cat pybuilddir.txt) ${CMAKE_BINARY_DIR}/${PYTHON_NATIVE_LIB_DIR}"
     COMMENT "Copying the interpreter's native libraries to ${CMAKE_BINARY_DIR}/${PYTHON_NATIVE_LIB_DIR}"
     WORKING_DIRECTORY ${CPYTHON_SRC_DIR}
     VERBATIM
     BYPRODUCTS ${CMAKE_BINARY_DIR}/${PYTHON_NATIVE_LIB_DIR}
 )
 
-# Build Python project & install into isolated environment workspace
-add_custom_target(
-    python-project ALL
-        ${CMAKE_COMMAND} -E env
-            --unset=PYTHONHOME
-            VIRTUAL_ENV=${PYTHON_ENV_DIR}
-            PATH=${PYTHON_ENV_DIR}/bin:$ENV{PATH}
-            LD_LIBRARY_PATH=${CPYTHON_SRC_DIR}
-        pip install --force-reinstall --disable-pip-version-check .
-    BYPRODUCTS
-        ${PYTHON_PROJECT_DIR}/build
-        ${PYTHON_PROJECT_DIR}/src/orbital.egg-info
-    WORKING_DIRECTORY ${PYTHON_PROJECT_DIR}
-)
-add_dependencies(python-project ${PYTHON_TARGET})
-
 # Copy the main CPython libraries from build location to the output directory
 add_custom_command(
     TARGET ${PYTHON_TARGET}
     POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E rm -rf -- "${OUTPUT_LIB_DIRECTORY}"
-    COMMAND ${CMAKE_COMMAND} -E make_directory
-        "${OUTPUT_LIB_DIRECTORY}"
-    COMMAND ${CMAKE_COMMAND} -E copy
-        ${CPYTHON_LIBS}
-        "${OUTPUT_LIB_DIRECTORY}"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${OUTPUT_LIB_DIRECTORY}"
+    COMMAND ${CMAKE_COMMAND} -E copy ${CPYTHON_LIBS} "${OUTPUT_LIB_DIRECTORY}"
     COMMENT "Copying the interpreter's shared libraries to ${OUTPUT_LIB_DIRECTORY}"
     BYPRODUCTS ${OUTPUT_LIB_DIRECTORY}
 )
 
 # Copy interpreter's library modules to the output directory
 add_custom_command(
-    TARGET python-project
+    TARGET ${PYTHON_TARGET}
     POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E rm -rf -- "${PYTHON_INSTALL_DIR}"
     COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -174,6 +148,9 @@ add_custom_command(
         "${PYTHON_ENV_DIR}/lib/python${PYTHON_VER_MAJ_MIN}/site-packages"
         "${PYTHON_INSTALL_DIR}/${PYTHON_SITE_PACKAGES_DIR}"
     COMMENT "Copying the interpreter's library modules to ${PYTHON_INSTALL_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy
+        "${PYTHON_PROJECT_DIR}/orbital.py"
+        "${PYTHON_INSTALL_DIR}/${PYTHON_LIB_DIR}"
     BYPRODUCTS ${PYTHON_INSTALL_DIR}
 )
 
