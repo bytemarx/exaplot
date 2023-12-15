@@ -47,14 +47,28 @@ TEST_F(ScriptTest, InitBasic)
 }
 
 
-TEST_F(ScriptTest, InitArgs)
+TEST_F(ScriptTest, RunBasic)
 {
     Interface* iface = new Interface;
     OrbitalCore* core = new OrbitalCore{iface};
     std::shared_ptr<ScriptModule> mod;
-    auto status = core->load(TEST_SCRIPTS_DIR "/init/args.py", mod);
+    auto status = core->load(TEST_SCRIPTS_DIR "/run/basic.py", mod);
     ASSERT_TRUE(status == OrbitalError::NONE) << status.message() << '\n' << status.traceback();
-    status = mod->init({{"a", "1"}, {"b", "2"}, {"c", "3"}});
+    status = mod->run();
+    ASSERT_TRUE(status == OrbitalError::NONE) << status.message() << '\n' << status.traceback();
+    delete core;
+    delete iface;
+}
+
+
+TEST_F(ScriptTest, RunArgs)
+{
+    Interface* iface = new Interface;
+    OrbitalCore* core = new OrbitalCore{iface};
+    std::shared_ptr<ScriptModule> mod;
+    auto status = core->load(TEST_SCRIPTS_DIR "/run/args.py", mod);
+    ASSERT_TRUE(status == OrbitalError::NONE) << status.message() << '\n' << status.traceback();
+    status = mod->run({{"a", "1"}, {"b", "2"}, {"c", "3"}});
     ASSERT_TRUE(status == OrbitalError::NONE) << status.message() << '\n' << status.traceback();
     delete core;
     delete iface;

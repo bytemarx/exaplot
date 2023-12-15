@@ -112,7 +112,7 @@ ExternalProject_Add(
     BUILD_COMMAND
         CFLAGS=-w make -s -j $(nproc)
     BUILD_IN_SOURCE TRUE
-    BUILD_ALWAYS TRUE
+    BUILD_ALWAYS FALSE
     INSTALL_COMMAND
         ${CMAKE_COMMAND} -E env LD_LIBRARY_PATH=${CPYTHON_SRC_DIR} ./python -m venv ${PYTHON_ENV_DIR}
 )
@@ -185,7 +185,6 @@ set_target_properties(pythonlib10 PROPERTIES IMPORTED_LOCATION "${OUTPUT_LIB_DIR
 set(PYTHON_INCLUDES
     "${CPYTHON_SRC_DIR}"
     "${CPYTHON_SRC_DIR}/Include"
-    # "${CPYTHON_SRC_DIR}/Include/internal"
 )
 
 ################################

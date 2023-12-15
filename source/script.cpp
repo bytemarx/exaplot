@@ -81,16 +81,37 @@ ScriptModule::reload()
 
 
 OrbitalError
-ScriptModule::init(const std::map<std::string, std::string>& kwargs)
+ScriptModule::init()
 {
     this->ensureThreadState();
     PyObject* pyOwned_initFn = NULL;
+    PyObject* pyOwned_result = NULL;
+
+    pyOwned_initFn = PyObject_GetAttrString(this->m_pyOwned_module, ORBITAL_SCRIPT_INIT);
+    if (pyOwned_initFn == NULL) goto error;
+
+    pyOwned_result = PyObject_CallFunctionObjArgs(pyOwned_initFn, NULL);
+    if (pyOwned_result == NULL) goto error;
+
+    return OrbitalError{OrbitalError::NONE};
+
+error:
+    Py_XDECREF(pyOwned_initFn);
+    return OrbitalError::pyerror(OrbitalError::RUNTIME);
+}
+
+
+OrbitalError
+ScriptModule::run(const std::map<std::string, std::string>& kwargs)
+{
+    this->ensureThreadState();
+    PyObject* pyOwned_runFn = NULL;
     PyObject* pyOwned_args = NULL;
     PyObject* pyOwned_kwargs = NULL;
     PyObject* pyOwned_result = NULL;
 
-    pyOwned_initFn = PyObject_GetAttrString(this->m_pyOwned_module, "init");
-    if (pyOwned_initFn == NULL) goto error;
+    pyOwned_runFn = PyObject_GetAttrString(this->m_pyOwned_module, ORBITAL_SCRIPT_RUN);
+    if (pyOwned_runFn == NULL) goto error;
 
     pyOwned_args = PyTuple_New(0);
     if (pyOwned_args == NULL) goto error;
@@ -106,28 +127,20 @@ ScriptModule::init(const std::map<std::string, std::string>& kwargs)
         Py_DECREF(pyOwned_val);
         if (result != 0) goto error;
     }
-    pyOwned_result = PyObject_Call(pyOwned_initFn, pyOwned_args, pyOwned_kwargs);
-    if (pyOwned_result == NULL)
-        goto error;
+    pyOwned_result = PyObject_Call(pyOwned_runFn, pyOwned_args, pyOwned_kwargs);
+    if (pyOwned_result == NULL) goto error;
 
     Py_DECREF(pyOwned_result);
     Py_DECREF(pyOwned_kwargs);
     Py_DECREF(pyOwned_args);
-    Py_DECREF(pyOwned_initFn);
+    Py_DECREF(pyOwned_runFn);
     return OrbitalError{OrbitalError::NONE};
 
 error:
     Py_XDECREF(pyOwned_kwargs);
     Py_XDECREF(pyOwned_args);
-    Py_XDECREF(pyOwned_initFn);
+    Py_XDECREF(pyOwned_runFn);
     return OrbitalError::pyerror(OrbitalError::RUNTIME);
-}
-
-
-OrbitalError
-ScriptModule::run()
-{
-    return OrbitalError{OrbitalError::NONE};
 }
 
 

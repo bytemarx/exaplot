@@ -18,6 +18,9 @@
 
 #define ORBITAL_MAX_PLOTS 64
 
+#define ORBITAL_SCRIPT_INIT "init"  // init()
+#define ORBITAL_SCRIPT_RUN  "run"   // run(**kwargs)
+
 
 namespace orbital {
 
@@ -109,8 +112,8 @@ class ScriptModule
 public:
     ~ScriptModule();
     OrbitalError reload();
-    OrbitalError init(const std::map<std::string, std::string>& kwargs = {});
-    OrbitalError run();
+    OrbitalError init();
+    OrbitalError run(const std::map<std::string, std::string>& kwargs = {});
 
 private:
     ScriptModule(PyThreadState* tState, const std::filesystem::path& file);
