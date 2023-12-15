@@ -112,7 +112,6 @@ class ScriptModule
 public:
     ~ScriptModule();
     OrbitalError reload();
-    OrbitalError init();
     OrbitalError run(const std::map<std::string, std::string>& kwargs = {});
 
 private:

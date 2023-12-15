@@ -81,27 +81,6 @@ ScriptModule::reload()
 
 
 OrbitalError
-ScriptModule::init()
-{
-    this->ensureThreadState();
-    PyObject* pyOwned_initFn = NULL;
-    PyObject* pyOwned_result = NULL;
-
-    pyOwned_initFn = PyObject_GetAttrString(this->m_pyOwned_module, ORBITAL_SCRIPT_INIT);
-    if (pyOwned_initFn == NULL) goto error;
-
-    pyOwned_result = PyObject_CallFunctionObjArgs(pyOwned_initFn, NULL);
-    if (pyOwned_result == NULL) goto error;
-
-    return OrbitalError{OrbitalError::NONE};
-
-error:
-    Py_XDECREF(pyOwned_initFn);
-    return OrbitalError::pyerror(OrbitalError::RUNTIME);
-}
-
-
-OrbitalError
 ScriptModule::run(const std::map<std::string, std::string>& kwargs)
 {
     this->ensureThreadState();

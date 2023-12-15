@@ -33,20 +33,6 @@ protected:
 };
 
 
-TEST_F(ScriptTest, InitBasic)
-{
-    Interface* iface = new Interface;
-    OrbitalCore* core = new OrbitalCore{iface};
-    std::shared_ptr<ScriptModule> mod;
-    auto status = core->load(TEST_SCRIPTS_DIR "/init/basic.py", mod);
-    ASSERT_TRUE(status == OrbitalError::NONE) << status.message() << '\n' << status.traceback();
-    status = mod->init();
-    ASSERT_TRUE(status == OrbitalError::NONE) << status.message() << '\n' << status.traceback();
-    delete core;
-    delete iface;
-}
-
-
 TEST_F(ScriptTest, RunBasic)
 {
     Interface* iface = new Interface;
