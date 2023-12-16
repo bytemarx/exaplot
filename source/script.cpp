@@ -6,7 +6,9 @@
 namespace orbital {
 
 
-ScriptModule::ScriptModule(PyThreadState* tState, const std::filesystem::path& file)
+ScriptModule::ScriptModule(
+    PyThreadState* tState,
+    const std::filesystem::path& file)
     : m_tState{tState}
     , m_file{file}
     , m_pyOwned_module{NULL}
@@ -53,7 +55,7 @@ ScriptModule::load()
     if (codeObject == NULL)
         return OrbitalError::pyerror(OrbitalError::IMPORT);
 
-    PyObject* pyOwned_module = PyImport_ExecCodeModule("__orbital__", codeObject);
+    PyObject* pyOwned_module = PyImport_ExecCodeModule(ORBITAL_SCRIPT_MODULE, codeObject);
     Py_DECREF(codeObject);
     if (pyOwned_module == NULL)
         return OrbitalError::pyerror(OrbitalError::IMPORT);

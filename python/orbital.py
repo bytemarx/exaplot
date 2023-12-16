@@ -4,4 +4,5 @@ from _orbital import (
     init,
     msg,
     plot,
+    stop,
 )

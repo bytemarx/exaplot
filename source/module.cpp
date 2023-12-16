@@ -26,7 +26,7 @@ orbitalExec(PyObject* module)
         goto error;
     }
 
-    mState->iface = static_cast<const OrbitalInterface*>(interp->orb_passthrough);
+    mState->iface = static_cast<const OrbitalCore::_OrbIFace*>(interp->orb_passthrough);
 
     return 0;
 error:
@@ -207,6 +207,17 @@ orbital_plot(PyObject* module, PyObject* const* args, Py_ssize_t nargs)
         }
         return state->iface->plot(dataSet, data);
     }
+}
+
+
+PyObject*
+orbital_stop(PyObject* module, PyObject* args)
+{
+    if (!PyArg_ParseTuple(args, ":" ORBITAL_STOP))
+        return NULL;
+
+    orbital_state* state = getModuleState(module);
+    return state->iface->stop();
 }
 
 

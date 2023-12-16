@@ -31,11 +31,14 @@ moduleMethods[] =
         METH_FASTCALL,
         NULL
     },
+    {
+        ORBITAL_STOP,
+        (PyCFunction)orbital_stop,
+        METH_VARARGS,
+        NULL
+    },
     {NULL, NULL}
 };
-
-
-// extern int orbitalExec(PyObject*);
 
 
 static PyModuleDef_Slot
@@ -289,8 +292,9 @@ OrbitalInterface::~OrbitalInterface() = default;
 
 
 OrbitalCore::OrbitalCore(const OrbitalInterface* interface)
-    : m_interface{interface}
+    : m_interface{new _OrbIFace{this, interface}}
     , m_tState{NULL}
+    , m_haltScripts{false}
 {
     assert(Py_IsInitialized());
     if (this->coreCount == 0) {
@@ -310,7 +314,7 @@ OrbitalCore::OrbitalCore(const OrbitalInterface* interface)
             throw std::runtime_error("Failed to initialize interpreter from config");
         }
     }
-    this->m_tState->interp->orb_passthrough = static_cast<const void*>(interface);
+    this->m_tState->interp->orb_passthrough = static_cast<const void*>(m_interface);
     this->coreCount++;
 }
 
@@ -333,6 +337,7 @@ OrbitalCore::~OrbitalCore()
     }
     Py_EndInterpreter(this->m_tState);
     assert(PyThreadState_Swap(this->mainThreadState) == NULL);
+    delete this->m_interface;
     this->coreCount--;
 }
 

@@ -35,29 +35,38 @@ protected:
 
 TEST_F(ScriptTest, RunBasic)
 {
-    Interface* iface = new Interface;
-    OrbitalCore* core = new OrbitalCore{iface};
+    Interface iface;
+    OrbitalCore core{&iface};
     std::shared_ptr<ScriptModule> mod;
-    auto status = core->load(TEST_SCRIPTS_DIR "/run/basic.py", mod);
+    auto status = core.load(TEST_SCRIPTS_DIR "/run/basic.py", mod);
     ASSERT_TRUE(status == OrbitalError::NONE) << status.message() << '\n' << status.traceback();
     status = mod->run();
     ASSERT_TRUE(status == OrbitalError::NONE) << status.message() << '\n' << status.traceback();
-    delete core;
-    delete iface;
 }
 
 
 TEST_F(ScriptTest, RunArgs)
 {
-    Interface* iface = new Interface;
-    OrbitalCore* core = new OrbitalCore{iface};
+    Interface iface;
+    OrbitalCore core{&iface};
     std::shared_ptr<ScriptModule> mod;
-    auto status = core->load(TEST_SCRIPTS_DIR "/run/args.py", mod);
+    auto status = core.load(TEST_SCRIPTS_DIR "/run/args.py", mod);
     ASSERT_TRUE(status == OrbitalError::NONE) << status.message() << '\n' << status.traceback();
     status = mod->run({{"a", "1"}, {"b", "2"}, {"c", "3"}});
     ASSERT_TRUE(status == OrbitalError::NONE) << status.message() << '\n' << status.traceback();
-    delete core;
-    delete iface;
+}
+
+
+TEST_F(ScriptTest, TestStop)
+{
+    Interface iface;
+    OrbitalCore core{&iface};
+    std::shared_ptr<ScriptModule> mod;
+    auto status = core.load(TEST_SCRIPTS_DIR "/stop/pre.py", mod);
+    ASSERT_TRUE(status == OrbitalError::NONE) << status.message() << '\n' << status.traceback();
+    core.stop();
+    status = core.load(TEST_SCRIPTS_DIR "/stop/post.py", mod);
+    ASSERT_TRUE(status == OrbitalError::NONE) << status.message() << '\n' << status.traceback();
 }
 
 

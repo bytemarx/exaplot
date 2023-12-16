@@ -26,7 +26,8 @@ typedef struct _is {
 } PyInterpreterState;
 
 typedef struct s_orbital_state {
-    const orbital::OrbitalInterface* iface;
+    // const orbital::OrbitalInterface* iface;
+    const orbital::OrbitalCore::_OrbIFace* iface;
 } orbital_state;
 
 
@@ -36,5 +37,6 @@ int orbitalExec(PyObject* module);
 PyObject* orbital_init(PyObject*, PyObject* const*, Py_ssize_t, PyObject*);
 PyObject* orbital_msg(PyObject*, PyObject*, PyObject*);
 PyObject* orbital_plot(PyObject*, PyObject* const*, Py_ssize_t);
+PyObject* orbital_stop(PyObject*, PyObject*);
 
 }
