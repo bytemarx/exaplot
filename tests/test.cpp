@@ -203,6 +203,21 @@ TEST_F(BaselineTest, Reload)
 }
 
 
+TEST_F(BaselineTest, NotIsolatedWithinCore)
+{
+    Interface* iface = new Interface;
+    OrbitalCore* core = new OrbitalCore{iface};
+    std::shared_ptr<ScriptModule> mod0;
+    std::shared_ptr<ScriptModule> mod1;
+    auto status = core->load(TEST_SCRIPTS_DIR "/baseline/reload2-0.py", mod0);
+    ASSERT_TRUE(status == OrbitalError::NONE) << status.message() << '\n' << status.traceback();
+    status = core->load(TEST_SCRIPTS_DIR "/baseline/reload2-1.py", mod1);
+    ASSERT_TRUE(status == OrbitalError::NONE) << status.message() << '\n' << status.traceback();
+    delete core;
+    delete iface;
+}
+
+
 }
 }
 
