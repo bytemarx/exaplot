@@ -203,7 +203,7 @@ TEST_F(BaselineTest, Reload)
 }
 
 
-TEST_F(BaselineTest, NotIsolatedWithinCore)
+TEST_F(BaselineTest, IsolatedWithinCore)
 {
     Interface* iface = new Interface;
     OrbitalCore* core = new OrbitalCore{iface};

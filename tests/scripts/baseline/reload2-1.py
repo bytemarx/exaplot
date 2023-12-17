@@ -1,1 +1,1 @@
-assert('__orbital_test__' in locals())
+assert('__orbital_test__' not in locals())

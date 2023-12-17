@@ -8,10 +8,13 @@ namespace orbital {
 
 ScriptModule::ScriptModule(
     PyThreadState* tState,
-    const std::filesystem::path& file)
+    const std::filesystem::path& file,
+    std::size_t id)
     : m_tState{tState}
     , m_file{file}
     , m_pyOwned_module{NULL}
+    , m_id{id}
+    , m_moduleName{std::string{ORBITAL_SCRIPT_MODULE}.append(std::to_string(id))}
 {
 }
 
@@ -50,13 +53,13 @@ ScriptModule::load()
     fclose(fp);
 
     this->ensureThreadState();
-    PyObject* codeObject = Py_CompileString(code, this->m_file.c_str(), Py_file_input);
+    PyObject* pyOwned_codeObject = Py_CompileString(code, this->m_file.c_str(), Py_file_input);
     free(code);
-    if (codeObject == NULL)
+    if (pyOwned_codeObject == NULL)
         return OrbitalError::pyerror(OrbitalError::IMPORT);
 
-    PyObject* pyOwned_module = PyImport_ExecCodeModule(ORBITAL_SCRIPT_MODULE, codeObject);
-    Py_DECREF(codeObject);
+    PyObject* pyOwned_module = PyImport_ExecCodeModule(this->m_moduleName.c_str(), pyOwned_codeObject);
+    Py_DECREF(pyOwned_codeObject);
     if (pyOwned_module == NULL)
         return OrbitalError::pyerror(OrbitalError::IMPORT);
     if (this->m_pyOwned_module != NULL)

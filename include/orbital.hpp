@@ -138,13 +138,15 @@ public:
     OrbitalError run(const std::map<std::string, std::string>& kwargs = {});
 
 private:
-    ScriptModule(PyThreadState* tState, const std::filesystem::path& file);
+    ScriptModule(PyThreadState* tState, const std::filesystem::path& file, std::size_t id);
     void ensureThreadState();
     OrbitalError load();
 
     PyThreadState* m_tState;
     std::filesystem::path m_file;
     PyObject* m_pyOwned_module;
+    const std::size_t m_id;
+    const std::string m_moduleName;
 };
 
 

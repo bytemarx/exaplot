@@ -369,10 +369,10 @@ OrbitalCore::OrbitalCore(const OrbitalInterface* interface)
             .gil = PyInterpreterConfig_OWN_GIL
         };
         PyStatus status = Py_NewInterpreterFromConfig(&this->m_tState, &config);
-        if (PyStatus_Exception(status)) {
-            throw std::runtime_error("Failed to initialize interpreter from config");
-        }
+        if (PyStatus_Exception(status))
+            throw std::runtime_error{"Failed to initialize interpreter from config"};
     }
+
     this->m_tState->interp->orb_passthrough = static_cast<const void*>(m_interface);
     this->coreCount++;
 }
@@ -404,7 +404,7 @@ OrbitalCore::~OrbitalCore()
 OrbitalError
 OrbitalCore::load(const std::filesystem::path& file, std::shared_ptr<ScriptModule>& module)
 {
-    module = std::shared_ptr<ScriptModule>(new ScriptModule{this->m_tState, file});
+    module = std::shared_ptr<ScriptModule>(new ScriptModule{this->m_tState, file, this->m_scripts.size()});
     this->m_scripts.push_back(module);
     return module->load();
 }
