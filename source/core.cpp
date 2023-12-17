@@ -291,6 +291,65 @@ OrbitalCore::deinit()
 OrbitalInterface::~OrbitalInterface() = default;
 
 
+OrbitalCore::_OrbIFace::_OrbIFace(
+    const OrbitalCore* const core,
+    const OrbitalInterface* const iface)
+    : m_core{core}
+    , m_iface{iface}
+{
+}
+
+
+PyObject*
+OrbitalCore::_OrbIFace::init(
+    const std::vector<std::string>& params,
+    const std::vector<GridPoint>& plots) const
+{
+    return this->m_iface->init(params, plots);
+}
+
+
+PyObject*
+OrbitalCore::_OrbIFace::msg(
+    const std::string& message,
+    bool append) const
+{
+    return this->m_iface->msg(message, append);
+}
+
+
+PyObject*
+OrbitalCore::_OrbIFace::plot(
+    long dataSet,
+    const std::vector<double>& data) const
+{
+    return this->m_iface->plot(dataSet, data);
+}
+
+
+PyObject*
+OrbitalCore::_OrbIFace::plotVec(
+    long dataSet,
+    const std::vector<std::vector<double>>& data) const
+{
+    return this->m_iface->plotVec(dataSet, data);
+}
+
+
+PyObject*
+OrbitalCore::_OrbIFace::clear(long dataSet) const
+{
+    return this->m_iface->clear(dataSet);
+}
+
+
+PyObject*
+OrbitalCore::_OrbIFace::stop() const
+{
+    return this->m_core->ifaceStop();
+}
+
+
 OrbitalCore::OrbitalCore(const OrbitalInterface* interface)
     : m_interface{new _OrbIFace{this, interface}}
     , m_tState{NULL}
@@ -348,6 +407,22 @@ OrbitalCore::load(const std::filesystem::path& file, std::shared_ptr<ScriptModul
     module = std::shared_ptr<ScriptModule>(new ScriptModule{this->m_tState, file});
     this->m_scripts.push_back(module);
     return module->load();
+}
+
+
+void
+OrbitalCore::stop()
+{
+    this->m_haltScripts = true;
+}
+
+
+PyObject*
+OrbitalCore::ifaceStop() const
+{
+    if (this->m_haltScripts)
+        Py_RETURN_TRUE;
+    Py_RETURN_FALSE;
 }
 
 

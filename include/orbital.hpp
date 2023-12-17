@@ -86,31 +86,18 @@ public:
     class _OrbIFace
     {
         friend class OrbitalCore;
-    private:
-        _OrbIFace(const OrbitalCore* const parent, const OrbitalInterface* const iface)
-            : m_parent{parent}, m_iface{iface} {}
     public:
-        PyObject* init(const std::vector<std::string>& params, const std::vector<GridPoint>& plots) const {
-            return m_iface->init(params, plots);
-        }
-        PyObject* msg(const std::string& message, bool append) const {
-            return m_iface->msg(message, append);
-        }
-        PyObject* plot(long dataSet, const std::vector<double>& data) const {
-            return m_iface->plot(dataSet, data);
-        }
-        PyObject* plotVec(long dataSet, const std::vector<std::vector<double>>& data) const {
-            return m_iface->plotVec(dataSet, data);
-        }
-        PyObject* clear(long dataSet) const {
-            return m_iface->clear(dataSet);
-        }
-        PyObject* stop() const {
-            return m_parent->ifaceStop();
-        }
+        PyObject* init(const std::vector<std::string>&, const std::vector<GridPoint>&) const;
+        PyObject* msg(const std::string&, bool) const;
+        PyObject* plot(long, const std::vector<double>&) const;
+        PyObject* plotVec(long, const std::vector<std::vector<double>>&) const;
+        PyObject* clear(long) const;
+        PyObject* stop() const;
 
     private:
-        const OrbitalCore* const m_parent;
+        _OrbIFace(const OrbitalCore* const, const OrbitalInterface* const);
+
+        const OrbitalCore* const m_core;
         const OrbitalInterface* const m_iface;
     };
 
@@ -125,18 +112,14 @@ public:
     OrbitalCore(OrbitalCore&&) = delete;
 
     OrbitalError load(const std::filesystem::path& file, std::shared_ptr<ScriptModule>& module);
-    void stop() { m_haltScripts = true; }
+    void stop();
 
 private:
     static ssize_t coreCount;
     static PyThreadState* mainThreadState;
 
     std::string traceback(PyObject* tb) const;
-    PyObject* ifaceStop() const {
-        if (m_haltScripts)
-            Py_RETURN_TRUE;
-        Py_RETURN_FALSE;
-    }
+    PyObject* ifaceStop() const;
 
     const _OrbIFace* const m_interface;
     PyThreadState* m_tState;
