@@ -92,7 +92,7 @@ public:
         PyObject* plot(long, const std::vector<double>&) const;
         PyObject* plotVec(long, const std::vector<std::vector<double>>&) const;
         PyObject* clear(long) const;
-        PyObject* stop() const;
+        PyObject* stop(std::size_t) const;
 
     private:
         _OrbIFace(const OrbitalCore* const, const OrbitalInterface* const);
@@ -112,19 +112,17 @@ public:
     OrbitalCore(OrbitalCore&&) = delete;
 
     OrbitalError load(const std::filesystem::path& file, std::shared_ptr<ScriptModule>& module);
-    void stop();
 
 private:
     static ssize_t coreCount;
     static PyThreadState* mainThreadState;
 
     std::string traceback(PyObject* tb) const;
-    PyObject* ifaceStop() const;
+    PyObject* scriptStop(std::size_t id) const;
 
     const _OrbIFace* const m_interface;
     PyThreadState* m_tState;
     std::vector<std::weak_ptr<ScriptModule>> m_scripts;
-    bool m_haltScripts;
 };
 
 
@@ -136,6 +134,7 @@ public:
     ~ScriptModule();
     OrbitalError reload();
     OrbitalError run(const std::map<std::string, std::string>& kwargs = {});
+    void stop();
 
 private:
     ScriptModule(PyThreadState* tState, const std::filesystem::path& file, std::size_t id);
@@ -147,6 +146,7 @@ private:
     PyObject* m_pyOwned_module;
     const std::size_t m_id;
     const std::string m_moduleName;
+    bool m_haltFlag;
 };
 
 

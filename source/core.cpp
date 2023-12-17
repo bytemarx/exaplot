@@ -344,16 +344,15 @@ OrbitalCore::_OrbIFace::clear(long dataSet) const
 
 
 PyObject*
-OrbitalCore::_OrbIFace::stop() const
+OrbitalCore::_OrbIFace::stop(std::size_t id) const
 {
-    return this->m_core->ifaceStop();
+    return this->m_core->scriptStop(id);
 }
 
 
 OrbitalCore::OrbitalCore(const OrbitalInterface* interface)
     : m_interface{new _OrbIFace{this, interface}}
     , m_tState{NULL}
-    , m_haltScripts{false}
 {
     assert(Py_IsInitialized());
     if (this->coreCount == 0) {
@@ -404,25 +403,34 @@ OrbitalCore::~OrbitalCore()
 OrbitalError
 OrbitalCore::load(const std::filesystem::path& file, std::shared_ptr<ScriptModule>& module)
 {
-    module = std::shared_ptr<ScriptModule>(new ScriptModule{this->m_tState, file, this->m_scripts.size()});
+    try {
+        module = std::shared_ptr<ScriptModule>(new ScriptModule{this->m_tState, file, this->m_scripts.size()});
+    } catch (const std::runtime_error& e) {
+        return PyErr_Occurred()
+            ? OrbitalError::pyerror(OrbitalError::UNDEFINED)
+            : OrbitalError{OrbitalError::UNDEFINED, e.what()};
+    }
     this->m_scripts.push_back(module);
     return module->load();
 }
 
 
-void
-OrbitalCore::stop()
-{
-    this->m_haltScripts = true;
-}
-
-
 PyObject*
-OrbitalCore::ifaceStop() const
+OrbitalCore::scriptStop(std::size_t id) const
 {
-    if (this->m_haltScripts)
-        Py_RETURN_TRUE;
-    Py_RETURN_FALSE;
+    try {
+        if (auto h_script = this->m_scripts.at(id).lock()) {
+            if (h_script.get()->m_haltFlag)
+                Py_RETURN_TRUE;
+            Py_RETURN_FALSE;
+        }
+    } catch (const std::out_of_range&) {
+        // A script ID is invalid if it doesn't reference any script (hence this catch) or if the
+        //   referenced script has been destroyed. Both of these situations *shouldn't* happen if
+        //   using public methods, however it is still possible.
+    }
+    PyErr_Format(PyExc_SystemError, "invalid script ID: %zd", static_cast<Py_ssize_t>(id));
+    return NULL;
 }
 
 

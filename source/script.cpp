@@ -6,6 +6,13 @@
 namespace orbital {
 
 
+#define ORBITAL_SCRIPT_PRELOAD "\
+def stop():\n\
+    from _orbital import stop as _stop\n\
+    return _stop(int(__name__[11:]))\n\
+"
+
+
 ScriptModule::ScriptModule(
     PyThreadState* tState,
     const std::filesystem::path& file,
@@ -15,7 +22,25 @@ ScriptModule::ScriptModule(
     , m_pyOwned_module{NULL}
     , m_id{id}
     , m_moduleName{std::string{ORBITAL_SCRIPT_MODULE}.append(std::to_string(id))}
+    , m_haltFlag{false}
 {
+    PyObject* pyOwned_codeObject;
+    PyObject* pyOwned_module;
+
+    this->ensureThreadState();
+    pyOwned_codeObject = Py_CompileString(ORBITAL_SCRIPT_PRELOAD, "<built-in>", Py_file_input);
+    if (pyOwned_codeObject == NULL) goto error;
+    pyOwned_module = PyImport_ExecCodeModule(this->m_moduleName.c_str(), pyOwned_codeObject);
+    if (pyOwned_module == NULL) goto error;
+
+    Py_DECREF(pyOwned_module);
+    Py_DECREF(pyOwned_codeObject);
+    return;
+
+error:
+    Py_XDECREF(pyOwned_module);
+    Py_XDECREF(pyOwned_codeObject);
+    throw std::runtime_error{"Failed to initialize script module"};
 }
 
 
@@ -111,6 +136,7 @@ ScriptModule::run(const std::map<std::string, std::string>& kwargs)
         Py_DECREF(pyOwned_val);
         if (result != 0) goto error;
     }
+    this->m_haltFlag = false;
     pyOwned_result = PyObject_Call(pyOwned_runFn, pyOwned_args, pyOwned_kwargs);
     if (pyOwned_result == NULL) goto error;
 
@@ -125,6 +151,13 @@ error:
     Py_XDECREF(pyOwned_args);
     Py_XDECREF(pyOwned_runFn);
     return OrbitalError::pyerror(OrbitalError::RUNTIME);
+}
+
+
+void
+ScriptModule::stop()
+{
+    this->m_haltFlag = true;
 }
 
 

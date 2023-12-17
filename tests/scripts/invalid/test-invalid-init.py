@@ -24,12 +24,12 @@ except TypeError as e:
 try:
     orbital.init(plots=None)
 except TypeError as e:
-    assert(str(e) == "init() plots must be either an 'int' or 'list' type")
+    assert(str(e) == "init() plots must be type 'int' or 'list'")
 
 try:
     orbital.init(plots=1.5)
 except TypeError as e:
-    assert(str(e) == "init() plots must be either an 'int' or 'list' type")
+    assert(str(e) == "init() plots must be type 'int' or 'list'")
 
 try:
     orbital.init(plots=0)
