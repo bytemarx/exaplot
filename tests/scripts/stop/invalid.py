@@ -4,7 +4,12 @@ import orbital
 try:
     orbital.stop(None)
 except TypeError as e:
-    assert(str(e) == "stop() argument must be type 'int' or 'str'")
+    assert(str(e) == "stop() argument must be type 'str'")
+
+try:
+    orbital.stop(0)
+except TypeError as e:
+    assert(str(e) == "stop() argument must be type 'str'")
 
 try:
     orbital.stop('')
@@ -14,17 +19,17 @@ except IndexError as e:
 try:
     orbital.stop('__orbital__')
 except ValueError as e:
-    assert(str(e) == "invalid literal for std::stoull() with base 10: ''")
+    assert(str(e) == "invalid literal for std::stoul() with base 10: ''")
 
 try:
     orbital.stop('__orbital___')
 except ValueError as e:
-    assert(str(e) == "invalid literal for std::stoull() with base 10: '_'")
+    assert(str(e) == "invalid literal for std::stoul() with base 10: '_'")
 
 try:
     orbital.stop('__orbital__!')
 except ValueError as e:
-    assert(str(e) == "invalid literal for std::stoull() with base 10: '!'")
+    assert(str(e) == "invalid literal for std::stoul() with base 10: '!'")
 
 try:
     orbital.stop('__orbital__1')

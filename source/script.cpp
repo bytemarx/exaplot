@@ -9,7 +9,7 @@ namespace orbital {
 #define ORBITAL_SCRIPT_PRELOAD "\
 def stop():\n\
     from _orbital import stop as _stop\n\
-    return _stop(int(__name__[11:]))\n\
+    return _stop(__name__)\n\
 "
 
 

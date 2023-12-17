@@ -214,44 +214,37 @@ orbital_plot(PyObject* module, PyObject* const* args, Py_ssize_t nargs)
 static int
 stopConverter(PyObject* object, void* address)
 {
-    if (PyLong_Check(object)) {
-        *static_cast<unsigned long long*>(address) = PyLong_AsUnsignedLongLong(object);
-        if (*static_cast<unsigned long long*>(address) == static_cast<unsigned long long>(-1)
-            && PyErr_Occurred()) return 0;
-        return 1;
-    }
-    if (PyUnicode_Check(object)) {
-        const char* moduleName = PyUnicode_AsUTF8(object);
-        if (moduleName == NULL) return 0;
-        try {
-            *static_cast<unsigned long long*>(address)
-                = std::stoull(std::string{moduleName}.substr(11));
-            return 1;
-        }
-        catch (const std::out_of_range& e) {
-            if (std::strlen(moduleName) < 11)
-                PyErr_Format(
-                    PyExc_IndexError,
-                    "string index out of range: '%s'",
-                    moduleName
-                );
-            else
-                PyErr_Format(
-                    PyExc_OverflowError,
-                    "int too big to convert: '%s'",
-                    std::string{moduleName}.substr(11).c_str()
-                );
-        }
-        catch (const std::invalid_argument& e) {
-            PyErr_Format(
-                PyExc_ValueError,
-                "invalid literal for std::stoull() with base 10: '%s'",
-                std::string{moduleName}.substr(11).c_str()
-            );
-        }
+    if (!PyUnicode_Check(object)) {
+        PyErr_SetString(PyExc_TypeError, "stop() argument must be type 'str'");
         return 0;
     }
-    PyErr_SetString(PyExc_TypeError, "stop() argument must be type 'int' or 'str'");
+    const char* moduleName = PyUnicode_AsUTF8(object);
+    if (moduleName == NULL) return 0;
+    try {
+        *static_cast<unsigned long*>(address) = std::stoul(std::string{moduleName}.substr(11));
+        return 1;
+    }
+    catch (const std::out_of_range& e) {
+        if (std::strlen(moduleName) < 11)
+            PyErr_Format(
+                PyExc_IndexError,
+                "string index out of range: '%s'",
+                moduleName
+            );
+        else
+            PyErr_Format(
+                PyExc_OverflowError,
+                "int too big to convert: '%s'",
+                std::string{moduleName}.substr(11).c_str()
+            );
+    }
+    catch (const std::invalid_argument& e) {
+        PyErr_Format(
+            PyExc_ValueError,
+            "invalid literal for std::stoul() with base 10: '%s'",
+            std::string{moduleName}.substr(11).c_str()
+        );
+    }
     return 0;
 }
 
@@ -259,7 +252,7 @@ stopConverter(PyObject* object, void* address)
 PyObject*
 orbital_stop(PyObject* module, PyObject* args)
 {
-    unsigned long long id;
+    unsigned long id;
     if (!PyArg_ParseTuple(args, "O&:" ORBITAL_STOP, stopConverter, &id))
         return NULL;
 
