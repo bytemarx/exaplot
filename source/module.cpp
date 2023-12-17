@@ -62,7 +62,11 @@ orbital_init(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject
                 auto n_plots = PyLong_AsLong(pyBorrowed_plots);
                 if (n_plots <= 0 || n_plots > ORBITAL_MAX_PLOTS) {
                     if (!PyErr_Occurred()) {
-                        PyErr_Format(PyExc_ValueError, ORBITAL_INIT "() 'plots' keyword must be an integer from 1 to %d", ORBITAL_MAX_PLOTS);
+                        PyErr_Format(
+                            PyExc_ValueError,
+                            ORBITAL_INIT "() 'plots' keyword must be an integer from 1 to %d",
+                            ORBITAL_MAX_PLOTS
+                        );
                     }
                     return NULL;
                 }
@@ -96,13 +100,21 @@ orbital_init(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject
                     for (decltype(std::size(p)) i_plotPoint = 0; i_plotPoint < std::size(p); ++i_plotPoint) {
                         PyObject* pyBorrowed_plotPoint = PyTuple_GET_ITEM(pyBorrowed_plot, i_plotPoint);
                         if (!PyLong_Check(pyBorrowed_plotPoint)) {
-                            PyErr_Format(PyExc_TypeError, ORBITAL_INIT "() entry #%zd of plot #%zd must be type 'int'", i_plotPoint + 1, i_plot + 1);
+                            PyErr_Format(
+                                PyExc_TypeError,
+                                ORBITAL_INIT "() entry #%zd of plot #%zd must be type 'int'",
+                                i_plotPoint + 1, i_plot + 1
+                            );
                             return NULL;
                         }
                         auto plotPoint = PyLong_AsLong(pyBorrowed_plotPoint);
                         if (plotPoint < 0 || plotPoint > (decltype(plotPoint))std::numeric_limits<int>::max()) {
                             if (!PyErr_Occurred()) {
-                                PyErr_Format(PyExc_ValueError, ORBITAL_INIT "() entry #%zd of plot #%zd is invalid: %ld", i_plotPoint + 1, i_plot + 1, plotPoint);
+                                PyErr_Format(
+                                    PyExc_ValueError,
+                                    ORBITAL_INIT "() entry #%zd of plot #%zd is invalid: %ld",
+                                    i_plotPoint + 1, i_plot + 1, plotPoint
+                                );
                             }
                             return NULL;
                         }

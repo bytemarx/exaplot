@@ -15,7 +15,7 @@
 #define ORBITAL_INIT    "init"  // orbital.init(*params, plots = 1) -> None
 #define ORBITAL_MSG     "msg"   // orbital.msg(message, append = False) -> None
 #define ORBITAL_PLOT    "plot"  // orbital.plot(data_set, *data) -> None
-#define ORBITAL_STOP    "stop"  // orbital.stop() -> bool
+#define ORBITAL_STOP    "stop"  // orbital.stop(module_name) -> bool
 
 #define ORBITAL_MAX_PLOTS 64
 
