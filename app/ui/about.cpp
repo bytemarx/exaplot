@@ -1,4 +1,4 @@
-#include "About.hpp"
+#include "about.hpp"
 
 #include "config.h"
 

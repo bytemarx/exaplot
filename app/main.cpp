@@ -1,4 +1,4 @@
-#include "AppMain.hpp"
+#include "appmain.hpp"
 
 #include "orbital.hpp"
 #include "config.h"

@@ -3,8 +3,8 @@
 #include <QObject>
 #include <QString>
 
-#include "MainWindow.hpp"
-#include "About.hpp"
+#include "mainwindow.hpp"
+#include "about.hpp"
 
 
 class AppUI : public QObject

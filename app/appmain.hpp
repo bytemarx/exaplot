@@ -4,11 +4,11 @@
 #include <QObject>
 #include <QString>
 
-#include "AppUI.hpp"
+#include "appui.hpp"
 #include "orbital.hpp"
 
 
-class Interface : public orbital::OrbitalInterface, public QObject
+class Interface : public QObject, public orbital::OrbitalInterface
 {
     Q_OBJECT
 
@@ -21,40 +21,40 @@ public:
         const std::vector<std::string>& params,
         const std::vector<orbital::GridPoint>& plots) const
     {
-        emit this->signal_init();
+        emit this->signal_init(params, plots);
         Py_RETURN_NONE;
     }
 
     PyObject* msg(const std::string& message, bool append) const
     {
-        emit this->signal_msg();
+        emit this->signal_msg(message, append);
         Py_RETURN_NONE;
     }
 
     PyObject* plot(long dataSet, const std::vector<double>& data) const
     {
-        emit this->signal_plot();
+        emit this->signal_plot(dataSet, data);
         Py_RETURN_NONE;
     }
 
     PyObject* plotVec(long dataSet, const std::vector<std::vector<double>>& data) const
     {
-        emit this->signal_plotVec();
+        emit this->signal_plotVec(dataSet, data);
         Py_RETURN_NONE;
     }
 
     PyObject* clear(long dataSet) const
     {
-        emit this->signal_clear();
+        emit this->signal_clear(dataSet);
         Py_RETURN_NONE;
     }
 
 Q_SIGNALS:
-    void signal_init() const;
-    void signal_msg() const;
-    void signal_plot() const;
-    void signal_plotVec() const;
-    void signal_clear() const;
+    void signal_init(const std::vector<std::string>&, const std::vector<orbital::GridPoint>&) const;
+    void signal_msg(const std::string&, bool) const;
+    void signal_plot(long, const std::vector<double>&) const;
+    void signal_plotVec(long, const std::vector<std::vector<double>>&) const;
+    void signal_clear(long) const;
 };
 
 
@@ -69,11 +69,11 @@ public:
     int exec();
 
 public Q_SLOTS:
-    void slot_init();
-    void slot_msg();
-    void slot_plot();
-    void slot_plotVec();
-    void slot_clear();
+    void slot_init(const std::vector<std::string>&, const std::vector<orbital::GridPoint>&);
+    void slot_msg(const std::string&, bool);
+    void slot_plot(long, const std::vector<double>&);
+    void slot_plotVec(long, const std::vector<std::vector<double>>&);
+    void slot_clear(long);
 
 private:
     QApplication a;

@@ -7,8 +7,8 @@ set(CMAKE_AUTOUIC ON)
 find_package(Qt${QTVER} COMPONENTS Core Widgets Gui REQUIRED)
 
 set(APP_UI_FILES
-	MainWindow
-	About
+	mainwindow
+	about
 )
 
 foreach(ui_file ${APP_UI_FILES})
@@ -19,8 +19,8 @@ endforeach(ui_file)
 set(APP_SOURCES
 	${APP_FORM_FILES}
 	${APP_SOURCES_UI}
-	AppUI.cpp
-	AppMain.cpp
+	appui.cpp
+	appmain.cpp
 	main.cpp
 )
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ui_About.h"
+#include "ui_about.h"
 
 
 class About : public QDialog

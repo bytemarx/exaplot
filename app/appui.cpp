@@ -1,6 +1,6 @@
 #include <QMessageBox>
 
-#include "AppUI.hpp"
+#include "appui.hpp"
 
 
 AppUI::AppUI(QObject* parent)

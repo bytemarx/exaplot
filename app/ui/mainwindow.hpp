@@ -2,7 +2,7 @@
 
 #include <QAction>
 
-#include "ui_MainWindow.h"
+#include "ui_mainwindow.h"
 
 
 class MainWindow : public QMainWindow
