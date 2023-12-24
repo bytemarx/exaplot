@@ -57,6 +57,21 @@ except TypeError as e:
     assert(str(e) == "init() plot #1 must be a 4-tuple")
 
 try:
+    orbital.init(plots=[(0,0)])
+except TypeError as e:
+    assert(str(e) == "init() plot #1 must be a 4-tuple")
+
+try:
+    orbital.init(plots=[(0,0,0)])
+except TypeError as e:
+    assert(str(e) == "init() plot #1 must be a 4-tuple")
+
+try:
+    orbital.init(plots=[(0,0,0,0,0)])
+except TypeError as e:
+    assert(str(e) == "init() plot #1 must be a 4-tuple")
+
+try:
     orbital.init(plots=[(None, None, None, None)])
 except TypeError as e:
     assert(str(e) == "init() entry #1 of plot #1 must be type 'int'")
