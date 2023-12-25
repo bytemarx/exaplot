@@ -26,10 +26,10 @@ namespace orbital {
 
 
 typedef struct s_gridpoint {
-    int x;
-    int dx;
-    int y;
-    int dy;
+    long x;
+    long dx;
+    long y;
+    long dy;
 } GridPoint;
 
 

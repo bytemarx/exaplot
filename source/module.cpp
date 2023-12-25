@@ -42,7 +42,8 @@ orbital_init(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject
 
     for (decltype(nargs) i = 0; i < nargs; ++i) {
         if (!PyUnicode_Check(args[i])) {
-            PyErr_Format(PyExc_TypeError, ORBITAL_INIT "() parameter #%zd must be type 'string'", i + 1);
+            PyErr_Format(PyExc_TypeError,
+                ORBITAL_INIT "() parameter #%zd must be type 'string'", i + 1);
             return NULL;
         }
         params.push_back(PyUnicode_AsUTF8(args[i]));
@@ -60,9 +61,9 @@ orbital_init(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject
             if (PyLong_Check(pyBorrowed_plots)) {
                 auto n_plots = PyLong_AsLong(pyBorrowed_plots);
                 if (n_plots <= 0 || n_plots > ORBITAL_MAX_PLOTS) {
-                    if (!PyErr_Occurred()) {
-                        PyErr_Format(PyExc_ValueError, ORBITAL_INIT "() 'plots' keyword must be an integer from 1 to %d", ORBITAL_MAX_PLOTS);
-                    }
+                    if (!PyErr_Occurred())
+                        PyErr_Format(PyExc_ValueError,
+                            ORBITAL_INIT "() 'plots' keyword must be an integer from 1 to %d", ORBITAL_MAX_PLOTS);
                     return NULL;
                 }
                 for (decltype(n_plots) i_plot = 0; i_plot < n_plots; ++i_plot) {
@@ -76,7 +77,8 @@ orbital_init(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject
             } else if (PyList_Check(pyBorrowed_plots)) {
                 auto n_plots = PyList_GET_SIZE(pyBorrowed_plots);
                 if (n_plots == 0) {
-                    PyErr_SetString(PyExc_ValueError, ORBITAL_INIT "() plots list is missing entries");
+                    PyErr_SetString(PyExc_ValueError,
+                        ORBITAL_INIT "() plots list is missing entries");
                     return NULL;
                 }
                 if (n_plots > 64)
@@ -84,28 +86,33 @@ orbital_init(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject
                 for (decltype(n_plots) i_plot = 0; i_plot < n_plots; ++i_plot) {
                     PyObject* pyBorrowed_plot = PyList_GET_ITEM(pyBorrowed_plots, i_plot);
                     if (!PyTuple_Check(pyBorrowed_plot)) {
-                        PyErr_Format(PyExc_TypeError, ORBITAL_INIT "() plot #%zd must be type 'tuple'", i_plot + 1);
+                        PyErr_Format(PyExc_TypeError,
+                            ORBITAL_INIT "() plot #%zd must be type 'tuple'", i_plot + 1);
                         return NULL;
                     }
                     if (PyTuple_GET_SIZE(pyBorrowed_plot) != 4) {
-                        PyErr_Format(PyExc_TypeError, ORBITAL_INIT "() plot #%zd must be a 4-tuple", i_plot + 1);
+                        PyErr_Format(PyExc_TypeError,
+                            ORBITAL_INIT "() plot #%zd must be a 4-tuple", i_plot + 1);
                         return NULL;
                     }
-                    int p[4];
+                    long p[4];
                     for (decltype(std::size(p)) i_plotPoint = 0; i_plotPoint < std::size(p); ++i_plotPoint) {
                         PyObject* pyBorrowed_plotPoint = PyTuple_GET_ITEM(pyBorrowed_plot, i_plotPoint);
                         if (!PyLong_Check(pyBorrowed_plotPoint)) {
-                            PyErr_Format(PyExc_TypeError, ORBITAL_INIT "() entry #%zd of plot #%zd must be type 'int'", i_plotPoint + 1, i_plot + 1);
+                            PyErr_Format(PyExc_TypeError,
+                                ORBITAL_INIT "() entry #%zd of plot #%zd must be type 'int'",
+                                i_plotPoint + 1, i_plot + 1);
                             return NULL;
                         }
                         auto plotPoint = PyLong_AsLong(pyBorrowed_plotPoint);
-                        if (plotPoint < 0 || plotPoint > (decltype(plotPoint))std::numeric_limits<int>::max()) {
-                            if (!PyErr_Occurred()) {
-                                PyErr_Format(PyExc_ValueError, ORBITAL_INIT "() entry #%zd of plot #%zd is invalid: %ld", i_plotPoint + 1, i_plot + 1, plotPoint);
-                            }
+                        if (plotPoint < 0) {
+                            if (!PyErr_Occurred())
+                                PyErr_Format(PyExc_ValueError,
+                                    ORBITAL_INIT "() entry #%zd of plot #%zd is invalid: %ld",
+                                    i_plotPoint + 1, i_plot + 1, plotPoint);
                             return NULL;
                         }
-                        p[i_plotPoint] = (int)plotPoint;
+                        p[i_plotPoint] = plotPoint;
                     }
                     plots.push_back({
                         .x = p[0],
