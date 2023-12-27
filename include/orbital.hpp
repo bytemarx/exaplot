@@ -16,8 +16,6 @@
 #define ORBITAL_MSG     "msg"   // orbital.msg(message, append = False)
 #define ORBITAL_PLOT    "plot"  // orbital.plot(data_set, *data)
 
-#define ORBITAL_MAX_PLOTS 64
-
 #define ORBITAL_SCRIPT_INIT "init"  // init()
 #define ORBITAL_SCRIPT_RUN  "run"   // run(**kwargs)
 
@@ -25,11 +23,12 @@
 namespace orbital {
 
 
+typedef std::size_t GridPoint_t;
 typedef struct s_gridpoint {
-    long x;
-    long dx;
-    long y;
-    long dy;
+    GridPoint_t x;
+    GridPoint_t dx;
+    GridPoint_t y;
+    GridPoint_t dy;
 } GridPoint;
 
 

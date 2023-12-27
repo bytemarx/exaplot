@@ -34,12 +34,12 @@ except TypeError as e:
 try:
     orbital.init(plots=0)
 except ValueError as e:
-    assert(str(e) == "init() 'plots' keyword must be an integer from 1 to 64")
+    assert(str(e) == "init() 'plots' keyword must be an integer greater than zero")
 
 try:
     orbital.init(plots=-1)
 except ValueError as e:
-    assert(str(e) == "init() 'plots' keyword must be an integer from 1 to 64")
+    assert(str(e) == "init() 'plots' keyword must be an integer greater than zero")
 
 try:
     orbital.init(plots=[])

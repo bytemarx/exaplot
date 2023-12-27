@@ -60,15 +60,15 @@ orbital_init(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject
             PyObject* pyBorrowed_plots = args[nargs + i];
             if (PyLong_Check(pyBorrowed_plots)) {
                 auto n_plots = PyLong_AsLong(pyBorrowed_plots);
-                if (n_plots <= 0 || n_plots > ORBITAL_MAX_PLOTS) {
+                if (n_plots <= 0) {
                     if (!PyErr_Occurred())
                         PyErr_Format(PyExc_ValueError,
-                            ORBITAL_INIT "() 'plots' keyword must be an integer from 1 to %d", ORBITAL_MAX_PLOTS);
+                            ORBITAL_INIT "() 'plots' keyword must be an integer greater than zero");
                     return NULL;
                 }
                 for (decltype(n_plots) i_plot = 0; i_plot < n_plots; ++i_plot) {
                     plots.push_back({
-                        .x = (int)i_plot,
+                        .x = static_cast<GridPoint_t>(i_plot),
                         .dx = 1,
                         .y = 0,
                         .dy = 1,
@@ -115,10 +115,10 @@ orbital_init(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject
                         p[i_plotPoint] = plotPoint;
                     }
                     plots.push_back({
-                        .x = p[0],
-                        .dx = p[1],
-                        .y = p[2],
-                        .dy = p[3],
+                        .x = static_cast<GridPoint_t>(p[0]),
+                        .dx = static_cast<GridPoint_t>(p[1]),
+                        .y = static_cast<GridPoint_t>(p[2]),
+                        .dy = static_cast<GridPoint_t>(p[3]),
                     });
                 }
             } else {
