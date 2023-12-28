@@ -16,10 +16,13 @@ class QButtonGrid : public QWidget
 	Q_OBJECT
 
 public:
+    using GridPoint = orbital::GridPoint;
 	explicit QButtonGrid(QWidget *parent = Q_NULLPTR);
     QButtonGrid(const QButtonGrid&) = delete;
 	~QButtonGrid();
 
+    QList<GridPoint> arrangement() const;
+    void setArrangement(const QList<GridPoint>&);
     std::size_t nRows() const;
     std::size_t nCols() const;
     int id(std::size_t col, std::size_t row) const;
@@ -32,7 +35,7 @@ public:
     void split();
 
 Q_SIGNALS:
-    void gridChanged(const QList<orbital::GridPoint>& arrangement);
+    void gridChanged();
 
 private Q_SLOTS:
     void clickLeft() { this->delCol(); }
@@ -43,8 +46,8 @@ private Q_SLOTS:
     void clickSplit() { this->split(); }
 
 private:
-    void update();
-    void split(std::size_t col, std::size_t row);
+    void clear();
+    bool split(std::size_t col, std::size_t row);
     bool selectionVertices(std::size_t& cmin, std::size_t& cmax, std::size_t& rmin, std::size_t& rmax);
     QButtonGridRootNode* root(std::size_t col, std::size_t row);
     const QButtonGridRootNode* root(std::size_t col, std::size_t row) const;

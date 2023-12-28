@@ -25,6 +25,8 @@ public:
             c.resize(nRow);
         this->m.resize(nCol, vec(nRow));
     }
+    typename mat::const_iterator begin() const noexcept { return this->m.begin(); }
+    typename mat::const_iterator end() const noexcept { return this->m.end(); }
 
 private:
     mat m;

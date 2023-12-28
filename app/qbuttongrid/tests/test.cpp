@@ -192,6 +192,82 @@ TEST(ComplexTest, MultipleCombine) {
 }
 
 
+TEST(ArrangementTest, Simple) {
+    QButtonGrid buttonGrid;
+    QList<QButtonGrid::GridPoint> points{
+        {
+            .x = 0,
+            .dx = 0,
+            .y = 0,
+            .dy = 0
+        }
+    };
+    buttonGrid.setArrangement(points);
+    ASSERT_EQ(1, buttonGrid.nCols());
+    ASSERT_EQ(1, buttonGrid.nRows());
+    ASSERT_EQ(1, buttonGrid.id(0, 0));
+    ASSERT_EQ(0, buttonGrid.id(1, 0));
+    ASSERT_EQ(0, buttonGrid.id(0, 1));
+}
+
+
+TEST(ArrangementTest, Overwrite) {
+    QButtonGrid buttonGrid;
+    QList<QButtonGrid::GridPoint> points{
+        {
+            .x = 0,
+            .dx = 0,
+            .y = 0,
+            .dy = 0
+        }
+    };
+    buttonGrid.addCol();
+    buttonGrid.setArrangement(points);
+    ASSERT_EQ(1, buttonGrid.nCols());
+    ASSERT_EQ(1, buttonGrid.nRows());
+    ASSERT_EQ(1, buttonGrid.id(0, 0));
+    ASSERT_EQ(0, buttonGrid.id(1, 0));
+    ASSERT_EQ(0, buttonGrid.id(0, 1));
+}
+
+
+TEST(ArrangementTest, Complex) {
+    QButtonGrid buttonGrid;
+    QList<QButtonGrid::GridPoint> points{
+        {
+            .x = 0,
+            .dx = 1,
+            .y = 0,
+            .dy = 1
+        },
+        {
+            .x = 2,
+            .dx = 0,
+            .y = 0,
+            .dy = 1
+        },
+        {
+            .x = 0,
+            .dx = 2,
+            .y = 2,
+            .dy = 0
+        }
+    };
+    buttonGrid.setArrangement(points);
+    ASSERT_EQ(3, buttonGrid.nCols());
+    ASSERT_EQ(3, buttonGrid.nRows());
+    ASSERT_EQ(1, buttonGrid.id(0, 0));
+    ASSERT_EQ(1, buttonGrid.id(1, 0));
+    ASSERT_EQ(1, buttonGrid.id(0, 1));
+    ASSERT_EQ(1, buttonGrid.id(1, 1));
+    ASSERT_EQ(2, buttonGrid.id(2, 0));
+    ASSERT_EQ(2, buttonGrid.id(2, 1));
+    ASSERT_EQ(3, buttonGrid.id(0, 2));
+    ASSERT_EQ(3, buttonGrid.id(1, 2));
+    ASSERT_EQ(3, buttonGrid.id(2, 2));
+}
+
+
 }
 
 

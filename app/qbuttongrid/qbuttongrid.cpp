@@ -5,8 +5,74 @@
 
 #include <limits>
 
+using orbital::GridPoint;
+using orbital::GridPoint_t;
+
 
 static constexpr auto QBUTTONGRID_MAX = std::numeric_limits<int>::max();
+
+
+static void
+updateIds(const Matrix<QButtonGridNode*>* m)
+{
+    int id = 1;
+    for (decltype(m->nRows()) r = 0; r < m->nRows(); ++r) {
+        for (decltype(m->nCols()) c = 0; c < m->nCols(); ++c) {
+            if (m->itemAt(c, r)->isRoot())
+                dynamic_cast<QButtonGridRootNode*>(m->itemAt(c, r))->setId(id++);
+        }
+    }
+}
+
+
+/**
+ * @brief Checks if the given arrangement is a valid arrangement. If valid, returns `true` and
+ * populates the given `cols` and `rows` variables with the total columns and rows, respectively.
+ * 
+ * @param arrangement 
+ * @param cols 
+ * @param rows 
+ * @return true 
+ * @return false 
+ */
+static bool
+isArrangementValid(
+    const QList<GridPoint>& arrangement,
+    GridPoint_t& cols,
+    GridPoint_t& rows)
+{
+    if (arrangement.size() == 0) return false;
+    cols = 0;
+    rows = 0;
+
+    for (const auto& button : arrangement) {
+        if (button.x + button.dx > cols) cols = button.x + button.dx;
+        if (button.y + button.dy > rows) rows = button.y + button.dy;
+    }
+    // max(a+1, b+1) = max(a, b)+1
+    cols += 1;
+    rows += 1;
+    if (cols > QBUTTONGRID_MAX || rows > QBUTTONGRID_MAX)
+        return false;
+
+    Matrix<int> m{cols, rows, 0};
+    for (const auto& button : arrangement) {
+        for (GridPoint_t cs = 0; cs <= button.dx; ++cs) {
+            for (GridPoint_t rs = 0; rs <= button.dy; ++rs) {
+                if (m.itemAt(button.x + cs, button.y + rs))
+                    return false;
+                m.setCell(button.x + cs, button.y + rs, 1);
+            }
+        }
+    }
+    for (const auto& col : m) {
+        for (const auto& occupied : col)
+            if (occupied == 0)
+                return false;
+    }
+
+    return true;
+}
 
 
 QButtonGrid::QButtonGrid(QWidget* parent)
@@ -53,12 +119,67 @@ QButtonGrid::QButtonGrid(QWidget* parent)
 
 QButtonGrid::~QButtonGrid()
 {
-    for (auto c = this->m->nCols(); c > 0; --c) {
-        for (auto r = this->m->nRows(); r > 0; --r) {
-            delete this->m->itemAt(c - 1, r - 1);
+    this->clear();
+}
+
+
+/**
+ * @brief Returns the current button arrangement.
+ * 
+ * @return QList<GridPoint> 
+ */
+QList<GridPoint>
+QButtonGrid::arrangement() const
+{
+    QList<GridPoint> arrangement;
+    for (decltype(this->m->nRows()) r = 0; r < this->m->nRows(); ++r) {
+        for (decltype(this->m->nCols()) c = 0; c < this->m->nCols(); ++c) {
+            if (this->m->itemAt(c, r)->isRoot()) {
+                auto root = dynamic_cast<QButtonGridRootNode*>(this->m->itemAt(c, r));
+                arrangement.push_back(GridPoint{
+                    .x = static_cast<GridPoint_t>(c),
+                    .dx = static_cast<GridPoint_t>(root->cs),
+                    .y = static_cast<GridPoint_t>(r),
+                    .dy = static_cast<GridPoint_t>(root->rs)
+                });
+            }
         }
     }
-    delete this->m;
+    return arrangement;
+}
+
+
+/**
+ * @brief Sets the button arrangement.
+ * 
+ * @param arrangement 
+ */
+void
+QButtonGrid::setArrangement(const QList<GridPoint>& arrangement)
+{
+    GridPoint_t cols;
+    GridPoint_t rows;
+
+    if (!isArrangementValid(arrangement, cols, rows))
+        return;
+
+    this->clear();
+    this->m = new Matrix<QButtonGridNode*>{cols, rows};
+    for (GridPoint_t c = 0; c < cols; ++c) {
+        for (GridPoint_t r = 0; r < rows; ++r) {
+            auto root = new QButtonGridRootNode;
+            this->m->setCell(c, r, root);
+            this->gridLayout->addWidget(dynamic_cast<QPushButton*>(root), r, c);
+        }
+    }
+
+    for (auto button : arrangement) {
+        if (button.dx || button.dy) {
+            this->select(button.x, button.y);
+            this->select(button.x + button.dx, button.y + button.dy);
+            this->combine();
+        }
+    }
 }
 
 
@@ -135,7 +256,8 @@ QButtonGrid::addRow()
         this->m->setCell(c, r, root);
         this->gridLayout->addWidget(dynamic_cast<QPushButton*>(root), r, c);
     }
-    this->update();
+    updateIds(this->m);
+    emit this->gridChanged();
 }
 
 
@@ -167,7 +289,8 @@ QButtonGrid::delRow()
         delete node;
     }
     this->m->resize(this->m->nCols(), this->m->nRows() - 1);
-    this->update();
+    updateIds(this->m);
+    emit this->gridChanged();
 }
 
 
@@ -188,7 +311,8 @@ QButtonGrid::addCol()
         this->m->setCell(c, r, root);
         this->gridLayout->addWidget(dynamic_cast<QPushButton*>(root), r, c);
     }
-    this->update();
+    updateIds(this->m);
+    emit this->gridChanged();
 }
 
 
@@ -220,7 +344,8 @@ QButtonGrid::delCol()
         delete node;
     }
     this->m->resize(this->m->nCols() - 1, this->m->nRows());
-    this->update();
+    updateIds(this->m);
+    emit this->gridChanged();
 }
 
 
@@ -271,7 +396,8 @@ QButtonGrid::combine()
         rowSpan + 1,
         colSpan + 1
     );
-    this->update();
+    updateIds(this->m);
+    emit this->gridChanged();
 }
 
 
@@ -282,61 +408,58 @@ QButtonGrid::combine()
 void
 QButtonGrid::split()
 {
+    bool gridChanged = false;
     for (std::size_t c = 0; c < this->m->nCols(); ++c) {
         for (std::size_t r = 0; r < this->m->nRows(); ++r) {
             if (this->root(c, r)->isChecked()) {
                 this->root(c, r)->setChecked(false);
-                this->split(c, r);
+                gridChanged = this->split(c, r);
             }
         }
     }
-    this->update();
+    if (gridChanged) {
+        updateIds(this->m);
+        emit this->gridChanged();
+    }
 }
 
 
 /**
- * @brief Relabels all of the buttons to match their current position and emits the `gridChanged`
- * signal.
+ * @brief Clears the button grid and deletes the internal button matrix.
  * 
  */
 void
-QButtonGrid::update()
+QButtonGrid::clear()
 {
-    int id = 1;
-    QList<orbital::GridPoint> arrangement;
-
-    for (decltype(this->m->nRows()) r = 0; r < this->m->nRows(); ++r) {
-        for (decltype(this->m->nCols()) c = 0; c < this->m->nCols(); ++c) {
-            if (this->m->itemAt(c, r)->isRoot()) {
-                auto root = dynamic_cast<QButtonGridRootNode*>(this->m->itemAt(c, r));
-                root->setId(id++);
-                arrangement.push_back(orbital::GridPoint{
-                    .x = static_cast<long>(c),
-                    .dx = static_cast<long>(root->cs),
-                    .y = static_cast<long>(r),
-                    .dy = static_cast<long>(root->rs)
-                });
-            }
+    for (auto c = this->m->nCols(); c > 0; --c) {
+        for (auto r = this->m->nRows(); r > 0; --r) {
+            auto node = this->m->itemAt(c - 1, r - 1);
+            if (node->isRoot())
+                this->gridLayout->removeWidget(dynamic_cast<QPushButton*>(node));
+            delete this->m->itemAt(c - 1, r - 1);
         }
     }
-    emit this->gridChanged(arrangement);
+    delete this->m;
 }
 
 
 /**
- * @brief Separates the button attributed to the given row and column fully into root nodes.
+ * @brief Separates the designated button fully into root nodes. Returns `true` if the designated
+ * button was actually split, `false` otherwise.
  * 
  * @param col 
  * @param row 
+ * @return true 
+ * @return false 
  */
-void
+bool
 QButtonGrid::split(std::size_t col, std::size_t row)
 {
     auto node = this->m->itemAt(col, row);
     if (node->isRoot()) {
         if (dynamic_cast<QButtonGridRootNode*>(node)->cs == 0 &&
             dynamic_cast<QButtonGridRootNode*>(node)->rs == 0)
-            return;
+            return false;
     } else {
         auto ext = dynamic_cast<QButtonGridExtNode*>(node);
         assert(col >= ext->dc);
@@ -355,11 +478,13 @@ QButtonGrid::split(std::size_t col, std::size_t row)
             this->gridLayout->addWidget(dynamic_cast<QPushButton*>(newRoot), r, c);
         }
     }
+    return true;
 }
 
 
 /**
- * @brief Calculates the vertices of the rectangle for the current selection.
+ * @brief Calculates the vertices of the rectangle for the current selection. Returns `true` if
+ * more than one button is selected, `false` otherwise.
  * 
  * @param colMin 
  * @param colMax 
@@ -375,7 +500,8 @@ QButtonGrid::selectionVertices(
     std::size_t& rowMin,
     std::size_t& rowMax)
 {
-    bool isSelected = false;
+    bool oneSelected = false;
+    bool twoSelected = false;
     std::size_t cmin = this->m->nCols();
     std::size_t cmax = 0;
     std::size_t rmin = this->m->nRows();
@@ -383,7 +509,10 @@ QButtonGrid::selectionVertices(
     for (std::size_t c = 0; c < this->m->nCols(); ++c) {
         for (std::size_t r = 0; r < this->m->nRows(); ++r) {
             if (this->root(c, r)->isChecked()) {
-                isSelected = true;
+                if (this->m->itemAt(c, r)->isRoot()) {
+                    twoSelected = oneSelected;
+                    oneSelected = true;
+                }
                 if (c < cmin) cmin = c;
                 if (c > cmax) cmax = c;
                 if (r < rmin) rmin = r;
@@ -395,7 +524,7 @@ QButtonGrid::selectionVertices(
     colMax = cmax;
     rowMin = rmin;
     rowMax = rmax;
-    return isSelected;
+    return twoSelected;
 }
 
 
