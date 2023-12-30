@@ -172,7 +172,6 @@ QButtonGrid::setArrangement(const QList<GridPoint>& arrangement)
             this->gridLayout->addWidget(dynamic_cast<QPushButton*>(root), r, c);
         }
     }
-
     for (auto button : arrangement) {
         if (button.dx || button.dy) {
             this->select(button.x, button.y);
@@ -180,6 +179,7 @@ QButtonGrid::setArrangement(const QList<GridPoint>& arrangement)
             this->combine();
         }
     }
+    updateIds(this->m);
 }
 
 
@@ -361,38 +361,34 @@ QButtonGrid::combine()
     std::size_t rowMin;
     std::size_t rowMax;
 
-    if (!selectionVertices(colMin, colMax, rowMin, rowMax))
+    auto selected = selectionVertices(colMin, colMax, rowMin, rowMax);
+    if (selected <= 1) {
+        if (selected == 1)
+            this->root(colMin, colMax)->setChecked(false);
         return;
+    }
 
     // split up buttons crossing the border (i'm building a wall and it's going to be beautiful, believe me)
     for (auto c = colMin; c <= colMax; ++c) {
         for (auto r = rowMin; r <= rowMax; ++r) {
             this->split(c, r);
             assert(this->m->itemAt(c, r)->isRoot());
-            dynamic_cast<QButtonGridRootNode*>(this->m->itemAt(c, r))->setChecked(true);
-        }
-    }
-
-    auto col = colMin;
-    auto row = rowMin;
-    auto colSpan = colMax - colMin;
-    auto rowSpan = rowMax - rowMin;
-    auto root = new QButtonGridRootNode{colSpan, rowSpan};
-    for (auto c = colMin; c <= colMax; ++c) {
-        for (auto r = rowMin; r <= rowMax; ++r) {
             auto consumed = this->m->itemAt(c, r);
-            if (consumed->isRoot())
-                this->gridLayout->removeWidget(dynamic_cast<QPushButton*>(consumed));
+            this->gridLayout->removeWidget(dynamic_cast<QPushButton*>(consumed));
             delete consumed;
             if (c != colMin || r != rowMin)
                 this->m->setCell(c, r, new QButtonGridExtNode{c - colMin, r - rowMin});
         }
     }
-    this->m->setCell(col, row, root);
+
+    auto colSpan = colMax - colMin;
+    auto rowSpan = rowMax - rowMin;
+    auto root = new QButtonGridRootNode{colSpan, rowSpan};
+    this->m->setCell(colMin, rowMin, root);
     this->gridLayout->addWidget(
         dynamic_cast<QPushButton*>(root),
-        row,
-        col,
+        rowMin,
+        colMin,
         rowSpan + 1,
         colSpan + 1
     );
@@ -467,9 +463,11 @@ QButtonGrid::split(std::size_t col, std::size_t row)
         col -= ext->dc;
         row -= ext->dr;
     }
-    auto colEnd = col + this->root(col, row)->cs;
-    auto rowEnd = row + this->root(col, row)->rs;
-    this->gridLayout->removeWidget(dynamic_cast<QPushButton*>(this->root(col, row)));
+    assert(this->m->itemAt(col, row)->isRoot());
+    auto root = dynamic_cast<QButtonGridRootNode*>(this->m->itemAt(col, row));
+    auto colEnd = col + root->cs;
+    auto rowEnd = row + root->rs;
+    this->gridLayout->removeWidget(dynamic_cast<QPushButton*>(root));
     for (std::size_t c = col; c <= colEnd; ++c) {
         for (std::size_t r = row; r <= rowEnd; ++r) {
             delete this->m->itemAt(c, r);
@@ -483,25 +481,23 @@ QButtonGrid::split(std::size_t col, std::size_t row)
 
 
 /**
- * @brief Calculates the vertices of the rectangle for the current selection. Returns `true` if
- * more than one button is selected, `false` otherwise.
+ * @brief Calculates the vertices of the rectangle for the current selection. Returns the amount
+ * of buttons selected. Note that the vertices are only valid if at least one button is selected.
  * 
  * @param colMin 
  * @param colMax 
  * @param rowMin 
  * @param rowMax 
- * @return true 
- * @return false 
+ * @return int 
  */
-bool
+int
 QButtonGrid::selectionVertices(
     std::size_t& colMin,
     std::size_t& colMax,
     std::size_t& rowMin,
     std::size_t& rowMax)
 {
-    bool oneSelected = false;
-    bool twoSelected = false;
+    int selected = 0;
     std::size_t cmin = this->m->nCols();
     std::size_t cmax = 0;
     std::size_t rmin = this->m->nRows();
@@ -509,10 +505,8 @@ QButtonGrid::selectionVertices(
     for (std::size_t c = 0; c < this->m->nCols(); ++c) {
         for (std::size_t r = 0; r < this->m->nRows(); ++r) {
             if (this->root(c, r)->isChecked()) {
-                if (this->m->itemAt(c, r)->isRoot()) {
-                    twoSelected = oneSelected;
-                    oneSelected = true;
-                }
+                if (this->m->itemAt(c, r)->isRoot())
+                    selected += 1;
                 if (c < cmin) cmin = c;
                 if (c > cmax) cmax = c;
                 if (r < rmin) rmin = r;
@@ -524,7 +518,7 @@ QButtonGrid::selectionVertices(
     colMax = cmax;
     rowMin = rmin;
     rowMax = rmax;
-    return twoSelected;
+    return selected;
 }
 
 

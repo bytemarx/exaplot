@@ -48,7 +48,7 @@ private Q_SLOTS:
 private:
     void clear();
     bool split(std::size_t col, std::size_t row);
-    bool selectionVertices(std::size_t& cmin, std::size_t& cmax, std::size_t& rmin, std::size_t& rmax);
+    int selectionVertices(std::size_t& cmin, std::size_t& cmax, std::size_t& rmin, std::size_t& rmax);
     QButtonGridRootNode* root(std::size_t col, std::size_t row);
     const QButtonGridRootNode* root(std::size_t col, std::size_t row) const;
 
