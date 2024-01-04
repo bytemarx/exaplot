@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>res/checkmark.svg</file>
+        <file>res/exclamation.svg</file>
+        <file>res/attributions.txt</file>
+    </qresource>
+</RCC>
