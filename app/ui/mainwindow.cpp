@@ -13,3 +13,10 @@ MainWindow::actionAbout()
 {
     return this->ui.actionAbout;
 }
+
+
+QAction*
+MainWindow::actionPlotEditor()
+{
+    return this->ui.actionPlotEditor;
+}

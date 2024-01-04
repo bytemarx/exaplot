@@ -5,12 +5,17 @@
 
 AppUI::AppUI(QObject* parent)
     : QObject{parent}
+    , mainWindow{new MainWindow}
+    , aboutDialog{new About{this->mainWindow}}
+    , plotEditorDialog{new PlotEditor{this->mainWindow}}
 {
-    this->mainWindow = new MainWindow{};
-    this->aboutDialog = new About{this->mainWindow};
     QObject::connect(
         this->mainWindow->actionAbout(), &QAction::triggered,
         this->aboutDialog, &About::open
+    );
+    QObject::connect(
+        this->mainWindow->actionPlotEditor(), &QAction::triggered,
+        this->plotEditorDialog, &PlotEditor::open
     );
 }
 

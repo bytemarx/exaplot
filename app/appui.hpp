@@ -5,6 +5,7 @@
 
 #include "mainwindow.hpp"
 #include "about.hpp"
+#include "ploteditor.hpp"
 
 
 class AppUI : public QObject
@@ -21,4 +22,5 @@ public:
 private:
     MainWindow* mainWindow;
     About* aboutDialog;
+    PlotEditor* plotEditorDialog;
 };

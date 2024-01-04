@@ -17,7 +17,7 @@ class QButtonGrid : public QWidget
 
 public:
     using GridPoint = orbital::GridPoint;
-	explicit QButtonGrid(QWidget *parent = Q_NULLPTR);
+	explicit QButtonGrid(QWidget* parent = Q_NULLPTR);
     QButtonGrid(const QButtonGrid&) = delete;
 	~QButtonGrid();
 
@@ -25,6 +25,7 @@ public:
     void setArrangement(const QList<GridPoint>&);
     std::size_t nRows() const;
     std::size_t nCols() const;
+    std::size_t nButtons() const;
     int id(std::size_t col, std::size_t row) const;
     void select(std::size_t col, std::size_t row, bool val = true);
     void addRow();

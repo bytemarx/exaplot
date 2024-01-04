@@ -13,6 +13,7 @@ public:
     MainWindow();
 
     QAction* actionAbout();
+    QAction* actionPlotEditor();
 
 private:
     Ui::MainWindow ui;

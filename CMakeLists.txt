@@ -15,7 +15,6 @@ set(LIB_INSTALL_DIR lib/orbital)
 
 include(ExternalProject)
 
-set(QTVER "6")
 set(PYTHON_VERSION "3.12.0")
 
 ################################

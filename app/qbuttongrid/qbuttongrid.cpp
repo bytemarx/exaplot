@@ -207,6 +207,20 @@ QButtonGrid::nCols() const
 }
 
 
+std::size_t
+QButtonGrid::nButtons() const
+{
+    std::size_t n = 0;
+    for (const auto& col : *this->m) {
+        for (const auto& node : col) {
+            if (node->isRoot())
+                n += 1;
+        }
+    }
+    return n;
+}
+
+
 /**
  * @brief Returns the ID of the designated button.
  * 
