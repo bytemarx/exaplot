@@ -3,22 +3,88 @@
 #include "qplottabprivate.hpp"
 
 
+QNumberEdit::QNumberEdit(
+    const QString& defaultValue,
+    QWidget* parent)
+    : QLineEdit{defaultValue, parent}
+    , m_cache{defaultValue}
+{
+}
+
+
+void
+QNumberEdit::focusInEvent(QFocusEvent* event)
+{
+    switch (event->reason()) {
+    case Qt::MouseFocusReason:
+    case Qt::TabFocusReason:
+    case Qt::BacktabFocusReason:
+        this->m_cache = this->text();
+        break;
+    default:
+        break;
+    }
+    QLineEdit::focusInEvent(event);
+}
+
+
+void
+QNumberEdit::focusOutEvent(QFocusEvent* event)
+{
+    if (this->text().isEmpty() || !this->validate())
+        this->setText(this->m_cache);
+    QLineEdit::focusOutEvent(event);
+}
+
+
+bool
+QNumberEdit::validate()
+{
+    auto v = this->validator();
+    if (v == nullptr) return true;
+
+    auto input = this->text();
+    int pos;
+    return v->validate(input, pos) == QValidator::State::Acceptable;
+}
+
+
+QIntEdit::QIntEdit(
+    int defaultValue,
+    QWidget* parent,
+    int min,
+    int max)
+    : QNumberEdit{QString::number(defaultValue), parent}
+{
+    this->setValidator(new QIntValidator{min, max, this});
+}
+
+
+QDoubleEdit::QDoubleEdit(
+    double defaultValue,
+    QWidget* parent,
+    double min,
+    double max,
+    int decimals)
+    : QNumberEdit{QString::number(defaultValue), parent}
+{
+    this->setValidator(new QDoubleValidator{min, max, decimals, this});
+}
+
+
 MinSizeFramePrivate::MinSizeFramePrivate(QWidget* parent)
     : QFrame{parent}
     , m_layout{new QHBoxLayout{this}}
-    , m_label_width{new QLabel{"W,", this}}
-    , m_label_height{new QLabel{"H", this}}
-    , m_lineEdit_width{new QLineEdit{"0", this}}
-    , m_lineEdit_height{new QLineEdit{"0", this}}
+    , m_label_width{new QLabel{"W", this}}
+    , m_label_height{new QLabel{", H", this}}
+    , m_intEdit_width{new QIntEdit{0, this}}
+    , m_intEdit_height{new QIntEdit{0, this}}
 {
-    auto validator = new QIntValidator{0, INT_MAX, this};
-    this->m_lineEdit_width->setValidator(validator);
-    this->m_lineEdit_height->setValidator(validator);
     this->m_layout->setContentsMargins(0, 0, 0, 0);
-    this->m_layout->addWidget(this->m_lineEdit_width);
     this->m_layout->addWidget(this->m_label_width);
-    this->m_layout->addWidget(this->m_lineEdit_height);
+    this->m_layout->addWidget(this->m_intEdit_width);
     this->m_layout->addWidget(this->m_label_height);
+    this->m_layout->addWidget(this->m_intEdit_height);
 }
 
 
@@ -26,14 +92,14 @@ void
 MinSizeFramePrivate::setWidth(int val)
 {
     if (val < 0) return;
-    this->m_lineEdit_width->setText(QString::number(val));
+    this->m_intEdit_width->setText(QString::number(val));
 }
 
 
 int
 MinSizeFramePrivate::width() const
 {
-    return this->m_lineEdit_width->text().toInt();
+    return this->m_intEdit_width->text().toInt();
 }
 
 
@@ -41,14 +107,14 @@ void
 MinSizeFramePrivate::setHeight(int val)
 {
     if (val < 0) return;
-    this->m_lineEdit_height->setText(QString::number(val));
+    this->m_intEdit_height->setText(QString::number(val));
 }
 
 
 int
 MinSizeFramePrivate::height() const
 {
-    return this->m_lineEdit_height->text().toInt();
+    return this->m_intEdit_height->text().toInt();
 }
 
 
@@ -57,41 +123,41 @@ RangeBoxPrivate::RangeBoxPrivate(const QString& title, QWidget* parent)
     , m_layout{new QHBoxLayout{this}}
     , m_label_min{new QLabel{"Min", this}}
     , m_label_max{new QLabel{"Max", this}}
-    , m_lineEdit_min{new QLineEdit{this}}
-    , m_lineEdit_max{new QLineEdit{this}}
+    , m_doubleEdit_min{new QDoubleEdit{0, this}}
+    , m_doubleEdit_max{new QDoubleEdit{0, this}}
 {
     this->m_layout->addWidget(this->m_label_min);
-    this->m_layout->addWidget(this->m_lineEdit_min);
+    this->m_layout->addWidget(this->m_doubleEdit_min);
     this->m_layout->addWidget(this->m_label_max);
-    this->m_layout->addWidget(this->m_lineEdit_max);
+    this->m_layout->addWidget(this->m_doubleEdit_max);
 }
 
 
 void
 RangeBoxPrivate::setMin(const QString& text)
 {
-    this->m_lineEdit_min->setText(text);
+    this->m_doubleEdit_min->setText(text);
 }
 
 
 QString
 RangeBoxPrivate::min() const
 {
-    return this->m_lineEdit_min->text();
+    return this->m_doubleEdit_min->text();
 }
 
 
 void
 RangeBoxPrivate::setMax(const QString& text)
 {
-    this->m_lineEdit_max->setText(text);
+    this->m_doubleEdit_max->setText(text);
 }
 
 
 QString
 RangeBoxPrivate::max() const
 {
-    return this->m_lineEdit_max->text();
+    return this->m_doubleEdit_max->text();
 }
 
 
@@ -313,16 +379,13 @@ DataSizeBoxPrivate::DataSizeBoxPrivate(const QString& title, QWidget* parent)
     , m_layout{new QHBoxLayout{this}}
     , m_label_x{new QLabel{"X", this}}
     , m_label_y{new QLabel{", Y", this}}
-    , m_lineEdit_x{new QLineEdit{"0", this}}
-    , m_lineEdit_y{new QLineEdit{"0", this}}
+    , m_intEdit_x{new QIntEdit{0, this}}
+    , m_intEdit_y{new QIntEdit{0, this}}
 {
-    QIntValidator* validator = new QIntValidator{0, INT_MAX, this};
-    this->m_lineEdit_x->setValidator(validator);
-    this->m_lineEdit_y->setValidator(validator);
     this->m_layout->addWidget(this->m_label_x);
-    this->m_layout->addWidget(this->m_lineEdit_x);
+    this->m_layout->addWidget(this->m_intEdit_x);
     this->m_layout->addWidget(this->m_label_y);
-    this->m_layout->addWidget(this->m_lineEdit_y);
+    this->m_layout->addWidget(this->m_intEdit_y);
 }
 
 
@@ -330,14 +393,14 @@ void
 DataSizeBoxPrivate::setX(int val)
 {
     if (val < 0) return;
-    this->m_lineEdit_x->setText(QString::number(val));
+    this->m_intEdit_x->setText(QString::number(val));
 }
 
 
 int
 DataSizeBoxPrivate::x() const
 {
-    return this->m_lineEdit_x->text().toInt();
+    return this->m_intEdit_x->text().toInt();
 }
 
 
@@ -345,14 +408,14 @@ void
 DataSizeBoxPrivate::setY(int val)
 {
     if (val < 0) return;
-    this->m_lineEdit_y->setText(QString::number(val));
+    this->m_intEdit_y->setText(QString::number(val));
 }
 
 
 int
 DataSizeBoxPrivate::y() const
 {
-    return this->m_lineEdit_y->text().toInt();
+    return this->m_intEdit_y->text().toInt();
 }
 
 

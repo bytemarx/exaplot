@@ -4,6 +4,56 @@
 
 #include "qplottab.hpp"
 
+#include <limits>
+
+
+class QNumberEdit : public QLineEdit
+{
+    Q_OBJECT
+
+public:
+    virtual ~QNumberEdit() = default;
+
+protected:
+    QNumberEdit(const QString&, QWidget*);
+    void focusInEvent(QFocusEvent*) override;
+    void focusOutEvent(QFocusEvent*) override;
+
+private:
+    bool validate();
+
+    QString m_cache;
+};
+
+
+class QIntEdit : public QNumberEdit
+{
+    Q_OBJECT
+
+public:
+    explicit QIntEdit(
+        int defaultValue,
+        QWidget* parent,
+        int min = std::numeric_limits<int>::lowest(),
+        int max = std::numeric_limits<int>::max()
+    );
+};
+
+
+class QDoubleEdit : public QNumberEdit
+{
+    Q_OBJECT
+
+public:
+    explicit QDoubleEdit(
+        double defaultValue,
+        QWidget* parent,
+        double min = std::numeric_limits<double>::lowest(),
+        double max = std::numeric_limits<double>::max(),
+        int decimals = -1
+    );
+};
+
 
 class MinSizeFramePrivate : public QFrame, public QPlotTab::MinSizeFrame
 {
@@ -21,8 +71,8 @@ private:
     QHBoxLayout* m_layout;
     QLabel* m_label_width;
     QLabel* m_label_height;
-    QLineEdit* m_lineEdit_width;
-    QLineEdit* m_lineEdit_height;
+    QIntEdit* m_intEdit_width;
+    QIntEdit* m_intEdit_height;
 };
 
 
@@ -42,8 +92,8 @@ private:
     QHBoxLayout* m_layout;
     QLabel* m_label_min;
     QLabel* m_label_max;
-    QLineEdit* m_lineEdit_min;
-    QLineEdit* m_lineEdit_max;
+    QDoubleEdit* m_doubleEdit_min;
+    QDoubleEdit* m_doubleEdit_max;
 };
 
 
@@ -121,8 +171,8 @@ private:
     QHBoxLayout* m_layout;
     QLabel* m_label_x;
     QLabel* m_label_y;
-    QLineEdit* m_lineEdit_x;
-    QLineEdit* m_lineEdit_y;
+    QIntEdit* m_intEdit_x;
+    QIntEdit* m_intEdit_y;
 };
 
 
