@@ -15,6 +15,7 @@
 #include <QFrame>
 
 #include "qcustomplot.h"
+#include "qplot.hpp"
 
 
 class MinSizeFramePrivate;
@@ -202,6 +203,7 @@ public:
     const SubTab2D* tab2D() const;
     SubTabColorMap* tabColorMap();
     const SubTabColorMap* tabColorMap() const;
+    QPlot::Type selected() const;
 
 private:
     QVBoxLayout* m_layout;

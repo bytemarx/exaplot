@@ -195,9 +195,9 @@ QPlotTab::QPlotTab(QWidget* parent)
 void
 QPlotTab::setCache(const QPlotTab::Cache& cache)
 {
-    this->m_label_title->setText(cache.title);
-    this->m_label_xAxis->setText(cache.xAxis);
-    this->m_label_yAxis->setText(cache.yAxis);
+    this->m_lineEdit_title->setText(cache.title);
+    this->m_lineEdit_xAxis->setText(cache.xAxis);
+    this->m_lineEdit_yAxis->setText(cache.yAxis);
     this->m_minSizeFrame->setCache(cache.minSize);
     this->m_tab2D->setCache(cache.twoDimen);
     this->m_tabColorMap->setCache(cache.colorMap);
@@ -208,9 +208,9 @@ QPlotTab::Cache
 QPlotTab::cache() const
 {
     return {
-        .title = this->m_label_title->text(),
-        .xAxis = this->m_label_xAxis->text(),
-        .yAxis = this->m_label_yAxis->text(),
+        .title = this->m_lineEdit_title->text(),
+        .xAxis = this->m_lineEdit_xAxis->text(),
+        .yAxis = this->m_lineEdit_yAxis->text(),
         .minSize = this->m_minSizeFrame->cache(),
         .twoDimen = this->m_tab2D->cache(),
         .colorMap = this->m_tabColorMap->cache()
@@ -221,42 +221,42 @@ QPlotTab::cache() const
 void
 QPlotTab::setTitle(const QString& text)
 {
-    this->m_label_title->setText(text);
+    this->m_lineEdit_title->setText(text);
 }
 
 
 QString
 QPlotTab::title() const
 {
-    return this->m_label_title->text();
+    return this->m_lineEdit_title->text();
 }
 
 
 void
 QPlotTab::setXAxis(const QString& text)
 {
-    this->m_label_xAxis->setText(text);
+    this->m_lineEdit_xAxis->setText(text);
 }
 
 
 QString
 QPlotTab::xAxis() const
 {
-    return this->m_label_xAxis->text();
+    return this->m_lineEdit_xAxis->text();
 }
 
 
 void
 QPlotTab::setYAxis(const QString& text)
 {
-    this->m_label_yAxis->setText(text);
+    this->m_lineEdit_yAxis->setText(text);
 }
 
 
 QString
 QPlotTab::yAxis() const
 {
-    return this->m_label_yAxis->text();
+    return this->m_lineEdit_yAxis->text();
 }
 
 
@@ -299,4 +299,15 @@ const QPlotTab::SubTabColorMap*
 QPlotTab::tabColorMap() const
 {
     return static_cast<const SubTabColorMap*>(this->m_tabColorMap);
+}
+
+
+QPlot::Type
+QPlotTab::selected() const
+{
+    switch (this->m_tabWidget->currentIndex()) {
+        default:
+        case 0: return QPlot::Type::TWODIMEN;
+        case 1: return QPlot::Type::COLORMAP;
+    }
 }

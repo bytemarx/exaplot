@@ -2,6 +2,7 @@
 
 #include "ui_ploteditor.h"
 #include "qplottab.hpp"
+#include "qplot.hpp"
 
 #include <vector>
 
@@ -15,6 +16,7 @@ public:
     {
         orbital::GridPoint position;
         QPlotTab::Cache attributes;
+        QPlot::Type selected;
     } PlotInfo;
 
     PlotEditor(QWidget* parent);

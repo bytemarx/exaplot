@@ -25,6 +25,7 @@ target_sources(qplottabplugin PRIVATE
 target_include_directories(qplottabplugin PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}"
     "${CMAKE_CURRENT_SOURCE_DIR}/../qcustomplot"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../qplot"
 )
 
 set_target_properties(qplottabplugin PROPERTIES

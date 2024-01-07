@@ -39,6 +39,14 @@ MainWindow::setPlots(const std::vector<PlotEditor::PlotInfo>& plots)
 
     for (std::size_t i = 0; i < plots.size(); ++i) {
         auto plot = this->m_plots[i];
+        this->ui.gridLayout_plots->addWidget(
+            plot,
+            static_cast<int>(plots[i].position.y),
+            static_cast<int>(plots[i].position.x),
+            static_cast<int>(plots[i].position.dy) + 1,
+            static_cast<int>(plots[i].position.dx) + 1
+        );
+        plot->setType(plots[i].selected);
         plot->setTitle(plots[i].attributes.title);
         plot->setLabelX(plots[i].attributes.xAxis);
         plot->setLabelY(plots[i].attributes.yAxis);
@@ -83,12 +91,5 @@ MainWindow::setPlots(const std::vector<PlotEditor::PlotInfo>& plots)
         color.setColorStopAt(0, plots[i].attributes.colorMap.color.min);
         color.setColorStopAt(1, plots[i].attributes.colorMap.color.max);
         plot->plotColorMap()->setColorGradient(color);
-        this->ui.gridLayout_plots->addWidget(
-            plot,
-            static_cast<int>(plots[i].position.y),
-            static_cast<int>(plots[i].position.x),
-            static_cast<int>(plots[i].position.dy) + 1,
-            static_cast<int>(plots[i].position.dx) + 1
-        );
     }
 }

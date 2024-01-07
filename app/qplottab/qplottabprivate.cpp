@@ -448,11 +448,11 @@ ColorBoxPrivate::ColorBoxPrivate(const QString& title, QWidget* parent)
         [=] { this->m_colorDialog_max->open(); }
     );
     QObject::connect(
-        this->m_colorDialog_min, &QColorDialog::accepted,
+        this->m_colorDialog_min, &QColorDialog::colorSelected,
         this, &ColorBoxPrivate::minColorSelected
     );
     QObject::connect(
-        this->m_colorDialog_max, &QColorDialog::accepted,
+        this->m_colorDialog_max, &QColorDialog::colorSelected,
         this, &ColorBoxPrivate::maxColorSelected
     );
 }
@@ -471,7 +471,7 @@ ColorBoxPrivate::setMin(const QColor& color)
 QColor
 ColorBoxPrivate::min() const
 {
-    return this->m_colorDialog_min->selectedColor();
+    return this->m_colorDialog_min->currentColor();
 }
 
 
@@ -488,21 +488,21 @@ ColorBoxPrivate::setMax(const QColor& color)
 QColor
 ColorBoxPrivate::max() const
 {
-    return this->m_colorDialog_max->selectedColor();
+    return this->m_colorDialog_max->currentColor();
 }
 
 
 void
-ColorBoxPrivate::minColorSelected()
+ColorBoxPrivate::minColorSelected(const QColor& color)
 {
-    this->setMin(this->m_colorDialog_min->selectedColor());
+    this->setMin(color);
 }
 
 
 void
-ColorBoxPrivate::maxColorSelected()
+ColorBoxPrivate::maxColorSelected(const QColor& color)
 {
-    this->setMax(this->m_colorDialog_max->selectedColor());
+    this->setMax(color);
 }
 
 

@@ -63,7 +63,8 @@ PlotEditor::plots() const
     for (std::size_t i = 0; i < this->plotTabs.size(); ++i) {
         plotInfo.push_back({
             .position = arrangement[i],
-            .attributes = this->plotTabs[i]->cache()
+            .attributes = this->plotTabs[i]->cache(),
+            .selected = this->plotTabs[i]->selected()
         });
     }
     return plotInfo;

@@ -39,6 +39,7 @@ target_include_directories(
 	test PUBLIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/.."
 	"${CMAKE_CURRENT_SOURCE_DIR}/../../qcustomplot"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../../qplot"
     "${CMAKE_BINARY_DIR}"
 )
 

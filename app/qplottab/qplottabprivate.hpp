@@ -189,8 +189,8 @@ public:
     QColor max() const override;
 
 private Q_SLOTS:
-    void minColorSelected();
-    void maxColorSelected();
+    void minColorSelected(const QColor&);
+    void maxColorSelected(const QColor&);
 
 private:
     QFormLayout* m_layout;
