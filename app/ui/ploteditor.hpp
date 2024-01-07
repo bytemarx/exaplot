@@ -11,7 +11,15 @@ class PlotEditor : public QDialog
     Q_OBJECT
 
 public:
+    typedef struct
+    {
+        orbital::GridPoint position;
+        QPlotTab::Cache attributes;
+    } PlotInfo;
+
     PlotEditor(QWidget* parent);
+
+    std::vector<PlotInfo> plots() const;
 
 public Q_SLOTS:
     void open() override;

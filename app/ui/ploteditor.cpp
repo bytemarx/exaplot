@@ -53,6 +53,23 @@ PlotEditor::open()
 }
 
 
+std::vector<PlotEditor::PlotInfo>
+PlotEditor::plots() const
+{
+    std::vector<PlotInfo> plotInfo;
+    auto arrangement = this->ui.buttonGrid->arrangement();
+    // TODO: tighter coupling between button grid arrangement and plot tabs
+    assert(arrangement.size() == this->plotTabs.size());
+    for (std::size_t i = 0; i < this->plotTabs.size(); ++i) {
+        plotInfo.push_back({
+            .position = arrangement[i],
+            .attributes = this->plotTabs[i]->cache()
+        });
+    }
+    return plotInfo;
+}
+
+
 void
 PlotEditor::done(int r)
 {
@@ -62,6 +79,8 @@ PlotEditor::done(int r)
             this->plotTabs.at(i)->setCache(this->cache.plotTabs.at(i));
         this->ui.buttonGrid->setArrangement(this->cache.arrangement);
         this->ui.label_buttonGridStatus->setPixmap(this->cache.buttonGridStatus);
+    } else {
+        this->applyArrangement();
     }
     return QDialog::done(r);
 }

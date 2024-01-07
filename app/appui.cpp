@@ -9,6 +9,8 @@ AppUI::AppUI(QObject* parent)
     , aboutDialog{new About{this->mainWindow}}
     , plotEditorDialog{new PlotEditor{this->mainWindow}}
 {
+    this->mainWindow->setPlots(this->plotEditorDialog->plots());
+
     QObject::connect(
         this->mainWindow->actionAbout(), &QAction::triggered,
         this->aboutDialog, &About::open
@@ -16,6 +18,10 @@ AppUI::AppUI(QObject* parent)
     QObject::connect(
         this->mainWindow->actionPlotEditor(), &QAction::triggered,
         this->plotEditorDialog, &PlotEditor::open
+    );
+    QObject::connect(
+        this->plotEditorDialog, &QDialog::accepted,
+        [=] { this->mainWindow->setPlots(this->plotEditorDialog->plots()); }
     );
 }
 

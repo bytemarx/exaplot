@@ -35,12 +35,24 @@ set(QCUSTOMPLOT_SOURCES
 	qcustomplot/qcustomplot.h
 )
 
+set(QPLOT_SOURCES
+	qplot/plot.cpp
+	qplot/plot.hpp
+	qplot/plot2d.cpp
+	qplot/plot2d.hpp
+	qplot/plotcolormap.cpp
+	qplot/plotcolormap.hpp
+	qplot/qplot.cpp
+	qplot/qplot.hpp
+)
+
 set(APP_SOURCES
 	${APP_FORM_FILES}
 	${APP_SOURCES_UI}
 	${QBUTTONGRID_SOURCES}
 	${QPLOTTAB_SOURCES}
 	${QCUSTOMPLOT_SOURCES}
+	${QPLOT_SOURCES}
 	appui.cpp
 	appmain.cpp
 	main.cpp
@@ -62,6 +74,7 @@ target_include_directories(
 	"${CMAKE_CURRENT_SOURCE_DIR}/qbuttongrid"
 	"${CMAKE_CURRENT_SOURCE_DIR}/qplottab"
 	"${CMAKE_CURRENT_SOURCE_DIR}/qcustomplot"
+	"${CMAKE_CURRENT_SOURCE_DIR}/qplot"
 	"${CMAKE_CURRENT_SOURCE_DIR}/../include"
     "${PYTHON_INCLUDES}"
 )
@@ -75,3 +88,4 @@ target_link_libraries(app PRIVATE orbital ${ADDITIONAL_LIBRARY_DEPENDENCIES})
 
 add_subdirectory("qbuttongrid")
 add_subdirectory("qplottab")
+add_subdirectory("qplot")

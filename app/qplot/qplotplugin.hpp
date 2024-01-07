@@ -1,16 +1,17 @@
 #pragma once
 
+
 #include <QDesignerCustomWidgetInterface>
 
 
-class QButtonGridPlugin : public QObject, public QDesignerCustomWidgetInterface
+class QPlotPlugin : public QObject, public QDesignerCustomWidgetInterface
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QDesignerCustomWidgetInterface")
+    Q_PLUGIN_METADATA(IID "orbital.QPlotPlugin")
     Q_INTERFACES(QDesignerCustomWidgetInterface)
 
 public:
-    explicit QButtonGridPlugin(QObject* parent = Q_NULLPTR);
+    explicit QPlotPlugin(QObject* parent = Q_NULLPTR);
 
     QString name() const override;
     QString group() const override;

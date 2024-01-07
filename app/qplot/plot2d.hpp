@@ -1,0 +1,33 @@
+#pragma once
+
+#include "plot.hpp"
+
+
+class Plot2D : public Plot
+{
+public:
+	Plot2D(
+		const QString& title = QString{},
+		const QString& labelX = QString{},
+		const QString& labelY = QString{},
+		const QCPRange& rangeX = QCPRange{-10, 10},
+		const QCPRange& rangeY = QCPRange{-10, 10},
+		QCPGraph::LineStyle lineStyle = QCPGraph::LineStyle::lsNone,
+		const QCPScatterStyle& scatStyle = QCPScatterStyle{},
+		const QPen& pen = QPen{}
+	);
+	Type type() const override;
+	void setRangeX(const QCPRange&);
+	const QCPRange rangeX() const;
+	void setRangeY(const QCPRange&);
+	const QCPRange rangeY() const;
+	void setLineStyle(QCPGraph::LineStyle);
+	QCPGraph::LineStyle lineStyle() const;
+	void setScatStyle(const QCPScatterStyle&);
+	QCPScatterStyle scatStyle() const;
+	void setPen(const QPen&);
+	QPen pen() const;
+
+private:
+	QCPGraph* m_graph;
+};
