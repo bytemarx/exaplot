@@ -15,7 +15,7 @@ public:
     virtual ~QNumberEdit() = default;
 
 protected:
-    QNumberEdit(const QString&, QWidget*);
+    QNumberEdit(QWidget*, const QString&);
     void focusInEvent(QFocusEvent*) override;
     void focusOutEvent(QFocusEvent*) override;
 
@@ -31,9 +31,9 @@ class QIntEdit : public QNumberEdit
     Q_OBJECT
 
 public:
-    explicit QIntEdit(
-        int defaultValue,
+    QIntEdit(
         QWidget* parent,
+        int defaultValue,
         int min = std::numeric_limits<int>::lowest(),
         int max = std::numeric_limits<int>::max()
     );
@@ -45,9 +45,9 @@ class QDoubleEdit : public QNumberEdit
     Q_OBJECT
 
 public:
-    explicit QDoubleEdit(
-        double defaultValue,
+    QDoubleEdit(
         QWidget* parent,
+        double defaultValue,
         double min = std::numeric_limits<double>::lowest(),
         double max = std::numeric_limits<double>::max(),
         int decimals = -1
@@ -60,7 +60,7 @@ class MinSizeFramePrivate : public QFrame, public QPlotTab::MinSizeFrame
     Q_OBJECT
 
 public:
-    MinSizeFramePrivate(QWidget* parent);
+    explicit MinSizeFramePrivate(QWidget* parent);
 
     void setWidth(int) override;
     int width() const override;
@@ -81,7 +81,7 @@ class RangeBoxPrivate : public QGroupBox, public QPlotTab::RangeBox
     Q_OBJECT
 
 public:
-    RangeBoxPrivate(const QString& title, QWidget* parent);
+    RangeBoxPrivate(QWidget* parent, const QString& title, double defaultMin, double defaultMax);
 
     void setMin(const QString& text) override;
     QString min() const override;
@@ -102,7 +102,7 @@ class LineBoxPrivate : public QGroupBox, public QPlotTab::LineBox
     Q_OBJECT
 
 public:
-    LineBoxPrivate(const QString& title, QWidget* parent);
+    LineBoxPrivate(QWidget* parent, const QString& title);
 
     void setType(QCPGraph::LineStyle) override;
     QCPGraph::LineStyle type() const override;
@@ -131,7 +131,7 @@ class PointsBoxPrivate : public QGroupBox, public QPlotTab::PointsBox
     Q_OBJECT
 
 public:
-    PointsBoxPrivate(const QString& title, QWidget* parent);
+    PointsBoxPrivate(QWidget* parent, const QString& title);
 
     void setShape(QCPScatterStyle::ScatterShape) override;
     QCPScatterStyle::ScatterShape shape() const override;
@@ -160,7 +160,7 @@ class DataSizeBoxPrivate : public QGroupBox, public QPlotTab::DataSizeBox
     Q_OBJECT
 
 public:
-    DataSizeBoxPrivate(const QString& title, QWidget* parent);
+    DataSizeBoxPrivate(QWidget* parent, const QString& title, int defaultX, int defaultY);
 
     void setX(int) override;
     int x() const override;
@@ -181,7 +181,7 @@ class ColorBoxPrivate : public QGroupBox, public QPlotTab::ColorBox
     Q_OBJECT
 
 public:
-    ColorBoxPrivate(const QString& title, QWidget* parent);
+    ColorBoxPrivate(QWidget* parent, const QString& title);
 
     void setMin(const QColor&) override;
     QColor min() const override;

@@ -4,8 +4,8 @@
 
 
 QNumberEdit::QNumberEdit(
-    const QString& defaultValue,
-    QWidget* parent)
+    QWidget* parent,
+    const QString& defaultValue)
     : QLineEdit{defaultValue, parent}
     , m_cache{defaultValue}
 {
@@ -50,23 +50,23 @@ QNumberEdit::validate()
 
 
 QIntEdit::QIntEdit(
-    int defaultValue,
     QWidget* parent,
+    int defaultValue,
     int min,
     int max)
-    : QNumberEdit{QString::number(defaultValue), parent}
+    : QNumberEdit{parent, QString::number(defaultValue)}
 {
     this->setValidator(new QIntValidator{min, max, this});
 }
 
 
 QDoubleEdit::QDoubleEdit(
-    double defaultValue,
     QWidget* parent,
+    double defaultValue,
     double min,
     double max,
     int decimals)
-    : QNumberEdit{QString::number(defaultValue), parent}
+    : QNumberEdit{parent, QString::number(defaultValue)}
 {
     this->setValidator(new QDoubleValidator{min, max, decimals, this});
 }
@@ -77,8 +77,8 @@ MinSizeFramePrivate::MinSizeFramePrivate(QWidget* parent)
     , m_layout{new QHBoxLayout{this}}
     , m_label_width{new QLabel{"W", this}}
     , m_label_height{new QLabel{", H", this}}
-    , m_intEdit_width{new QIntEdit{0, this}}
-    , m_intEdit_height{new QIntEdit{0, this}}
+    , m_intEdit_width{new QIntEdit{this, 0}}
+    , m_intEdit_height{new QIntEdit{this, 0}}
 {
     this->m_layout->setContentsMargins(0, 0, 0, 0);
     this->m_layout->addWidget(this->m_label_width);
@@ -118,13 +118,17 @@ MinSizeFramePrivate::height() const
 }
 
 
-RangeBoxPrivate::RangeBoxPrivate(const QString& title, QWidget* parent)
+RangeBoxPrivate::RangeBoxPrivate(
+    QWidget* parent,
+    const QString& title,
+    double defaultMin,
+    double defaultMax)
     : QGroupBox{title, parent}
     , m_layout{new QHBoxLayout{this}}
     , m_label_min{new QLabel{"Min", this}}
     , m_label_max{new QLabel{"Max", this}}
-    , m_doubleEdit_min{new QDoubleEdit{0, this}}
-    , m_doubleEdit_max{new QDoubleEdit{0, this}}
+    , m_doubleEdit_min{new QDoubleEdit{this, defaultMin}}
+    , m_doubleEdit_max{new QDoubleEdit{this, defaultMax}}
 {
     this->m_layout->addWidget(this->m_label_min);
     this->m_layout->addWidget(this->m_doubleEdit_min);
@@ -161,7 +165,7 @@ RangeBoxPrivate::max() const
 }
 
 
-LineBoxPrivate::LineBoxPrivate(const QString& title, QWidget* parent)
+LineBoxPrivate::LineBoxPrivate(QWidget* parent, const QString& title)
     : QGroupBox{title, parent}
     , m_layout{new QFormLayout{this}}
     , m_label_type{new QLabel{"Type", this}}
@@ -267,7 +271,7 @@ LineBoxPrivate::colorSelected()
 }
 
 
-PointsBoxPrivate::PointsBoxPrivate(const QString& title, QWidget* parent)
+PointsBoxPrivate::PointsBoxPrivate(QWidget* parent, const QString& title)
     : QGroupBox{title, parent}
     , m_layout{new QFormLayout{this}}
     , m_label_shape{new QLabel{"Shape", this}}
@@ -374,13 +378,17 @@ PointsBoxPrivate::colorSelected()
 }
 
 
-DataSizeBoxPrivate::DataSizeBoxPrivate(const QString& title, QWidget* parent)
+DataSizeBoxPrivate::DataSizeBoxPrivate(
+    QWidget* parent,
+    const QString& title,
+    int defaultX,
+    int defaultY)
     : QGroupBox{title, parent}
     , m_layout{new QHBoxLayout{this}}
     , m_label_x{new QLabel{"X", this}}
     , m_label_y{new QLabel{", Y", this}}
-    , m_intEdit_x{new QIntEdit{0, this}}
-    , m_intEdit_y{new QIntEdit{0, this}}
+    , m_intEdit_x{new QIntEdit{this, defaultX}}
+    , m_intEdit_y{new QIntEdit{this, defaultY}}
 {
     this->m_layout->addWidget(this->m_label_x);
     this->m_layout->addWidget(this->m_intEdit_x);
@@ -419,7 +427,7 @@ DataSizeBoxPrivate::y() const
 }
 
 
-ColorBoxPrivate::ColorBoxPrivate(const QString& title, QWidget* parent)
+ColorBoxPrivate::ColorBoxPrivate(QWidget* parent, const QString& title)
     : QGroupBox{title, parent}
     , m_layout{new QFormLayout{this}}
     , m_label_min{new QLabel{"Min", this}}
@@ -512,10 +520,10 @@ SubTab2DPrivate::SubTab2DPrivate(QWidget* parent)
     , m_scrollArea{new QScrollArea{this}}
     , m_contents{new QWidget{this}}
     , m_layout_contents{new QVBoxLayout{m_contents}}
-    , m_rangeBox_x{new RangeBoxPrivate{"X-Range", m_contents}}
-    , m_rangeBox_y{new RangeBoxPrivate{"Y-Range", m_contents}}
-    , m_lineBox{new LineBoxPrivate{"Line", m_contents}}
-    , m_pointsBox{new PointsBoxPrivate{"Points", m_contents}}
+    , m_rangeBox_x{new RangeBoxPrivate{m_contents, "X-Range", -10, 10}}
+    , m_rangeBox_y{new RangeBoxPrivate{m_contents, "Y-Range", -10, 10}}
+    , m_lineBox{new LineBoxPrivate{m_contents, "Line"}}
+    , m_pointsBox{new PointsBoxPrivate{m_contents, "Points"}}
     , m_spacer{new QSpacerItem{0, 0, QSizePolicy::Minimum, QSizePolicy::Expanding}}
 {
     this->m_scrollArea->setFrameShape(QFrame::NoFrame);
@@ -593,11 +601,11 @@ SubTabColorMapPrivate::SubTabColorMapPrivate(QWidget* parent)
     , m_scrollArea{new QScrollArea{this}}
     , m_contents{new QWidget{this}}
     , m_layout_contents{new QVBoxLayout{m_contents}}
-    , m_rangeBox_x{new RangeBoxPrivate{"X-Range", m_contents}}
-    , m_rangeBox_y{new RangeBoxPrivate{"Y-Range", m_contents}}
-    , m_rangeBox_z{new RangeBoxPrivate{"Z-Range", m_contents}}
-    , m_dataSizeBox{new DataSizeBoxPrivate{"Data Size", m_contents}}
-    , m_colorBox{new ColorBoxPrivate{"Color", m_contents}}
+    , m_rangeBox_x{new RangeBoxPrivate{m_contents, "X-Range", -10, 10}}
+    , m_rangeBox_y{new RangeBoxPrivate{m_contents, "Y-Range", -10, 10}}
+    , m_rangeBox_z{new RangeBoxPrivate{m_contents, "Z-Range", 0, 1}}
+    , m_dataSizeBox{new DataSizeBoxPrivate{m_contents, "Data Size", 21, 21}}
+    , m_colorBox{new ColorBoxPrivate{m_contents, "Color"}}
     , m_spacer{new QSpacerItem{0, 0, QSizePolicy::Minimum, QSizePolicy::Expanding}}
 {
     this->m_scrollArea->setFrameShape(QFrame::NoFrame);
