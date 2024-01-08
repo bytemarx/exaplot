@@ -7,6 +7,9 @@
 #include "about.hpp"
 #include "ploteditor.hpp"
 
+#include <map>
+#include <string>
+
 
 class AppUI : public QObject
 {
@@ -17,7 +20,15 @@ public:
     ~AppUI();
 
     void show();
-    void displayError(const QString&);
+    void displayError(const QString&, const QString& = "ERROR");
+    std::map<std::string, std::string> scriptArgs() const;
+    void setMessage(const QString&);
+
+Q_SIGNALS:
+    void scriptLoaded(const QString&);
+
+private Q_SLOTS:
+    void loadScript();
 
 private:
     MainWindow* mainWindow;

@@ -16,9 +16,11 @@ class MainWindow : public QMainWindow
 public:
     MainWindow();
 
+    QAction* actionLoad();
     QAction* actionAbout();
     QAction* actionPlotEditor();
     void setPlots(const std::vector<PlotEditor::PlotInfo>&);
+    void setMessage(const QString&);
 
 private:
     Ui::MainWindow ui;

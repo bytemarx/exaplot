@@ -56,8 +56,8 @@ void
 ModuleTest::run(const char* file)
 {
     std::shared_ptr<ScriptModule> mod;
-    auto status = this->core.load(this->scriptsDir / file, mod);
-    ASSERT_TRUE(status == OrbitalError::NONE) << status.message() << '\n' << status.traceback();
+    auto error = this->core.load(this->scriptsDir / file, mod);
+    ASSERT_FALSE(error) << error.message() << '\n' << error.traceback();
 }
 
 
@@ -163,12 +163,12 @@ TEST_F(BaselineTest, InterleaveLoads)
         std::shared_ptr<ScriptModule> mod0;
         std::shared_ptr<ScriptModule> mod1;
         {
-            auto status = core0->load(TEST_SCRIPTS_DIR "/baseline/isolated-interp-0.py", mod0);
-            ASSERT_TRUE(status == OrbitalError::NONE) << status.message() << '\n' << status.traceback();
+            auto error = core0->load(TEST_SCRIPTS_DIR "/baseline/isolated-interp-0.py", mod0);
+            ASSERT_FALSE(error) << error.message() << '\n' << error.traceback();
         }
         {
-            auto status = core1->load(TEST_SCRIPTS_DIR "/baseline/isolated-interp-1.py", mod1);
-            ASSERT_TRUE(status == OrbitalError::NONE) << status.message() << '\n' << status.traceback();
+            auto error = core1->load(TEST_SCRIPTS_DIR "/baseline/isolated-interp-1.py", mod1);
+            ASSERT_FALSE(error) << error.message() << '\n' << error.traceback();
         }
     }
     delete core0;
@@ -186,17 +186,17 @@ TEST_F(BaselineTest, Reload)
         std::ofstream file(TEST_SCRIPTS_DIR "/baseline/reload.py");
         file << "";
         file.close();
-        auto status = core->load(TEST_SCRIPTS_DIR "/baseline/reload.py", mod);
-        ASSERT_TRUE(status == OrbitalError::NONE) << status.message() << '\n' << status.traceback();
+        auto error = core->load(TEST_SCRIPTS_DIR "/baseline/reload.py", mod);
+        ASSERT_FALSE(error) << error.message() << '\n' << error.traceback();
     }
     {
         std::ofstream file;
         file.open(TEST_SCRIPTS_DIR "/baseline/reload.py");
         file << "assert(False)";
         file.close();
-        auto status = mod->reload();
-        ASSERT_TRUE(status == OrbitalError::IMPORT);
-        ASSERT_STREQ(status.traceback().c_str(), "  File \"" TEST_SCRIPTS_DIR "/baseline/reload.py\", line 1, in <module>\n    assert(False)\n");
+        auto error = mod->reload();
+        ASSERT_TRUE(error);
+        ASSERT_STREQ(error.traceback().c_str(), "  File \"" TEST_SCRIPTS_DIR "/baseline/reload.py\", line 1, in <module>\n    assert(False)\n");
     }
     delete core;
     delete iface;
@@ -209,10 +209,10 @@ TEST_F(BaselineTest, NotIsolatedWithinCore)
     OrbitalCore* core = new OrbitalCore{iface};
     std::shared_ptr<ScriptModule> mod0;
     std::shared_ptr<ScriptModule> mod1;
-    auto status = core->load(TEST_SCRIPTS_DIR "/baseline/reload2-0.py", mod0);
-    ASSERT_TRUE(status == OrbitalError::NONE) << status.message() << '\n' << status.traceback();
-    status = core->load(TEST_SCRIPTS_DIR "/baseline/reload2-1.py", mod1);
-    ASSERT_TRUE(status == OrbitalError::NONE) << status.message() << '\n' << status.traceback();
+    auto error = core->load(TEST_SCRIPTS_DIR "/baseline/reload2-0.py", mod0);
+    ASSERT_FALSE(error) << error.message() << '\n' << error.traceback();
+    error = core->load(TEST_SCRIPTS_DIR "/baseline/reload2-1.py", mod1);
+    ASSERT_FALSE(error) << error.message() << '\n' << error.traceback();
     delete core;
     delete iface;
 }

@@ -69,6 +69,8 @@ public:
     int exec();
 
 public Q_SLOTS:
+    void load(const QString&);
+    void run();
     void slot_init(const std::vector<std::string>&, const std::vector<orbital::GridPoint>&);
     void slot_msg(const std::string&, bool);
     void slot_plot(long, const std::vector<double>&);
@@ -79,4 +81,6 @@ private:
     QApplication a;
     AppUI ui;
     Interface interface;
+    orbital::OrbitalCore core;
+    std::shared_ptr<orbital::ScriptModule> module;
 };

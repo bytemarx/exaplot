@@ -9,6 +9,13 @@ MainWindow::MainWindow()
 
 
 QAction*
+MainWindow::actionLoad()
+{
+    return this->ui.actionLoadScript;
+}
+
+
+QAction*
 MainWindow::actionAbout()
 {
     return this->ui.actionAbout;
@@ -92,4 +99,11 @@ MainWindow::setPlots(const std::vector<PlotEditor::PlotInfo>& plots)
         color.setColorStopAt(1, plots[i].attributes.colorMap.color.max);
         plot->plotColorMap()->setColorGradient(color);
     }
+}
+
+
+void
+MainWindow::setMessage(const QString& message)
+{
+    this->ui.plainTextEdit_messages->setPlainText(message);
 }

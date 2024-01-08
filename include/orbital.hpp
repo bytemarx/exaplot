@@ -34,14 +34,13 @@ typedef struct s_gridpoint {
 
 struct OrbitalError
 {
-    enum Type {
-        NONE,
-        IMPORT,
-        RUNTIME,
-        RELOAD,
-        SYSTEM,
-        UNDEFINED
-    };
+    typedef const char* Type;
+    constexpr static Type NONE = "NONE";
+    constexpr static Type IMPORT = "IMPORT";
+    constexpr static Type RUNTIME = "RUNTIME";
+    constexpr static Type RELOAD = "RELOAD";
+    constexpr static Type SYSTEM = "SYSTEM";
+    constexpr static Type UNDEFINED = "UNDEFINED";
 
     static OrbitalError pyerror(Type);
 
@@ -50,10 +49,12 @@ struct OrbitalError
         const std::string& msg = "",
         const std::string& tb = "");
 
-    bool operator==(const OrbitalError::Type& type) const { return this->m_type == type; }
-    bool operator!=(const OrbitalError::Type& type) const { return !this->operator==(type); }
-    std::string message() const { return this->m_message; }
-    std::string traceback() const { return this->m_traceback; }
+    explicit operator bool() const noexcept { return strcmp(this->m_type, NONE) != 0; }
+    // bool operator==(const OrbitalError::Type& type) const { return strcmp(this->m_type, type) == 0; }
+    // bool operator!=(const OrbitalError::Type& type) const { return !this->operator==(type); }
+    auto type() const { return this->m_type; }
+    auto message() const { return this->m_message; }
+    auto traceback() const { return this->m_traceback; }
 
 private:
     Type m_type;
