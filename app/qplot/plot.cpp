@@ -14,6 +14,8 @@ Plot::Plot(
     this->m_plot->yAxis->setLabel(labelY);
     this->m_plot->setContextMenuPolicy(Qt::CustomContextMenu);
     this->m_plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
+
+    QObject::connect(this->m_plot, &QCustomPlot::mouseDoubleClick, this, &Plot::doubleClick);
 }
 
 
@@ -69,4 +71,12 @@ QCustomPlot*
 Plot::widget()
 {
     return this->m_plot;
+}
+
+
+void
+Plot::doubleClick()
+{
+    this->m_plot->rescaleAxes();
+    this->m_plot->replot();
 }

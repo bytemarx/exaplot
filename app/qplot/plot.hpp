@@ -3,11 +3,11 @@
 #include "qcustomplot.h"
 
 
-class Plot
+class Plot : public QObject
 {
 friend class QPlot;
 
-	Q_GADGET
+	Q_OBJECT
 
 public:
 	enum Type {
@@ -19,6 +19,9 @@ public:
 	virtual ~Plot();
 	virtual Type type() const = 0;
 	QCustomPlot* widget();
+
+private Q_SLOTS:
+	void doubleClick();
 
 protected:
 	Plot(
