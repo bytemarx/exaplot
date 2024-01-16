@@ -99,3 +99,10 @@ Plot2D::pen() const
 {
     return this->m_graph->pen();
 }
+
+
+void
+Plot2D::addData(double x, double y)
+{
+    this->m_graph->addData(x, y);
+}

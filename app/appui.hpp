@@ -20,12 +20,18 @@ public:
     ~AppUI();
 
     void show();
-    void displayError(const QString&, const QString& = "ERROR");
     std::map<std::string, std::string> scriptArgs() const;
     void setMessage(const QString&);
+    void initArgs(const std::vector<std::string>&);
+    QPlot* plot(std::size_t);
+    std::size_t plotCount() const;
+
+public Q_SLOTS:
+    void displayError(const QString&, const QString& = "ERROR");
 
 Q_SIGNALS:
-    void scriptLoaded(const QString&);
+    void scriptLoad(const QString&);
+    void scriptRun(const std::map<std::string, std::string>&);
 
 private Q_SLOTS:
     void loadScript();

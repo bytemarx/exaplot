@@ -1,10 +1,11 @@
 #include "mainwindow.hpp"
-
+#include <iostream>
 
 MainWindow::MainWindow()
     : QMainWindow{nullptr}
 {
     this->ui.setupUi(this);
+    this->ui.tableWidget_params->setHorizontalHeaderLabels({"Parameter", "Value"});
 }
 
 
@@ -12,6 +13,13 @@ QAction*
 MainWindow::actionLoad()
 {
     return this->ui.actionLoadScript;
+}
+
+
+QPushButton*
+MainWindow::buttonRun()
+{
+    return this->ui.pushButton_run;
 }
 
 
@@ -106,4 +114,30 @@ void
 MainWindow::setMessage(const QString& message)
 {
     this->ui.plainTextEdit_messages->setPlainText(message);
+}
+
+
+void
+MainWindow::initArgs(const std::vector<std::string>& params)
+{
+    this->ui.tableWidget_params->clearContents();
+    this->ui.tableWidget_params->setRowCount(static_cast<int>(params.size()));
+    int i = 0;
+    for (const auto& param : params) {
+        this->ui.tableWidget_params->setVerticalHeaderItem(i++, new QTableWidgetItem{QString::fromStdString(param)});
+    }
+}
+
+
+QPlot*
+MainWindow::plot(std::size_t n)
+{
+    return this->m_plots.at(n);
+}
+
+
+std::size_t
+MainWindow::plotCount() const
+{
+    return this->m_plots.size();
 }

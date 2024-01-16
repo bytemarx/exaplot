@@ -27,6 +27,7 @@ public:
 	QCPScatterStyle scatStyle() const;
 	void setPen(const QPen&);
 	QPen pen() const;
+	void addData(double x, double y);
 
 private:
 	QCPGraph* m_graph;

@@ -16,6 +16,10 @@ AppUI::AppUI(QObject* parent)
         this, &AppUI::loadScript
     );
     QObject::connect(
+        this->mainWindow->buttonRun(), &QPushButton::clicked,
+        [=] { emit this->scriptRun(this->scriptArgs()); }
+    );
+    QObject::connect(
         this->mainWindow->actionAbout(), &QAction::triggered,
         this->aboutDialog, &About::open
     );
@@ -43,13 +47,6 @@ AppUI::show()
 }
 
 
-void
-AppUI::displayError(const QString& msg, const QString& title)
-{
-    QMessageBox::critical(this->mainWindow, title, msg);
-}
-
-
 std::map<std::string, std::string>
 AppUI::scriptArgs() const
 {
@@ -66,6 +63,34 @@ AppUI::setMessage(const QString& message)
 
 
 void
+AppUI::initArgs(const std::vector<std::string>& params)
+{
+    this->mainWindow->initArgs(params);
+}
+
+
+QPlot*
+AppUI::plot(std::size_t n)
+{
+    return this->mainWindow->plot(n);
+}
+
+
+std::size_t
+AppUI::plotCount() const
+{
+    return this->mainWindow->plotCount();
+}
+
+
+void
+AppUI::displayError(const QString& msg, const QString& title)
+{
+    QMessageBox::critical(this->mainWindow, title, msg);
+}
+
+
+void
 AppUI::loadScript()
 {
     auto file = QFileDialog::getOpenFileName(
@@ -75,5 +100,5 @@ AppUI::loadScript()
         tr("Python Files (*.py *.opy);;All Files (*)")
     );
     if (file.isEmpty()) return;
-    emit this->scriptLoaded(file);
+    emit this->scriptLoad(file);
 }
