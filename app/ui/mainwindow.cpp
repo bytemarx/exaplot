@@ -1,11 +1,14 @@
 #include "mainwindow.hpp"
-#include <iostream>
+
 
 MainWindow::MainWindow()
     : QMainWindow{nullptr}
+    , timer{this}
 {
+    QObject::connect(&this->timer, &QTimer::timeout, this, &MainWindow::redraw);
     this->ui.setupUi(this);
     this->ui.tableWidget_params->setHorizontalHeaderLabels({"Parameter", "Value"});
+    this->timer.start(16);
 }
 
 
@@ -140,4 +143,12 @@ std::size_t
 MainWindow::plotCount() const
 {
     return this->m_plots.size();
+}
+
+
+void
+MainWindow::redraw()
+{
+    for (const auto& plot : this->m_plots)
+        plot->redraw();
 }

@@ -4,8 +4,8 @@
 #include <QMutex>
 #include <QMutexLocker>
 #include <QObject>
-#include <QThread>
 #include <QString>
+#include <QThread>
 
 #include "appui.hpp"
 #include "orbital.hpp"

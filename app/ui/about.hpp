@@ -10,10 +10,6 @@ class About : public QDialog
 public:
     About(QWidget* parent);
 
-public Q_SLOTS:
-
-Q_SIGNALS:
-
 private:
     Ui::AboutDialog ui;
 };

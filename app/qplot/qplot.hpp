@@ -51,6 +51,7 @@ public:
     QPlot(const QPlot&) = delete;
     ~QPlot();
 
+    void queue();
     void redraw();
 	void setTitle(const QString&);
 	QString title() const;
@@ -73,4 +74,5 @@ private:
     Plot2D* m_plot2D;
     PlotColorMap* m_plotColorMap;
     Plot::Type m_current;
+    bool m_queued;
 };

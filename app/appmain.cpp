@@ -182,7 +182,7 @@ AppMain::slot_plot(long dataSet, const std::vector<double>& data)
     auto plot = this->ui.plot(n - 1);
     if (data.size() >= 2)
         plot->plot2D()->addData(data[0], data[1]);
-    plot->redraw();
+    plot->queue();
 }
 
 

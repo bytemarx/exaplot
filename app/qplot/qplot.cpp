@@ -9,6 +9,7 @@ QPlot::QPlot(QWidget* parent)
     , m_plot2D{new Plot2D}
     , m_plotColorMap{new PlotColorMap}
     , m_current{Plot::TWODIMEN}
+    , m_queued{false}
 {
     this->m_layout->addWidget(this->m_plot2D->widget());
 }
@@ -22,9 +23,20 @@ QPlot::~QPlot()
 
 
 void
+QPlot::queue()
+{
+    this->m_queued = true;
+}
+
+
+void
 QPlot::redraw()
 {
-    this->plot()->widget()->replot(QCustomPlot::rpQueuedReplot);
+    if (this->m_queued) {
+        this->plot()->widget()->replot(QCustomPlot::rpQueuedReplot);
+        this->plot()->widget()->rescaleAxes();
+        this->m_queued = false;
+    }
 }
 
 
@@ -33,7 +45,7 @@ QPlot::setTitle(const QString& title)
 {
     this->m_plot2D->setTitle(title);
     this->m_plotColorMap->setTitle(title);
-    this->redraw();
+    this->m_queued = true;
 }
 
 
@@ -49,7 +61,7 @@ QPlot::setLabelX(const QString& label)
 {
     this->m_plot2D->setLabelX(label);
     this->m_plotColorMap->setLabelX(label);
-    this->redraw();
+    this->m_queued = true;
 }
 
 
@@ -65,7 +77,7 @@ QPlot::setLabelY(const QString& label)
 {
     this->m_plot2D->setLabelY(label);
     this->m_plotColorMap->setLabelY(label);
-    this->redraw();
+    this->m_queued = true;
 }
 
 
@@ -100,7 +112,7 @@ QPlot::setType(Plot::Type type)
         throw std::runtime_error{QString{"Unexpected plot type: %1"}.arg(type).toStdString()};
     }
     this->m_current = type;
-    this->redraw();
+    this->m_queued = true;
 }
 
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QAction>
+#include <QTimer>
 
 #include "ui_mainwindow.h"
 #include "ploteditor.hpp"
@@ -26,7 +27,11 @@ public:
     QPlot* plot(std::size_t);
     std::size_t plotCount() const;
 
+private Q_SLOTS:
+    void redraw();
+
 private:
     Ui::MainWindow ui;
+    QTimer timer;
     std::vector<QPlot*> m_plots;
 };
