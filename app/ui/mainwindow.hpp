@@ -17,6 +17,7 @@ class MainWindow : public QMainWindow
 public:
     MainWindow();
 
+    bool close();
     QAction* actionLoad();
     QAction* actionAbout();
     QAction* actionPlotEditor();
@@ -24,14 +25,22 @@ public:
     void setPlots(const std::vector<PlotEditor::PlotInfo>&);
     void setMessage(const QString&);
     void initArgs(const std::vector<std::string>&);
+    void setScriptStatus(const QString&);
     QPlot* plot(std::size_t);
     std::size_t plotCount() const;
+
+Q_SIGNALS:
+    void closed();
+
+protected:
+    void closeEvent(QCloseEvent*) override;
 
 private Q_SLOTS:
     void redraw();
 
 private:
-    Ui::MainWindow ui;
-    QTimer timer;
+    Ui::MainWindow m_ui;
+    QTimer m_timer;
     std::vector<QPlot*> m_plots;
+    bool m_programmaticClose;
 };

@@ -12,12 +12,16 @@ AppUI::AppUI(QObject* parent)
     this->mainWindow->setPlots(this->plotEditorDialog->plots());
 
     QObject::connect(
+        this->mainWindow, &MainWindow::closed,
+        [this] { emit this->closed(); }
+    );
+    QObject::connect(
         this->mainWindow->actionLoad(), &QAction::triggered,
         this, &AppUI::loadScript
     );
     QObject::connect(
         this->mainWindow->buttonRun(), &QPushButton::clicked,
-        [=] { emit this->scriptRun(this->scriptArgs()); }
+        [this] { emit this->scriptRun(this->scriptArgs()); }
     );
     QObject::connect(
         this->mainWindow->actionAbout(), &QAction::triggered,
@@ -47,6 +51,13 @@ AppUI::show()
 }
 
 
+bool
+AppUI::close()
+{
+    return this->mainWindow->close();
+}
+
+
 std::map<std::string, std::string>
 AppUI::scriptArgs() const
 {
@@ -66,6 +77,13 @@ void
 AppUI::initArgs(const std::vector<std::string>& params)
 {
     this->mainWindow->initArgs(params);
+}
+
+
+void
+AppUI::setScriptStatus(const QString& message)
+{
+    this->mainWindow->setScriptStatus(message);
 }
 
 

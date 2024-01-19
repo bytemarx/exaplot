@@ -28,13 +28,13 @@ public:
 
 Q_SIGNALS:
     void fatalError(int);
-    void signal_init(const std::vector<std::string>&, const std::vector<orbital::GridPoint>&) const;
-    void signal_msg(const std::string&, bool) const;
-    void signal_plot(long, const std::vector<double>&) const;
-    void signal_plotVec(long, const std::vector<std::vector<double>>&) const;
-    void signal_clear(long) const;
-    void signal_error(const QString&, const QString&) const;
-    void runCompleted() const;
+    void runErrored(const QString&, const QString&);
+    void runCompleted();
+    void module_init(const std::vector<std::string>&, const std::vector<orbital::GridPoint>&) const;
+    void module_msg(const std::string&, bool) const;
+    void module_plot(long, const std::vector<double>&) const;
+    void module_plotVec(long, const std::vector<std::vector<double>>&) const;
+    void module_clear(long) const;
 
 public Q_SLOTS:
     void pythonInit();
@@ -59,17 +59,25 @@ public:
 
     int exec();
 
+Q_SIGNALS:
+    void scriptLoaded(const QString&);
+    void scriptRan(const std::map<std::string, std::string>&);
+
 public Q_SLOTS:
     void shutdown(int = 0);
-    void slot_init(const std::vector<std::string>&, const std::vector<orbital::GridPoint>&);
-    void slot_msg(const std::string&, bool);
-    void slot_plot(long, const std::vector<double>&);
-    void slot_plotVec(long, const std::vector<std::vector<double>>&);
-    void slot_clear(long);
-    void slot_error(const QString&, const QString&);
+    void load(const QString&);
+    void run(const std::map<std::string, std::string>&);
+    void runError(const QString&, const QString&);
+    void runComplete();
+    void module_init(const std::vector<std::string>&, const std::vector<orbital::GridPoint>&);
+    void module_msg(const std::string&, bool);
+    void module_plot(long, const std::vector<double>&);
+    void module_plotVec(long, const std::vector<std::vector<double>>&);
+    void module_clear(long);
 
 private:
     QApplication a;
     AppUI ui;
     QThread* ifaceThread;
+    bool scriptRunning;
 };

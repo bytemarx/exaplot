@@ -3,40 +3,52 @@
 
 MainWindow::MainWindow()
     : QMainWindow{nullptr}
-    , timer{this}
+    , m_timer{this}
+    , m_programmaticClose{false}
 {
-    QObject::connect(&this->timer, &QTimer::timeout, this, &MainWindow::redraw);
-    this->ui.setupUi(this);
-    this->ui.tableWidget_params->setHorizontalHeaderLabels({"Parameter", "Value"});
-    this->timer.start(16);
+    this->m_ui.setupUi(this);
+    this->m_ui.tableWidget_params->setHorizontalHeaderLabels({"Parameter", "Value"});
+
+    QObject::connect(&this->m_timer, &QTimer::timeout, this, &MainWindow::redraw);
+    QObject::connect(this->m_ui.actionQuit, &QAction::triggered, [this] { emit this->closed(); });
+
+    this->m_timer.start(16);
+}
+
+
+bool
+MainWindow::close()
+{
+    this->m_programmaticClose = true;
+    return QMainWindow::close();
 }
 
 
 QAction*
 MainWindow::actionLoad()
 {
-    return this->ui.actionLoadScript;
+    return this->m_ui.actionLoadScript;
 }
 
 
 QPushButton*
 MainWindow::buttonRun()
 {
-    return this->ui.pushButton_run;
+    return this->m_ui.pushButton_run;
 }
 
 
 QAction*
 MainWindow::actionAbout()
 {
-    return this->ui.actionAbout;
+    return this->m_ui.actionAbout;
 }
 
 
 QAction*
 MainWindow::actionPlotEditor()
 {
-    return this->ui.actionPlotEditor;
+    return this->m_ui.actionPlotEditor;
 }
 
 
@@ -44,11 +56,11 @@ void
 MainWindow::setPlots(const std::vector<PlotEditor::PlotInfo>& plots)
 {
     for (auto plot : this->m_plots)
-        this->ui.gridLayout_plots->removeWidget(plot);
+        this->m_ui.gridLayout_plots->removeWidget(plot);
 
     if (this->m_plots.size() < plots.size()) {
         for (auto i = this->m_plots.size(); i < plots.size(); ++i)
-            this->m_plots.push_back(new QPlot{this->ui.widget_plotPanel});
+            this->m_plots.push_back(new QPlot{this->m_ui.widget_plotPanel});
     } else if (this->m_plots.size() > plots.size()) {
         for (auto i = this->m_plots.size(); i > plots.size(); --i)
             delete this->m_plots[i - 1];
@@ -57,7 +69,7 @@ MainWindow::setPlots(const std::vector<PlotEditor::PlotInfo>& plots)
 
     for (std::size_t i = 0; i < plots.size(); ++i) {
         auto plot = this->m_plots[i];
-        this->ui.gridLayout_plots->addWidget(
+        this->m_ui.gridLayout_plots->addWidget(
             plot,
             static_cast<int>(plots[i].position.y),
             static_cast<int>(plots[i].position.x),
@@ -116,19 +128,26 @@ MainWindow::setPlots(const std::vector<PlotEditor::PlotInfo>& plots)
 void
 MainWindow::setMessage(const QString& message)
 {
-    this->ui.plainTextEdit_messages->setPlainText(message);
+    this->m_ui.plainTextEdit_messages->setPlainText(message);
 }
 
 
 void
 MainWindow::initArgs(const std::vector<std::string>& params)
 {
-    this->ui.tableWidget_params->clearContents();
-    this->ui.tableWidget_params->setRowCount(static_cast<int>(params.size()));
+    this->m_ui.tableWidget_params->clearContents();
+    this->m_ui.tableWidget_params->setRowCount(static_cast<int>(params.size()));
     int i = 0;
     for (const auto& param : params) {
-        this->ui.tableWidget_params->setVerticalHeaderItem(i++, new QTableWidgetItem{QString::fromStdString(param)});
+        this->m_ui.tableWidget_params->setVerticalHeaderItem(i++, new QTableWidgetItem{QString::fromStdString(param)});
     }
+}
+
+
+void
+MainWindow::setScriptStatus(const QString& message)
+{
+    this->m_ui.lineEdit_scriptStatus->setText(message);
 }
 
 
@@ -143,6 +162,23 @@ std::size_t
 MainWindow::plotCount() const
 {
     return this->m_plots.size();
+}
+
+
+void
+MainWindow::closeEvent(QCloseEvent* event)
+{
+    // Since QWidget::close will also invoke this method, we use
+    //   a flag to check if we're invoked from the close method
+    //   programmatically or from the user. User invocations will
+    //   be translated to a MainWindow::closed signal emission,
+    //   whereas programmatic ones will use the default method.
+    if (this->m_programmaticClose) {
+        this->m_programmaticClose = false;
+        return QMainWindow::closeEvent(event);
+    }
+    event->ignore();
+    emit this->closed();
 }
 
 

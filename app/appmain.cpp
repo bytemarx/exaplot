@@ -1,3 +1,5 @@
+#include <QMessageBox>
+
 #include "appmain.hpp"
 #include "config.h"
 
@@ -16,7 +18,7 @@ Interface::init(
     const std::vector<std::string>& params,
     const std::vector<orbital::GridPoint>& plots) const
 {
-    emit this->signal_init(params, plots);
+    emit this->module_init(params, plots);
     Py_RETURN_NONE;
 }
 
@@ -24,7 +26,7 @@ Interface::init(
 PyObject*
 Interface::msg(const std::string& message, bool append) const
 {
-    emit this->signal_msg(message, append);
+    emit this->module_msg(message, append);
     Py_RETURN_NONE;
 }
 
@@ -32,7 +34,7 @@ Interface::msg(const std::string& message, bool append) const
 PyObject*
 Interface::plot(long dataSet, const std::vector<double>& data) const
 {
-    emit this->signal_plot(dataSet, data);
+    emit this->module_plot(dataSet, data);
     Py_RETURN_NONE;
 }
 
@@ -40,7 +42,7 @@ Interface::plot(long dataSet, const std::vector<double>& data) const
 PyObject*
 Interface::plotVec(long dataSet, const std::vector<std::vector<double>>& data) const
 {
-    emit this->signal_plotVec(dataSet, data);
+    emit this->module_plotVec(dataSet, data);
     Py_RETURN_NONE;
 }
 
@@ -48,7 +50,7 @@ Interface::plotVec(long dataSet, const std::vector<std::vector<double>>& data) c
 PyObject*
 Interface::clear(long dataSet) const
 {
-    emit this->signal_clear(dataSet);
+    emit this->module_clear(dataSet);
     Py_RETURN_NONE;
 }
 
@@ -96,7 +98,7 @@ Interface::loadScript(const QString& file)
         auto message = status.message();
         if (!status.traceback().empty())
             message.append("\n").append(status.traceback());
-        emit this->signal_error(message.c_str(), QString{"ERROR::"}.append(status.type()));
+        emit this->runErrored(message.c_str(), QString{"ERROR::"}.append(status.type()));
     }
 }
 
@@ -104,14 +106,16 @@ Interface::loadScript(const QString& file)
 void
 Interface::runScript(const std::map<std::string, std::string>& kwargs)
 {
+    if (!this->module) return;
     QMutexLocker locker{&this->mutex};
     auto status = this->module.get()->run(kwargs);
     if (status) {
         auto message = status.message();
         if (!status.traceback().empty())
             message.append("\n").append(status.traceback());
-        emit this->signal_error(message.c_str(), QString{"ERROR::"}.append(status.type()));
+        emit this->runErrored(message.c_str(), QString{"ERROR::"}.append(status.type()));
     }
+    emit this->runCompleted();
 }
 
 
@@ -120,17 +124,22 @@ AppMain::AppMain(int& argc, char* argv[], Interface* iface, QThread* ifaceThread
     , a{argc, argv}
     , ui{this}
     , ifaceThread{ifaceThread}
+    , scriptRunning{false}
 {
-    QObject::connect(&this->a, &QApplication::aboutToQuit, [this]() { this->shutdown(0); });
-    QObject::connect(&this->ui, &AppUI::scriptLoad, iface, &Interface::loadScript, Qt::QueuedConnection);
-    QObject::connect(&this->ui, &AppUI::scriptRun, iface, &Interface::runScript, Qt::QueuedConnection);
+    QObject::connect(&this->a, &QApplication::aboutToQuit, [this] { this->shutdown(0); });
+    QObject::connect(&this->ui, &AppUI::closed, [this] { this->shutdown(0); });
+    QObject::connect(&this->ui, &AppUI::scriptLoad, this, &AppMain::load);
+    QObject::connect(&this->ui, &AppUI::scriptRun, this, &AppMain::run);
+    QObject::connect(this, &AppMain::scriptLoaded, iface, &Interface::loadScript, Qt::QueuedConnection);
+    QObject::connect(this, &AppMain::scriptRan, iface, &Interface::runScript, Qt::QueuedConnection);
     QObject::connect(iface, &Interface::fatalError, this, &AppMain::shutdown, Qt::QueuedConnection);
-    QObject::connect(iface, &Interface::signal_init, this, &AppMain::slot_init, Qt::QueuedConnection);
-    QObject::connect(iface, &Interface::signal_msg, this, &AppMain::slot_msg, Qt::QueuedConnection);
-    QObject::connect(iface, &Interface::signal_plot, this, &AppMain::slot_plot, Qt::QueuedConnection);
-    QObject::connect(iface, &Interface::signal_plotVec, this, &AppMain::slot_plotVec, Qt::QueuedConnection);
-    QObject::connect(iface, &Interface::signal_clear, this, &AppMain::slot_clear, Qt::QueuedConnection);
-    QObject::connect(iface, &Interface::signal_error, this, &AppMain::slot_error, Qt::QueuedConnection);
+    QObject::connect(iface, &Interface::runErrored, this, &AppMain::runError, Qt::QueuedConnection);
+    QObject::connect(iface, &Interface::runCompleted, this, &AppMain::runComplete, Qt::QueuedConnection);
+    QObject::connect(iface, &Interface::module_init, this, &AppMain::module_init, Qt::QueuedConnection);
+    QObject::connect(iface, &Interface::module_msg, this, &AppMain::module_msg, Qt::QueuedConnection);
+    QObject::connect(iface, &Interface::module_plot, this, &AppMain::module_plot, Qt::QueuedConnection);
+    QObject::connect(iface, &Interface::module_plotVec, this, &AppMain::module_plotVec, Qt::QueuedConnection);
+    QObject::connect(iface, &Interface::module_clear, this, &AppMain::module_clear, Qt::QueuedConnection);
 }
 
 
@@ -150,14 +159,57 @@ AppMain::exec()
 void
 AppMain::shutdown(int status)
 {
-    ifaceThread->quit();
-    ifaceThread->wait();
+    if (this->scriptRunning) {
+        QMessageBox msgBox{
+            QMessageBox::Warning,
+            "",
+            "Script is running. Force quit?",
+            QMessageBox::Yes | QMessageBox::No
+        };
+        switch (msgBox.exec()) {
+        case QMessageBox::Yes:
+            this->ifaceThread->terminate();
+            this->scriptRunning = false;
+            break;
+        default:
+            return;
+        }
+    } else {
+        this->ifaceThread->quit();
+        this->ifaceThread->wait();
+    }
+    this->ui.close();
     this->a.exit(status);
 }
 
 
 void
-AppMain::slot_init(
+AppMain::load(const QString& file)
+{
+    this->ui.setScriptStatus();
+    emit this->scriptLoaded(file);
+}
+
+
+void
+AppMain::run(const std::map<std::string, std::string>& kwargs)
+{
+    this->ui.setScriptStatus("Running...");
+    emit this->scriptRan(kwargs);
+    this->scriptRunning = true;
+}
+
+
+void
+AppMain::runComplete()
+{
+    this->scriptRunning = false;
+    this->ui.setScriptStatus("Completed");
+}
+
+
+void
+AppMain::module_init(
     const std::vector<std::string>& params,
     const std::vector<orbital::GridPoint>& plots)
 {
@@ -166,14 +218,14 @@ AppMain::slot_init(
 
 
 void
-AppMain::slot_msg(const std::string& message, bool append)
+AppMain::module_msg(const std::string& message, bool append)
 {
     this->ui.setMessage(QString::fromStdString(message));
 }
 
 
 void
-AppMain::slot_plot(long dataSet, const std::vector<double>& data)
+AppMain::module_plot(long dataSet, const std::vector<double>& data)
 {
     auto n = static_cast<std::size_t>(dataSet);
     if (n > this->ui.plotCount())
@@ -187,19 +239,19 @@ AppMain::slot_plot(long dataSet, const std::vector<double>& data)
 
 
 void
-AppMain::slot_plotVec(long dataSet, const std::vector<std::vector<double>>& data)
+AppMain::module_plotVec(long dataSet, const std::vector<std::vector<double>>& data)
 {
 }
 
 
 void
-AppMain::slot_clear(long dataSet)
+AppMain::module_clear(long dataSet)
 {
 }
 
 
 void
-AppMain::slot_error(const QString& message, const QString& title)
+AppMain::runError(const QString& message, const QString& title)
 {
     this->ui.displayError(message, title);
 }

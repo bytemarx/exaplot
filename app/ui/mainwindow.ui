@@ -127,6 +127,25 @@
               </widget>
              </widget>
             </item>
+            <item>
+             <widget class="QGroupBox" name="groupBox_scriptStatus">
+              <property name="title">
+               <string>Script Status</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_scriptStatus">
+               <item>
+                <widget class="QLineEdit" name="lineEdit_scriptStatus">
+                 <property name="focusPolicy">
+                  <enum>Qt::NoFocus</enum>
+                 </property>
+                 <property name="readOnly">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
            </layout>
           </widget>
           <widget class="QFrame" name="frame_plotPanel">
@@ -179,6 +198,8 @@
      <string>File</string>
     </property>
     <addaction name="actionLoadScript"/>
+    <addaction name="separator"/>
+    <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -220,6 +241,17 @@
   <action name="actionLoadScript">
    <property name="text">
     <string>Load Script</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+L</string>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="text">
+    <string>Quit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
    </property>
   </action>
  </widget>
