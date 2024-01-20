@@ -154,14 +154,14 @@ QButtonGrid::arrangement() const
  * 
  * @param arrangement 
  */
-void
+bool
 QButtonGrid::setArrangement(const QList<GridPoint>& arrangement)
 {
     GridPoint_t cols;
     GridPoint_t rows;
 
     if (!isArrangementValid(arrangement, cols, rows))
-        return;
+        return false;
 
     this->clear();
     this->m = new Matrix<QButtonGridNode*>{cols, rows};
@@ -180,6 +180,7 @@ QButtonGrid::setArrangement(const QList<GridPoint>& arrangement)
         }
     }
     updateIds(this->m);
+    return true;
 }
 
 

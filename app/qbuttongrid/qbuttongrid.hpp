@@ -22,7 +22,7 @@ public:
 	~QButtonGrid();
 
     QList<GridPoint> arrangement() const;
-    void setArrangement(const QList<GridPoint>&);
+    bool setArrangement(const QList<GridPoint>&);
     std::size_t nRows() const;
     std::size_t nCols() const;
     std::size_t nButtons() const;
