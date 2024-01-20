@@ -28,8 +28,8 @@ public:
 
 Q_SIGNALS:
     void fatalError(int);
-    void runErrored(const QString&, const QString&);
-    void runCompleted();
+    void scriptErrored(const QString&, const QString&);
+    void runCompleted(const QString&);
     void module_init(const std::vector<std::string>&, const std::vector<orbital::GridPoint>&) const;
     void module_msg(const std::string&, bool) const;
     void module_plot(long, const std::vector<double>&) const;
@@ -67,8 +67,8 @@ public Q_SLOTS:
     void shutdown(int = 0);
     void load(const QString&);
     void run(const std::map<std::string, std::string>&);
-    void runError(const QString&, const QString&);
-    void runComplete();
+    void scriptError(const QString&, const QString&);
+    void runComplete(const QString&);
     void module_init(const std::vector<std::string>&, const std::vector<orbital::GridPoint>&);
     void module_msg(const std::string&, bool);
     void module_plot(long, const std::vector<double>&);
@@ -76,6 +76,8 @@ public Q_SLOTS:
     void module_clear(long);
 
 private:
+    void reset();
+
     QApplication a;
     AppUI ui;
     QThread* ifaceThread;

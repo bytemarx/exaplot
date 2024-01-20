@@ -98,7 +98,7 @@ Interface::loadScript(const QString& file)
         auto message = status.message();
         if (!status.traceback().empty())
             message.append("\n").append(status.traceback());
-        emit this->runErrored(message.c_str(), QString{"ERROR::"}.append(status.type()));
+        emit this->scriptErrored(message.c_str(), QString{"ERROR::"}.append(status.type()));
     }
 }
 
@@ -106,16 +106,23 @@ Interface::loadScript(const QString& file)
 void
 Interface::runScript(const std::map<std::string, std::string>& kwargs)
 {
-    if (!this->module) return;
+    if (!this->module) {
+        emit this->runCompleted("No script loaded");
+        return;
+    }
     QMutexLocker locker{&this->mutex};
+    std::cerr << "kwargs = {";
+    for (const auto& kwarg : kwargs)
+        std::cerr << "\n  " << kwarg.first << ": " << kwarg.second;
+    std::cerr << "\n}\n";
     auto status = this->module.get()->run(kwargs);
     if (status) {
         auto message = status.message();
         if (!status.traceback().empty())
             message.append("\n").append(status.traceback());
-        emit this->runErrored(message.c_str(), QString{"ERROR::"}.append(status.type()));
+        emit this->scriptErrored(message.c_str(), QString{"ERROR::"}.append(status.type()));
     }
-    emit this->runCompleted();
+    emit this->runCompleted("Completed");
 }
 
 
@@ -133,7 +140,7 @@ AppMain::AppMain(int& argc, char* argv[], Interface* iface, QThread* ifaceThread
     QObject::connect(this, &AppMain::scriptLoaded, iface, &Interface::loadScript, Qt::QueuedConnection);
     QObject::connect(this, &AppMain::scriptRan, iface, &Interface::runScript, Qt::QueuedConnection);
     QObject::connect(iface, &Interface::fatalError, this, &AppMain::shutdown, Qt::QueuedConnection);
-    QObject::connect(iface, &Interface::runErrored, this, &AppMain::runError, Qt::QueuedConnection);
+    QObject::connect(iface, &Interface::scriptErrored, this, &AppMain::scriptError, Qt::QueuedConnection);
     QObject::connect(iface, &Interface::runCompleted, this, &AppMain::runComplete, Qt::QueuedConnection);
     QObject::connect(iface, &Interface::module_init, this, &AppMain::module_init, Qt::QueuedConnection);
     QObject::connect(iface, &Interface::module_msg, this, &AppMain::module_msg, Qt::QueuedConnection);
@@ -159,6 +166,7 @@ AppMain::exec()
 void
 AppMain::shutdown(int status)
 {
+    bool terminate = false;
     if (this->scriptRunning) {
         QMessageBox msgBox{
             QMessageBox::Warning,
@@ -167,13 +175,13 @@ AppMain::shutdown(int status)
             QMessageBox::Yes | QMessageBox::No
         };
         switch (msgBox.exec()) {
-        case QMessageBox::Yes:
-            this->ifaceThread->terminate();
-            this->scriptRunning = false;
-            break;
-        default:
-            return;
+            default: return;
+            case QMessageBox::Yes: terminate = true;
         }
+    }
+    if (this->scriptRunning && terminate) {
+        this->ifaceThread->terminate();
+        this->scriptRunning = false;
     } else {
         this->ifaceThread->quit();
         this->ifaceThread->wait();
@@ -187,6 +195,7 @@ void
 AppMain::load(const QString& file)
 {
     this->ui.setScriptStatus();
+    this->reset();
     emit this->scriptLoaded(file);
 }
 
@@ -194,6 +203,7 @@ AppMain::load(const QString& file)
 void
 AppMain::run(const std::map<std::string, std::string>& kwargs)
 {
+    this->ui.clear();
     this->ui.setScriptStatus("Running...");
     emit this->scriptRan(kwargs);
     this->scriptRunning = true;
@@ -201,10 +211,10 @@ AppMain::run(const std::map<std::string, std::string>& kwargs)
 
 
 void
-AppMain::runComplete()
+AppMain::runComplete(const QString& message)
 {
     this->scriptRunning = false;
-    this->ui.setScriptStatus("Completed");
+    this->ui.setScriptStatus(message);
 }
 
 
@@ -251,7 +261,14 @@ AppMain::module_clear(long dataSet)
 
 
 void
-AppMain::runError(const QString& message, const QString& title)
+AppMain::reset()
+{
+    this->ui.reset();
+}
+
+
+void
+AppMain::scriptError(const QString& message, const QString& title)
 {
     this->ui.displayError(message, title);
 }
