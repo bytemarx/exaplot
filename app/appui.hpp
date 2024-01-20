@@ -21,6 +21,8 @@ public:
 
     void show();
     bool close();
+    void reset();
+    void clear();
     std::map<std::string, std::string> scriptArgs() const;
     void setMessage(const QString&);
     void initArgs(const std::vector<std::string>&);

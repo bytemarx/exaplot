@@ -58,11 +58,28 @@ AppUI::close()
 }
 
 
+void
+AppUI::reset()
+{
+    this->plotEditorDialog->reset();
+    this->mainWindow->setPlots(this->plotEditorDialog->plots());
+    this->mainWindow->plot(0)->clear();
+}
+
+
+void
+AppUI::clear()
+{
+    auto n = this->mainWindow->plotCount();
+    for (decltype(n) i = 0; i < n; ++i)
+        this->mainWindow->plot(i)->clear();
+}
+
+
 std::map<std::string, std::string>
 AppUI::scriptArgs() const
 {
-    std::map<std::string, std::string> kwargs;
-    return kwargs;
+    return this->mainWindow->scriptArgs();
 }
 
 
