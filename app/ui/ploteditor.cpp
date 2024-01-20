@@ -53,6 +53,17 @@ PlotEditor::open()
 }
 
 
+void
+PlotEditor::reset()
+{
+    this->ui.tabWidget_plotTabs->clear();
+    for (const auto& tab : this->plotTabs) delete tab;
+    this->plotTabs.clear();
+    this->ui.buttonGrid->setArrangement({{.x = 0, .dx = 0, .y = 0, .dy = 0}});
+    this->applyArrangement();
+}
+
+
 std::vector<PlotEditor::PlotInfo>
 PlotEditor::plots() const
 {

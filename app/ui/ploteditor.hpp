@@ -21,6 +21,7 @@ public:
 
     PlotEditor(QWidget* parent);
 
+    void reset();
     std::vector<PlotInfo> plots() const;
 
 public Q_SLOTS:
