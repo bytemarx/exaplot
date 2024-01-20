@@ -53,6 +53,7 @@ public:
 
     void queue();
     void redraw();
+    void clear();
 	void setTitle(const QString&);
 	QString title() const;
 	void setLabelX(const QString&);

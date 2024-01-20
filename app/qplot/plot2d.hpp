@@ -17,6 +17,7 @@ public:
 		const QPen& pen = QPen{}
 	);
 	Type type() const override;
+	void clear() override;
 	void setRangeX(const QCPRange&);
 	const QCPRange rangeX() const;
 	void setRangeY(const QCPRange&);

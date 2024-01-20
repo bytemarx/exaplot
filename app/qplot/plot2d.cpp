@@ -32,6 +32,13 @@ Plot2D::type() const
 
 
 void
+Plot2D::clear()
+{
+    this->m_graph->data()->clear();
+}
+
+
+void
 Plot2D::setRangeX(const QCPRange& range)
 {
     this->m_plot->xAxis->setRange(range);

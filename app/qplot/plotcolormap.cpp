@@ -43,6 +43,13 @@ PlotColorMap::type() const
 
 
 void
+PlotColorMap::clear()
+{
+    this->m_map->data()->clear();
+}
+
+
+void
 PlotColorMap::setRangeX(const QCPRange& range)
 {
     this->m_map->data()->setKeyRange(range);
@@ -123,11 +130,4 @@ void
 PlotColorMap::setCell(int x, int y, double z)
 {
     this->m_map->data()->setCell(x, y, z);
-}
-
-
-void
-PlotColorMap::clear()
-{
-    this->m_map->data()->fill(this->m_map->colorScale()->dataRange().lower);
 }

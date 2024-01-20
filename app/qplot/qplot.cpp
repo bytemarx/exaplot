@@ -41,6 +41,14 @@ QPlot::redraw()
 
 
 void
+QPlot::clear()
+{
+    this->m_plot2D->clear();
+    this->m_plotColorMap->clear();
+}
+
+
+void
 QPlot::setTitle(const QString& title)
 {
     this->m_plot2D->setTitle(title);

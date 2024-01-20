@@ -21,6 +21,7 @@ public:
         const QCPColorGradient& color = QCPColorGradient::GradientPreset::gpGrayscale
     );
     Type type() const override;
+    void clear() override;
 	void setRangeX(const QCPRange&);
 	QCPRange rangeX() const;
 	void setRangeY(const QCPRange&);
@@ -33,7 +34,6 @@ public:
     void setColorGradient(const QCPColorGradient&);
     QCPColorGradient colorGradient() const;
     void setCell(int, int, double);
-    void clear();
 
 private:
     QCPColorMap* m_map;
