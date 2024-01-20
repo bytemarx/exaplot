@@ -92,7 +92,7 @@
                 </item>
                </layout>
               </widget>
-              <widget class="QGroupBox" name="groupBox_params">
+              <widget class="QGroupBox" name="groupBox_args">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                  <horstretch>0</horstretch>
@@ -102,9 +102,9 @@
                <property name="title">
                 <string>Script Arguments</string>
                </property>
-               <layout class="QVBoxLayout" name="verticalLayout_params">
+               <layout class="QVBoxLayout" name="verticalLayout_args">
                 <item>
-                 <widget class="QTableWidget" name="tableWidget_params">
+                 <widget class="QTableWidget" name="tableWidget_args">
                   <property name="selectionMode">
                    <enum>QAbstractItemView::NoSelection</enum>
                   </property>
@@ -134,12 +134,9 @@
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_scriptStatus">
                <item>
-                <widget class="QLineEdit" name="lineEdit_scriptStatus">
-                 <property name="focusPolicy">
-                  <enum>Qt::NoFocus</enum>
-                 </property>
-                 <property name="readOnly">
-                  <bool>true</bool>
+                <widget class="QLabel" name="label_scriptStatus">
+                 <property name="text">
+                  <string>No script loaded</string>
                  </property>
                 </widget>
                </item>

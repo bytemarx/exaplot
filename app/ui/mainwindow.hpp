@@ -25,6 +25,7 @@ public:
     void setPlots(const std::vector<PlotEditor::PlotInfo>&);
     void setMessage(const QString&);
     void initArgs(const std::vector<std::string>&);
+    std::map<std::string, std::string> scriptArgs() const;
     void setScriptStatus(const QString&);
     QPlot* plot(std::size_t);
     std::size_t plotCount() const;

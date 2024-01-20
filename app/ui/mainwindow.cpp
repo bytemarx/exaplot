@@ -7,7 +7,7 @@ MainWindow::MainWindow()
     , m_programmaticClose{false}
 {
     this->m_ui.setupUi(this);
-    this->m_ui.tableWidget_params->setHorizontalHeaderLabels({"Parameter", "Value"});
+    this->m_ui.tableWidget_args->setHorizontalHeaderLabels({"Parameter", "Value"});
 
     QObject::connect(&this->m_timer, &QTimer::timeout, this, &MainWindow::redraw);
     QObject::connect(this->m_ui.actionQuit, &QAction::triggered, [this] { emit this->closed(); });
@@ -135,19 +135,33 @@ MainWindow::setMessage(const QString& message)
 void
 MainWindow::initArgs(const std::vector<std::string>& params)
 {
-    this->m_ui.tableWidget_params->clearContents();
-    this->m_ui.tableWidget_params->setRowCount(static_cast<int>(params.size()));
+    this->m_ui.tableWidget_args->clearContents();
+    this->m_ui.tableWidget_args->setRowCount(static_cast<int>(params.size()));
     int i = 0;
     for (const auto& param : params) {
-        this->m_ui.tableWidget_params->setVerticalHeaderItem(i++, new QTableWidgetItem{QString::fromStdString(param)});
+        this->m_ui.tableWidget_args->setVerticalHeaderItem(i++, new QTableWidgetItem{QString::fromStdString(param)});
     }
+}
+
+
+std::map<std::string, std::string>
+MainWindow::scriptArgs() const
+{
+    std::map<std::string, std::string> kwargs;
+    for (int row = 0; row < this->m_ui.tableWidget_args->rowCount(); ++row) {
+        auto param = this->m_ui.tableWidget_args->verticalHeaderItem(row)->text().toStdString();
+        auto arg = this->m_ui.tableWidget_args->item(row, 0);
+        if (arg != nullptr && !arg->text().isEmpty())
+            kwargs[param] = arg->text().toStdString();
+    }
+    return kwargs;
 }
 
 
 void
 MainWindow::setScriptStatus(const QString& message)
 {
-    this->m_ui.lineEdit_scriptStatus->setText(message);
+    this->m_ui.label_scriptStatus->setText(message);
 }
 
 
