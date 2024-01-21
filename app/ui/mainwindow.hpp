@@ -29,6 +29,8 @@ public:
     void setScriptStatus(const QString&);
     QPlot* plot(std::size_t);
     std::size_t plotCount() const;
+    void enableRun(bool);
+    void enableStop(bool);
 
 Q_SIGNALS:
     void closed();

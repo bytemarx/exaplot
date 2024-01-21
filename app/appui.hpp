@@ -29,6 +29,8 @@ public:
     void setScriptStatus(const QString& = "");
     QPlot* plot(std::size_t);
     std::size_t plotCount() const;
+    void enableRun(bool);
+    void enableStop(bool);
 
 public Q_SLOTS:
     void displayError(const QString&, const QString& = "ERROR");

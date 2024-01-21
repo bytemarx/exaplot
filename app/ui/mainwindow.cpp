@@ -180,6 +180,20 @@ MainWindow::plotCount() const
 
 
 void
+MainWindow::enableRun(bool enable)
+{
+    this->m_ui.pushButton_run->setEnabled(enable);
+}
+
+
+void
+MainWindow::enableStop(bool enable)
+{
+    this->m_ui.pushButton_stop->setEnabled(enable);
+}
+
+
+void
 MainWindow::closeEvent(QCloseEvent* event)
 {
     // Since QWidget::close will also invoke this method, we use

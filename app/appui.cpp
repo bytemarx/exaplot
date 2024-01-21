@@ -119,6 +119,20 @@ AppUI::plotCount() const
 
 
 void
+AppUI::enableRun(bool enable)
+{
+    this->mainWindow->enableRun(enable);
+}
+
+
+void
+AppUI::enableStop(bool enable)
+{
+    this->mainWindow->enableStop(enable);
+}
+
+
+void
 AppUI::displayError(const QString& msg, const QString& title)
 {
     QMessageBox::critical(this->mainWindow, title, msg);

@@ -194,6 +194,13 @@ AppMain::shutdown(int status)
 void
 AppMain::load(const QString& file)
 {
+    if (this->scriptRunning) {
+        this->scriptError(
+            "Cannot load new script while current script is running.",
+            "Load Error"
+        );
+        return;
+    }
     this->ui.setScriptStatus();
     this->reset();
     emit this->scriptLoaded(file);
@@ -203,6 +210,10 @@ AppMain::load(const QString& file)
 void
 AppMain::run(const std::map<std::string, std::string>& kwargs)
 {
+    if (this->scriptRunning)
+        return;
+    this->ui.enableRun(false);
+    this->ui.enableStop(true);
     this->ui.clear();
     this->ui.setScriptStatus("Running...");
     emit this->scriptRan(kwargs);
@@ -215,6 +226,8 @@ AppMain::runComplete(const QString& message)
 {
     this->scriptRunning = false;
     this->ui.setScriptStatus(message);
+    this->ui.enableStop(false);
+    this->ui.enableRun(true);
 }
 
 
