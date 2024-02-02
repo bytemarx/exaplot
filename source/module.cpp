@@ -1,5 +1,7 @@
 #include "internal.hpp"
 
+#include <limits>
+
 
 namespace orbital {
 
@@ -148,7 +150,7 @@ msg_keywords[] = {
 PyObject*
 orbital_msg(PyObject* module, PyObject* args, PyObject* kwargs)
 {
-    const char *c_message = NULL;
+    const char* c_message = NULL;
     int c_append = 0;
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s|p:" ORBITAL_MSG, msg_keywords, &c_message, &c_append))
         return NULL;
@@ -177,6 +179,11 @@ orbital_plot(PyObject* module, PyObject* const* args, Py_ssize_t nargs)
         return NULL;
     }
     long dataSet = PyLong_AsLong(pyBorrowed_dataSet);
+    if (dataSet < 0) {
+        if (!PyErr_Occurred())
+            PyErr_SetString(PyExc_ValueError, "data_set parameter must be positive");
+        return NULL;
+    }
 
     if (nargs == 1) {
         return state->iface->clear(dataSet);
@@ -214,6 +221,122 @@ orbital_plot(PyObject* module, PyObject* const* args, Py_ssize_t nargs)
         }
         return state->iface->plot(dataSet, data);
     }
+}
+
+
+PyObject*
+orbital__set_plot_property(PyObject* module, PyObject* args)
+{
+    orbital_state* state = getModuleState(module);
+
+    long plotID = 0;
+    const char* c_prop = NULL;
+    PyObject* pyBorrowed_value = NULL;
+
+    if (!PyArg_ParseTuple(args, "lsO", &plotID, &c_prop, &pyBorrowed_value)) {
+        return NULL;
+    }
+
+    if (plotID <= 0) {
+        if (!PyErr_Occurred())
+            PyErr_SetString(PyExc_ValueError, "plot_id must be greater than zero");
+        return NULL;
+    }
+
+    std::string prop{c_prop};
+    std::variant<int, double, std::string> value;
+
+    // TODO: refactor this abomination
+    if (prop.compare(ORBITAL_PLOT_PROPERTY_TITLE) == 0 ||
+        prop.compare(ORBITAL_PLOT_PROPERTY_XAXIS) == 0 ||
+        prop.compare(ORBITAL_PLOT_PROPERTY_YAXIS) == 0 ||
+        prop.compare(ORBITAL_PLOT_PROPERTY_TWODIMEN_LINE_TYPE) == 0 ||
+        prop.compare(ORBITAL_PLOT_PROPERTY_TWODIMEN_LINE_COLOR) == 0 ||
+        prop.compare(ORBITAL_PLOT_PROPERTY_TWODIMEN_LINE_STYLE) == 0 ||
+        prop.compare(ORBITAL_PLOT_PROPERTY_TWODIMEN_POINTS_SHAPE) == 0 ||
+        prop.compare(ORBITAL_PLOT_PROPERTY_TWODIMEN_POINTS_COLOR) == 0 ||
+        prop.compare(ORBITAL_PLOT_PROPERTY_COLORMAP_COLOR_MIN) == 0 ||
+        prop.compare(ORBITAL_PLOT_PROPERTY_COLORMAP_COLOR_MAX) == 0)
+    {
+        if (!PyUnicode_Check(pyBorrowed_value)) {
+            PyErr_Format(PyExc_TypeError, "%s must be type 'str'", c_prop);
+            return NULL;
+        }
+        auto c_value = PyUnicode_AsUTF8(pyBorrowed_value);
+        if (c_value == NULL) return NULL;
+        value = std::string{c_value};
+    } else if (
+        prop.compare(ORBITAL_PLOT_PROPERTY_MINSIZE_W) == 0 ||
+        prop.compare(ORBITAL_PLOT_PROPERTY_MINSIZE_H) == 0 ||
+        prop.compare(ORBITAL_PLOT_PROPERTY_COLORMAP_DATASIZE_X) == 0 ||
+        prop.compare(ORBITAL_PLOT_PROPERTY_COLORMAP_DATASIZE_Y) == 0)
+    {
+        if (!PyLong_Check(pyBorrowed_value)) {
+            PyErr_Format(PyExc_TypeError, "%s must be type 'int'", c_prop);
+            return NULL;
+        }
+        auto long_value = PyLong_AsLong(pyBorrowed_value);
+        if (long_value <= 0) {
+            if (!PyErr_Occurred())
+                PyErr_Format(PyExc_ValueError, "%s must be greater than zero", c_prop);
+            return NULL;
+        }
+        if (long_value > std::numeric_limits<int>::max()) {
+            PyErr_Format(PyExc_OverflowError, "Value must not exceed %d", std::numeric_limits<int>::max());
+            return NULL;
+        }
+        value = static_cast<int>(long_value);
+    } else if (
+        prop.compare(ORBITAL_PLOT_PROPERTY_TWODIMEN_XRANGE_MIN) == 0 ||
+        prop.compare(ORBITAL_PLOT_PROPERTY_TWODIMEN_XRANGE_MAX) == 0 ||
+        prop.compare(ORBITAL_PLOT_PROPERTY_TWODIMEN_YRANGE_MIN) == 0 ||
+        prop.compare(ORBITAL_PLOT_PROPERTY_TWODIMEN_YRANGE_MAX) == 0 ||
+        prop.compare(ORBITAL_PLOT_PROPERTY_TWODIMEN_POINTS_SIZE) == 0 ||
+        prop.compare(ORBITAL_PLOT_PROPERTY_COLORMAP_XRANGE_MIN) == 0 ||
+        prop.compare(ORBITAL_PLOT_PROPERTY_COLORMAP_XRANGE_MAX) == 0 ||
+        prop.compare(ORBITAL_PLOT_PROPERTY_COLORMAP_YRANGE_MIN) == 0 ||
+        prop.compare(ORBITAL_PLOT_PROPERTY_COLORMAP_YRANGE_MAX) == 0 ||
+        prop.compare(ORBITAL_PLOT_PROPERTY_COLORMAP_ZRANGE_MIN) == 0 ||
+        prop.compare(ORBITAL_PLOT_PROPERTY_COLORMAP_ZRANGE_MAX) == 0)
+    {
+        if (!PyFloat_Check(pyBorrowed_value)) {
+            PyErr_Format(PyExc_TypeError, "%s must be type 'float'", c_prop);
+            return NULL;
+        }
+        auto double_value = PyFloat_AsDouble(pyBorrowed_value);
+        if (PyErr_Occurred())
+            return NULL;
+        if (prop.compare("two_dimen.points.size") == 0 && double_value < 0.) {
+            PyErr_SetString(PyExc_ValueError, "two_dimen.points.size must be positive");
+            return NULL;
+        }
+        value = double_value;
+    } else {
+        PyErr_Format(PyExc_KeyError, "Unknown property '%s'", c_prop);
+        return NULL;
+    }
+
+    return state->iface->setPlotProperty(plotID, prop, value);
+}
+
+
+PyObject*
+orbital__get_plot_property(PyObject* module, PyObject* args)
+{
+    orbital_state* state = getModuleState(module);
+
+    long plotID = 0;
+    const char* c_prop = NULL;
+
+    if (!PyArg_ParseTuple(args, "ls", &plotID, &c_prop)) {
+        return NULL;
+    }
+    if (plotID <= 0) {
+        PyErr_SetString(PyExc_ValueError, "plot_id must be greater than zero");
+        return NULL;
+    }
+
+    return state->iface->getPlotProperty(plotID, std::string{c_prop});
 }
 
 

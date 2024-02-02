@@ -31,11 +31,20 @@ moduleMethods[] =
         METH_FASTCALL,
         NULL
     },
+    {
+        ORBITAL_SET_PLOT,
+        (PyCFunction)orbital__set_plot_property,
+        METH_VARARGS,
+        NULL
+    },
+    {
+        ORBITAL_GET_PLOT,
+        (PyCFunction)orbital__get_plot_property,
+        METH_VARARGS,
+        NULL
+    },
     {NULL, NULL}
 };
-
-
-// extern int orbitalExec(PyObject*);
 
 
 static PyModuleDef_Slot

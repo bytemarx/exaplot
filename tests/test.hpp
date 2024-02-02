@@ -37,6 +37,10 @@ private:
         PyObject* plot(long dataSet, const std::vector<double>& data) const override;
         PyObject* plotVec(long dataSet, const std::vector<std::vector<double>>& data) const override;
         PyObject* clear(long dataSet) const override;
+        PyObject* setPlotProperty(
+            long plotID, const std::string& property,
+            const std::variant<int, double, std::string>& value) const override { Py_RETURN_NONE; }
+        PyObject* getPlotProperty(long plotID, const std::string& property) const override { Py_RETURN_NONE; }
 
     private:
         ModuleTest* m_tester;

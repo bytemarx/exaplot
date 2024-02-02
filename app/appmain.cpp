@@ -34,6 +34,10 @@ Interface::msg(const std::string& message, bool append) const
 PyObject*
 Interface::plot(long dataSet, const std::vector<double>& data) const
 {
+    if (this->plots.size() < static_cast<std::size_t>(dataSet)) {
+        PyErr_SetString(PyExc_IndexError, ORBITAL_PLOT " index out of range");
+        return NULL;
+    }
     emit this->module_plot(dataSet, data);
     Py_RETURN_NONE;
 }
@@ -42,6 +46,10 @@ Interface::plot(long dataSet, const std::vector<double>& data) const
 PyObject*
 Interface::plotVec(long dataSet, const std::vector<std::vector<double>>& data) const
 {
+    if (this->plots.size() < static_cast<std::size_t>(dataSet)) {
+        PyErr_SetString(PyExc_IndexError, ORBITAL_PLOT " index out of range");
+        return NULL;
+    }
     emit this->module_plotVec(dataSet, data);
     Py_RETURN_NONE;
 }
@@ -50,8 +58,142 @@ Interface::plotVec(long dataSet, const std::vector<std::vector<double>>& data) c
 PyObject*
 Interface::clear(long dataSet) const
 {
+    if (this->plots.size() < static_cast<std::size_t>(dataSet)) {
+        PyErr_SetString(PyExc_IndexError, ORBITAL_PLOT " index out of range");
+        return NULL;
+    }
     emit this->module_clear(dataSet);
     Py_RETURN_NONE;
+}
+
+
+PyObject*
+Interface::setPlotProperty(
+    long plotID,
+    const std::string& property,
+    const std::variant<int, double, std::string>& value) const
+{
+    if (plotID < 1) {
+        PyErr_SetString(PyExc_IndexError, "Invalid plot index");
+        return NULL;
+    }
+    auto i = static_cast<std::size_t>(plotID - 1);
+    if (i >= this->plots.size()) {
+        PyErr_SetString(PyExc_IndexError, "Plot index out of range");
+        return NULL;
+    }
+
+    Py_RETURN_NONE;
+}
+
+
+PyObject*
+Interface::getPlotProperty(long plotID, const std::string& property) const
+{
+    if (plotID < 1) {
+        PyErr_SetString(PyExc_IndexError, "Invalid plot index");
+        return NULL;
+    }
+    auto i = static_cast<std::size_t>(plotID - 1);
+    if (i >= this->plots.size()) {
+        PyErr_SetString(PyExc_IndexError, "Plot index out of range");
+        return NULL;
+    }
+
+    const auto& attributes = this->plots.at(i).attributes;
+    PyObject* pyOwned_value = NULL;
+
+    std::cout << "get: " << attributes.title.toStdString() << '\n';
+    if (property.compare(ORBITAL_PLOT_PROPERTY_TITLE) == 0) {
+        std::cout << "hi\n";
+        pyOwned_value = PyUnicode_FromString(attributes.title.toStdString().c_str());
+    } else if (property.compare(ORBITAL_PLOT_PROPERTY_XAXIS) == 0) {
+        pyOwned_value = PyUnicode_FromString(attributes.xAxis.toStdString().c_str());
+    } else if (property.compare(ORBITAL_PLOT_PROPERTY_YAXIS) == 0) {
+        pyOwned_value = PyUnicode_FromString(attributes.yAxis.toStdString().c_str());
+    } else if (property.compare(ORBITAL_PLOT_PROPERTY_MINSIZE_W) == 0) {
+        pyOwned_value = PyLong_FromLong(static_cast<long>(attributes.minSize.width));
+    } else if (property.compare(ORBITAL_PLOT_PROPERTY_MINSIZE_H) == 0) {
+        pyOwned_value = PyLong_FromLong(static_cast<long>(attributes.minSize.height));
+    } else if (property.compare(ORBITAL_PLOT_PROPERTY_TWODIMEN_XRANGE_MIN) == 0) {
+        pyOwned_value = PyFloat_FromDouble(attributes.twoDimen.xRange.min);
+    } else if (property.compare(ORBITAL_PLOT_PROPERTY_TWODIMEN_XRANGE_MAX) == 0) {
+        pyOwned_value = PyFloat_FromDouble(attributes.twoDimen.xRange.max);
+    } else if (property.compare(ORBITAL_PLOT_PROPERTY_TWODIMEN_YRANGE_MIN) == 0) {
+        pyOwned_value = PyFloat_FromDouble(attributes.twoDimen.yRange.min);
+    } else if (property.compare(ORBITAL_PLOT_PROPERTY_TWODIMEN_YRANGE_MAX) == 0) {
+        pyOwned_value = PyFloat_FromDouble(attributes.twoDimen.yRange.max);
+    } else if (property.compare(ORBITAL_PLOT_PROPERTY_TWODIMEN_LINE_TYPE) == 0) {
+        switch (attributes.twoDimen.line.type) {
+            case QCPGraph::LineStyle::lsNone: pyOwned_value = PyUnicode_FromString("none"); break;
+            case QCPGraph::LineStyle::lsLine: pyOwned_value = PyUnicode_FromString("line"); break;
+            case QCPGraph::LineStyle::lsStepLeft: pyOwned_value = PyUnicode_FromString("step-left"); break;
+            case QCPGraph::LineStyle::lsStepRight: pyOwned_value = PyUnicode_FromString("step-right"); break;
+            case QCPGraph::LineStyle::lsStepCenter: pyOwned_value = PyUnicode_FromString("step-center"); break;
+            case QCPGraph::LineStyle::lsImpulse: pyOwned_value = PyUnicode_FromString("impulse"); break;
+            default: pyOwned_value = Py_None;
+        }
+    } else if (property.compare(ORBITAL_PLOT_PROPERTY_TWODIMEN_LINE_COLOR) == 0) {
+        pyOwned_value = PyUnicode_FromString(attributes.twoDimen.line.color.name().toStdString().c_str());
+    } else if (property.compare(ORBITAL_PLOT_PROPERTY_TWODIMEN_LINE_STYLE) == 0) {
+        switch (attributes.twoDimen.line.style) {
+            case Qt::PenStyle::SolidLine: pyOwned_value = PyUnicode_FromString("solid"); break;
+            case Qt::PenStyle::DashLine: pyOwned_value = PyUnicode_FromString("dashed"); break;
+            case Qt::PenStyle::DotLine: pyOwned_value = PyUnicode_FromString("dotted"); break;
+            case Qt::PenStyle::DashDotLine: pyOwned_value = PyUnicode_FromString("dash-dotted"); break;
+            case Qt::PenStyle::DashDotDotLine: pyOwned_value = PyUnicode_FromString("dash-double-dotted"); break;
+            default: pyOwned_value = Py_None;
+        }
+    } else if (property.compare(ORBITAL_PLOT_PROPERTY_TWODIMEN_POINTS_SHAPE) == 0) {
+        switch (attributes.twoDimen.points.shape) {
+            case QCPScatterStyle::ScatterShape::ssNone: pyOwned_value = PyUnicode_FromString("none"); break;
+            case QCPScatterStyle::ScatterShape::ssDot: pyOwned_value = PyUnicode_FromString("dot"); break;
+            case QCPScatterStyle::ScatterShape::ssCross: pyOwned_value = PyUnicode_FromString("cross"); break;
+            case QCPScatterStyle::ScatterShape::ssPlus: pyOwned_value = PyUnicode_FromString("plus"); break;
+            case QCPScatterStyle::ScatterShape::ssCircle: pyOwned_value = PyUnicode_FromString("circle"); break;
+            case QCPScatterStyle::ScatterShape::ssDisc: pyOwned_value = PyUnicode_FromString("disc"); break;
+            case QCPScatterStyle::ScatterShape::ssSquare: pyOwned_value = PyUnicode_FromString("square"); break;
+            case QCPScatterStyle::ScatterShape::ssDiamond: pyOwned_value = PyUnicode_FromString("diamond"); break;
+            case QCPScatterStyle::ScatterShape::ssStar: pyOwned_value = PyUnicode_FromString("star"); break;
+            case QCPScatterStyle::ScatterShape::ssTriangle: pyOwned_value = PyUnicode_FromString("triangle"); break;
+            case QCPScatterStyle::ScatterShape::ssTriangleInverted: pyOwned_value = PyUnicode_FromString("triangle-inverted"); break;
+            case QCPScatterStyle::ScatterShape::ssCrossSquare: pyOwned_value = PyUnicode_FromString("cross-square"); break;
+            case QCPScatterStyle::ScatterShape::ssPlusSquare: pyOwned_value = PyUnicode_FromString("plus-square"); break;
+            case QCPScatterStyle::ScatterShape::ssCrossCircle: pyOwned_value = PyUnicode_FromString("cross-circle"); break;
+            case QCPScatterStyle::ScatterShape::ssPlusCircle: pyOwned_value = PyUnicode_FromString("plus-circle"); break;
+            case QCPScatterStyle::ScatterShape::ssPeace: pyOwned_value = PyUnicode_FromString("peace"); break;
+            default: pyOwned_value = Py_None;
+        }
+    } else if (property.compare(ORBITAL_PLOT_PROPERTY_TWODIMEN_POINTS_COLOR) == 0) {
+        pyOwned_value = PyUnicode_FromString(attributes.twoDimen.points.color.name().toStdString().c_str());
+    } else if (property.compare(ORBITAL_PLOT_PROPERTY_TWODIMEN_POINTS_SIZE) == 0) {
+        pyOwned_value = PyFloat_FromDouble(attributes.twoDimen.points.size);
+    } else if (property.compare(ORBITAL_PLOT_PROPERTY_COLORMAP_XRANGE_MIN) == 0) {
+        pyOwned_value = PyFloat_FromDouble(attributes.colorMap.xRange.min);
+    } else if (property.compare(ORBITAL_PLOT_PROPERTY_COLORMAP_XRANGE_MAX) == 0) {
+        pyOwned_value = PyFloat_FromDouble(attributes.colorMap.xRange.max);
+    } else if (property.compare(ORBITAL_PLOT_PROPERTY_COLORMAP_YRANGE_MIN) == 0) {
+        pyOwned_value = PyFloat_FromDouble(attributes.colorMap.yRange.min);
+    } else if (property.compare(ORBITAL_PLOT_PROPERTY_COLORMAP_YRANGE_MAX) == 0) {
+        pyOwned_value = PyFloat_FromDouble(attributes.colorMap.yRange.max);
+    } else if (property.compare(ORBITAL_PLOT_PROPERTY_COLORMAP_ZRANGE_MIN) == 0) {
+        pyOwned_value = PyFloat_FromDouble(attributes.colorMap.zRange.min);
+    } else if (property.compare(ORBITAL_PLOT_PROPERTY_COLORMAP_ZRANGE_MAX) == 0) {
+        pyOwned_value = PyFloat_FromDouble(attributes.colorMap.zRange.max);
+    } else if (property.compare(ORBITAL_PLOT_PROPERTY_COLORMAP_DATASIZE_X) == 0) {
+        pyOwned_value = PyLong_FromLong(static_cast<long>(attributes.colorMap.dataSize.x));
+    } else if (property.compare(ORBITAL_PLOT_PROPERTY_COLORMAP_DATASIZE_Y) == 0) {
+        pyOwned_value = PyLong_FromLong(static_cast<long>(attributes.colorMap.dataSize.y));
+    } else if (property.compare(ORBITAL_PLOT_PROPERTY_COLORMAP_COLOR_MIN) == 0) {
+        pyOwned_value = PyUnicode_FromString(attributes.colorMap.color.min.name().toStdString().c_str());
+    } else if (property.compare(ORBITAL_PLOT_PROPERTY_COLORMAP_COLOR_MAX) == 0) {
+        pyOwned_value = PyUnicode_FromString(attributes.colorMap.color.max.name().toStdString().c_str());
+    } else {
+        PyErr_Format(PyExc_KeyError, "Unknown property '%s'", property.c_str());
+        return NULL;
+    }
+
+    return pyOwned_value;
 }
 
 
