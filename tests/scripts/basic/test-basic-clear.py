@@ -1,4 +1,4 @@
 import orbital
 
 
-orbital.plot(3)
+orbital.plot[3]()
