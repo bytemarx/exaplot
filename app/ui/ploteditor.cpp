@@ -21,7 +21,7 @@ buttonGridStatusPixmap(bool status)
 
 
 PlotEditor::PlotEditor(QWidget* parent)
-    : QDialog{parent, Qt::Window | Qt::WindowStaysOnTopHint}
+    : QDialog{parent, Qt::Window}
 {
     this->ui.setupUi(this);
     this->applyArrangement();
