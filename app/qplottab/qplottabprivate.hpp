@@ -66,6 +66,8 @@ public:
     int width() const override;
     void setHeight(int) override;
     int height() const override;
+    void setWidthToolTip(const QString&);
+    void setHeightToolTip(const QString&);
 
 private:
     QHBoxLayout* m_layout;
@@ -83,10 +85,12 @@ class RangeBoxPrivate : public QGroupBox, public QPlotTab::RangeBox
 public:
     RangeBoxPrivate(QWidget* parent, const QString& title, double defaultMin, double defaultMax);
 
-    void setMin(const QString& text) override;
-    QString min() const override;
-    void setMax(const QString& text) override;
-    QString max() const override;
+    void setMin(double) override;
+    double min() const override;
+    void setMax(double) override;
+    double max() const override;
+    void setMinToolTip(const QString&);
+    void setMaxToolTip(const QString&);
 
 private:
     QHBoxLayout* m_layout;
@@ -110,6 +114,9 @@ public:
     QColor color() const override;
     void setStyle(Qt::PenStyle) override;
     Qt::PenStyle style() const override;
+    void setTypeToolTip(const QString&);
+    void setColorToolTip(const QString&);
+    void setStyleToolTip(const QString&);
 
 private Q_SLOTS:
     void colorSelected();
@@ -139,6 +146,9 @@ public:
     QColor color() const override;
     void setSize(double) override;
     double size() const override;
+    void setShapeToolTip(const QString&);
+    void setColorToolTip(const QString&);
+    void setSizeToolTip(const QString&);
 
 private Q_SLOTS:
     void colorSelected();
@@ -166,6 +176,8 @@ public:
     int x() const override;
     void setY(int) override;
     int y() const override;
+    void setXToolTip(const QString&);
+    void setYToolTip(const QString&);
 
 private:
     QHBoxLayout* m_layout;
@@ -187,6 +199,8 @@ public:
     QColor min() const override;
     void setMax(const QColor&) override;
     QColor max() const override;
+    void setMinToolTip(const QString&);
+    void setMaxToolTip(const QString&);
 
 private Q_SLOTS:
     void minColorSelected(const QColor&);

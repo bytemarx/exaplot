@@ -35,6 +35,12 @@ public:
             int width;
             int height;
         } Cache;
+        typedef struct
+        {
+            QString minSize;
+            QString width;
+            QString height;
+        } ToolTips;
         void setCache(const Cache&);
         Cache cache() const;
         virtual void setWidth(int) = 0;
@@ -48,15 +54,20 @@ public:
     public:
         typedef struct
         {
+            double min;
+            double max;
+        } Cache;
+        typedef struct
+        {
             QString min;
             QString max;
-        } Cache;
+        } ToolTips;
         void setCache(const Cache&);
         Cache cache() const;
-        virtual void setMin(const QString&) = 0;
-        virtual QString min() const = 0;
-        virtual void setMax(const QString&) = 0;
-        virtual QString max() const = 0;
+        virtual void setMin(double) = 0;
+        virtual double min() const = 0;
+        virtual void setMax(double) = 0;
+        virtual double max() const = 0;
     };
 
     class LineBox
@@ -68,6 +79,12 @@ public:
             QColor color;
             Qt::PenStyle style;
         } Cache;
+        typedef struct
+        {
+            QString type;
+            QString color;
+            QString style;
+        } ToolTips;
         void setCache(const Cache&);
         Cache cache() const;
         virtual void setType(QCPGraph::LineStyle) = 0;
@@ -87,6 +104,12 @@ public:
             QColor color;
             double size;
         } Cache;
+        typedef struct
+        {
+            QString shape;
+            QString color;
+            QString size;
+        } ToolTips;
         void setCache(const Cache&);
         Cache cache() const;
         virtual void setShape(QCPScatterStyle::ScatterShape) = 0;
@@ -105,6 +128,11 @@ public:
             int x;
             int y;
         } Cache;
+        typedef struct
+        {
+            QString x;
+            QString y;
+        } ToolTips;
         void setCache(const Cache&);
         Cache cache() const;
         virtual void setX(int) = 0;
@@ -121,6 +149,11 @@ public:
             QColor min;
             QColor max;
         } Cache;
+        typedef struct
+        {
+            QString min;
+            QString max;
+        } ToolTips;
         void setCache(const Cache&);
         Cache cache() const;
         virtual void setMin(const QColor&) = 0;
@@ -139,6 +172,13 @@ public:
             LineBox::Cache line;
             PointsBox::Cache points;
         } Cache;
+        typedef struct
+        {
+            RangeBox::ToolTips xRange;
+            RangeBox::ToolTips yRange;
+            LineBox::ToolTips line;
+            PointsBox::ToolTips points;
+        } ToolTips;
         void setCache(const Cache&);
         Cache cache() const;
         virtual RangeBox* rangeBoxX() = 0;
@@ -162,6 +202,14 @@ public:
             DataSizeBox::Cache dataSize;
             ColorBox::Cache color;
         } Cache;
+        typedef struct
+        {
+            RangeBox::ToolTips xRange;
+            RangeBox::ToolTips yRange;
+            RangeBox::ToolTips zRange;
+            DataSizeBox::ToolTips dataSize;
+            ColorBox::ToolTips color;
+        } ToolTips;
         void setCache(const Cache&);
         Cache cache() const;
         virtual RangeBox* rangeBoxX() = 0;
@@ -186,6 +234,16 @@ public:
         SubTabColorMap::Cache colorMap;
     } Cache;
 
+    static struct
+    {
+        QString title;
+        QString xAxis;
+        QString yAxis;
+        MinSizeFrame::ToolTips minSize;
+        SubTab2D::ToolTips twoDimen;
+        SubTabColorMap::ToolTips colorMap;
+    } toolTips;
+
     explicit QPlotTab(QWidget* parent = Q_NULLPTR);
     QPlotTab(const QPlotTab&) = delete;
 
@@ -204,6 +262,10 @@ public:
     SubTabColorMap* tabColorMap();
     const SubTabColorMap* tabColorMap() const;
     QPlot::Type selected() const;
+    void setTitleToolTip(const QString&);
+    void setXAxisToolTip(const QString&);
+    void setYAxisToolTip(const QString&);
+    void setMinSizeToolTip(const QString&);
 
 private:
     QVBoxLayout* m_layout;

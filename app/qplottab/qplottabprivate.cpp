@@ -80,6 +80,8 @@ MinSizeFramePrivate::MinSizeFramePrivate(QWidget* parent)
     , m_intEdit_width{new QIntEdit{this, 0}}
     , m_intEdit_height{new QIntEdit{this, 0}}
 {
+    this->m_label_width->setToolTip(QPlotTab::toolTips.minSize.width);
+    this->m_label_height->setToolTip(QPlotTab::toolTips.minSize.height);
     this->m_layout->setContentsMargins(0, 0, 0, 0);
     this->m_layout->addWidget(this->m_label_width);
     this->m_layout->addWidget(this->m_intEdit_width);
@@ -138,30 +140,44 @@ RangeBoxPrivate::RangeBoxPrivate(
 
 
 void
-RangeBoxPrivate::setMin(const QString& text)
+RangeBoxPrivate::setMin(double number)
 {
-    this->m_doubleEdit_min->setText(text);
+    this->m_doubleEdit_min->setText(QString::number(number));
 }
 
 
-QString
+double
 RangeBoxPrivate::min() const
 {
-    return this->m_doubleEdit_min->text();
+    return this->m_doubleEdit_min->text().toDouble();
 }
 
 
 void
-RangeBoxPrivate::setMax(const QString& text)
+RangeBoxPrivate::setMax(double number)
 {
-    this->m_doubleEdit_max->setText(text);
+    this->m_doubleEdit_max->setText(QString::number(number));
 }
 
 
-QString
+double
 RangeBoxPrivate::max() const
 {
-    return this->m_doubleEdit_max->text();
+    return this->m_doubleEdit_max->text().toDouble();
+}
+
+
+void
+RangeBoxPrivate::setMinToolTip(const QString& text)
+{
+    this->m_label_min->setToolTip(text);
+}
+
+
+void
+RangeBoxPrivate::setMaxToolTip(const QString& text)
+{
+    this->m_label_max->setToolTip(text);
 }
 
 
@@ -268,6 +284,27 @@ void
 LineBoxPrivate::colorSelected()
 {
     this->setColor(this->m_colorDialog->selectedColor());
+}
+
+
+void
+LineBoxPrivate::setTypeToolTip(const QString& text)
+{
+    this->m_label_type->setToolTip(text);
+}
+
+
+void
+LineBoxPrivate::setColorToolTip(const QString& text)
+{
+    this->m_label_color->setToolTip(text);
+}
+
+
+void
+LineBoxPrivate::setStyleToolTip(const QString& text)
+{
+    this->m_label_style->setToolTip(text);
 }
 
 
@@ -378,6 +415,27 @@ PointsBoxPrivate::colorSelected()
 }
 
 
+void
+PointsBoxPrivate::setShapeToolTip(const QString& text)
+{
+    this->m_label_shape->setToolTip(text);
+}
+
+
+void
+PointsBoxPrivate::setColorToolTip(const QString& text)
+{
+    this->m_label_color->setToolTip(text);
+}
+
+
+void
+PointsBoxPrivate::setSizeToolTip(const QString& text)
+{
+    this->m_label_size->setToolTip(text);
+}
+
+
 DataSizeBoxPrivate::DataSizeBoxPrivate(
     QWidget* parent,
     const QString& title,
@@ -424,6 +482,20 @@ int
 DataSizeBoxPrivate::y() const
 {
     return this->m_intEdit_y->text().toInt();
+}
+
+
+void
+DataSizeBoxPrivate::setXToolTip(const QString& text)
+{
+    this->m_label_x->setToolTip(text);
+}
+
+
+void
+DataSizeBoxPrivate::setYToolTip(const QString& text)
+{
+    this->m_label_y->setToolTip(text);
 }
 
 
@@ -514,6 +586,20 @@ ColorBoxPrivate::maxColorSelected(const QColor& color)
 }
 
 
+void
+ColorBoxPrivate::setMinToolTip(const QString& text)
+{
+    this->m_label_min->setToolTip(text);
+}
+
+
+void
+ColorBoxPrivate::setMaxToolTip(const QString& text)
+{
+    this->m_label_max->setToolTip(text);
+}
+
+
 SubTab2DPrivate::SubTab2DPrivate(QWidget* parent)
     : QWidget{parent}
     , m_layout{new QVBoxLayout{this}}
@@ -526,6 +612,16 @@ SubTab2DPrivate::SubTab2DPrivate(QWidget* parent)
     , m_pointsBox{new PointsBoxPrivate{m_contents, "Points"}}
     , m_spacer{new QSpacerItem{0, 0, QSizePolicy::Minimum, QSizePolicy::Expanding}}
 {
+    this->m_rangeBox_x->setMinToolTip(QPlotTab::toolTips.twoDimen.xRange.min);
+    this->m_rangeBox_x->setMaxToolTip(QPlotTab::toolTips.twoDimen.xRange.max);
+    this->m_rangeBox_y->setMinToolTip(QPlotTab::toolTips.twoDimen.yRange.min);
+    this->m_rangeBox_y->setMaxToolTip(QPlotTab::toolTips.twoDimen.yRange.max);
+    this->m_lineBox->setTypeToolTip(QPlotTab::toolTips.twoDimen.line.type);
+    this->m_lineBox->setColorToolTip(QPlotTab::toolTips.twoDimen.line.color);
+    this->m_lineBox->setStyleToolTip(QPlotTab::toolTips.twoDimen.line.style);
+    this->m_pointsBox->setShapeToolTip(QPlotTab::toolTips.twoDimen.points.shape);
+    this->m_pointsBox->setColorToolTip(QPlotTab::toolTips.twoDimen.points.color);
+    this->m_pointsBox->setSizeToolTip(QPlotTab::toolTips.twoDimen.points.size);
     this->m_scrollArea->setFrameShape(QFrame::NoFrame);
     this->m_scrollArea->setWidgetResizable(true);
     this->m_layout_contents->addWidget(this->m_rangeBox_x);
@@ -608,6 +704,16 @@ SubTabColorMapPrivate::SubTabColorMapPrivate(QWidget* parent)
     , m_colorBox{new ColorBoxPrivate{m_contents, "Color"}}
     , m_spacer{new QSpacerItem{0, 0, QSizePolicy::Minimum, QSizePolicy::Expanding}}
 {
+    this->m_rangeBox_x->setMinToolTip(QPlotTab::toolTips.colorMap.xRange.min);
+    this->m_rangeBox_x->setMaxToolTip(QPlotTab::toolTips.colorMap.xRange.max);
+    this->m_rangeBox_y->setMinToolTip(QPlotTab::toolTips.colorMap.yRange.min);
+    this->m_rangeBox_y->setMaxToolTip(QPlotTab::toolTips.colorMap.yRange.max);
+    this->m_rangeBox_z->setMinToolTip(QPlotTab::toolTips.colorMap.zRange.min);
+    this->m_rangeBox_z->setMaxToolTip(QPlotTab::toolTips.colorMap.zRange.max);
+    this->m_dataSizeBox->setXToolTip(QPlotTab::toolTips.colorMap.dataSize.x);
+    this->m_dataSizeBox->setYToolTip(QPlotTab::toolTips.colorMap.dataSize.y);
+    this->m_colorBox->setMinToolTip(QPlotTab::toolTips.colorMap.color.min);
+    this->m_colorBox->setMaxToolTip(QPlotTab::toolTips.colorMap.color.max);
     this->m_scrollArea->setFrameShape(QFrame::NoFrame);
     this->m_scrollArea->setWidgetResizable(true);
     this->m_layout_contents->addWidget(this->m_rangeBox_x);

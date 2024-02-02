@@ -85,12 +85,12 @@ MainWindow::setPlots(const std::vector<PlotEditor::PlotInfo>& plots)
             plots[i].attributes.minSize.height
         });
         plot->plot2D()->setRangeX({
-            plots[i].attributes.twoDimen.xRange.min.toDouble(),
-            plots[i].attributes.twoDimen.xRange.max.toDouble()
+            plots[i].attributes.twoDimen.xRange.min,
+            plots[i].attributes.twoDimen.xRange.max
         });
         plot->plot2D()->setRangeY({
-            plots[i].attributes.twoDimen.yRange.min.toDouble(),
-            plots[i].attributes.twoDimen.yRange.max.toDouble()
+            plots[i].attributes.twoDimen.yRange.min,
+            plots[i].attributes.twoDimen.yRange.max
         });
         plot->plot2D()->setLineStyle(plots[i].attributes.twoDimen.line.type);
         QPen pen{plots[i].attributes.twoDimen.line.color};
@@ -102,16 +102,16 @@ MainWindow::setPlots(const std::vector<PlotEditor::PlotInfo>& plots)
             plots[i].attributes.twoDimen.points.size
         });
         plot->plotColorMap()->setRangeX({
-            plots[i].attributes.colorMap.xRange.min.toDouble(),
-            plots[i].attributes.colorMap.xRange.max.toDouble()
+            plots[i].attributes.colorMap.xRange.min,
+            plots[i].attributes.colorMap.xRange.max
         });
         plot->plotColorMap()->setRangeY({
-            plots[i].attributes.colorMap.yRange.min.toDouble(),
-            plots[i].attributes.colorMap.yRange.max.toDouble()
+            plots[i].attributes.colorMap.yRange.min,
+            plots[i].attributes.colorMap.yRange.max
         });
         plot->plotColorMap()->setRangeZ({
-            plots[i].attributes.colorMap.zRange.min.toDouble(),
-            plots[i].attributes.colorMap.zRange.max.toDouble()
+            plots[i].attributes.colorMap.zRange.min,
+            plots[i].attributes.colorMap.zRange.max
         });
         plot->plotColorMap()->setDataSize(
             plots[i].attributes.colorMap.dataSize.x,

@@ -3,6 +3,60 @@
 #include "qplottabprivate.hpp"
 
 
+decltype(QPlotTab::toolTips) QPlotTab::toolTips = {
+    .title = {},
+    .xAxis = {},
+    .yAxis = {},
+    .minSize = {
+        .minSize = {},
+        .width = {},
+        .height = {}
+    },
+    .twoDimen = {
+        .xRange = {
+            .min = {},
+            .max = {}
+        },
+        .yRange = {
+            .min = {},
+            .max = {}
+        },
+        .line = {
+            .type = {},
+            .color = {},
+            .style = {}
+        },
+        .points = {
+            .shape = {},
+            .color = {},
+            .size = {}
+        }
+    },
+    .colorMap = {
+        .xRange = {
+            .min = {},
+            .max = {}
+        },
+        .yRange = {
+            .min = {},
+            .max = {}
+        },
+        .zRange = {
+            .min = {},
+            .max = {}
+        },
+        .dataSize = {
+            .x = {},
+            .y = {}
+        },
+        .color = {
+            .min = {},
+            .max = {}
+        }
+    }
+};
+
+
 void
 QPlotTab::MinSizeFrame::setCache(const QPlotTab::MinSizeFrame::Cache& cache)
 {
@@ -177,6 +231,10 @@ QPlotTab::QPlotTab(QWidget* parent)
     , m_tab2D{new SubTab2DPrivate{m_tabWidget}}
     , m_tabColorMap{new SubTabColorMapPrivate{m_tabWidget}}
 {
+    this->m_label_title->setToolTip(QPlotTab::toolTips.title);
+    this->m_label_xAxis->setToolTip(QPlotTab::toolTips.xAxis);
+    this->m_label_yAxis->setToolTip(QPlotTab::toolTips.yAxis);
+    this->m_label_minSize->setToolTip(QPlotTab::toolTips.minSize.minSize);
     this->m_layout_common->setWidget(0, QFormLayout::LabelRole, this->m_label_title);
     this->m_layout_common->setWidget(0, QFormLayout::FieldRole, this->m_lineEdit_title);
     this->m_layout_common->setWidget(1, QFormLayout::LabelRole, this->m_label_xAxis);
@@ -310,4 +368,32 @@ QPlotTab::selected() const
         case 0: return QPlot::Type::TWODIMEN;
         case 1: return QPlot::Type::COLORMAP;
     }
+}
+
+
+void
+QPlotTab::setTitleToolTip(const QString& text)
+{
+    this->m_label_title->setToolTip(text);
+}
+
+
+void
+QPlotTab::setXAxisToolTip(const QString& text)
+{
+    this->m_label_xAxis->setToolTip(text);
+}
+
+
+void
+QPlotTab::setYAxisToolTip(const QString& text)
+{
+    this->m_label_yAxis->setToolTip(text);
+}
+
+
+void
+QPlotTab::setMinSizeToolTip(const QString& text)
+{
+    this->m_label_minSize->setToolTip(text);
 }
