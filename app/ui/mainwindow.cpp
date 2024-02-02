@@ -122,6 +122,8 @@ MainWindow::setPlots(const std::vector<PlotEditor::PlotInfo>& plots)
         color.setColorStopAt(1, plots[i].attributes.colorMap.color.max);
         plot->plotColorMap()->setColorGradient(color);
     }
+
+    emit this->plotsSet(plots);
 }
 
 

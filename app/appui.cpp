@@ -33,7 +33,11 @@ AppUI::AppUI(QObject* parent)
     );
     QObject::connect(
         this->plotEditorDialog, &QDialog::accepted,
-        [=] { this->mainWindow->setPlots(this->plotEditorDialog->plots()); }
+        [this] { this->mainWindow->setPlots(this->plotEditorDialog->plots()); }
+    );
+    QObject::connect(
+        this->mainWindow, &MainWindow::plotsSet,
+        [this](const std::vector<PlotEditor::PlotInfo>& plots) { emit this->plotsSet(plots); }
     );
 }
 

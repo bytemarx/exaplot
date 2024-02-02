@@ -34,6 +34,7 @@ public:
 
 Q_SIGNALS:
     void closed();
+    void plotsSet(const std::vector<PlotEditor::PlotInfo>&);
 
 protected:
     void closeEvent(QCloseEvent*) override;

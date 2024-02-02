@@ -41,11 +41,13 @@ public Q_SLOTS:
     void pythonDeInit();
     void loadScript(const QString&);
     void runScript(const std::map<std::string, std::string>&);
+    void updatePlotProperties(const std::vector<PlotEditor::PlotInfo>&);
 
 private:
     QMutex mutex;
     orbital::OrbitalCore* core;
     std::shared_ptr<orbital::ScriptModule> module;
+    std::vector<PlotEditor::PlotInfo> plots;
 };
 
 

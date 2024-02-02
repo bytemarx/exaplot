@@ -126,6 +126,14 @@ Interface::runScript(const std::map<std::string, std::string>& kwargs)
 }
 
 
+void
+Interface::updatePlotProperties(const std::vector<PlotEditor::PlotInfo>& plots)
+{
+    this->plots = plots;
+    std::cout << "updating: " << this->plots.at(0).attributes.title.toStdString() << '\n';
+}
+
+
 AppMain::AppMain(int& argc, char* argv[])
     : QObject{Q_NULLPTR}
     , ifaceThread{}
@@ -143,6 +151,7 @@ AppMain::AppMain(int& argc, char* argv[])
     QObject::connect(&this->ui, &AppUI::closed, [this] { this->shutdown(0); });
     QObject::connect(&this->ui, &AppUI::scriptLoad, this, &AppMain::load);
     QObject::connect(&this->ui, &AppUI::scriptRun, this, &AppMain::run);
+    QObject::connect(&this->ui, &AppUI::plotsSet, &this->iface, &Interface::updatePlotProperties, Qt::QueuedConnection);
     QObject::connect(this, &AppMain::scriptLoaded, &this->iface, &Interface::loadScript, Qt::QueuedConnection);
     QObject::connect(this, &AppMain::scriptRan, &this->iface, &Interface::runScript, Qt::QueuedConnection);
     QObject::connect(&this->iface, &Interface::fatalError, this, &AppMain::shutdown, Qt::QueuedConnection);
