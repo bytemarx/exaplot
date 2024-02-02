@@ -54,7 +54,7 @@ class AppMain : public QObject
     Q_OBJECT
 
 public:
-    AppMain(int& argc, char* argv[], Interface* iface, QThread* ifaceThread);
+    AppMain(int& argc, char* argv[]);
     ~AppMain();
 
     int exec();
@@ -78,8 +78,9 @@ public Q_SLOTS:
 private:
     void reset();
 
+    QThread ifaceThread;
+    Interface iface;
     QApplication a;
     AppUI ui;
-    QThread* ifaceThread;
     bool scriptRunning;
 };

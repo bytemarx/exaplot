@@ -126,27 +126,33 @@ Interface::runScript(const std::map<std::string, std::string>& kwargs)
 }
 
 
-AppMain::AppMain(int& argc, char* argv[], Interface* iface, QThread* ifaceThread)
+AppMain::AppMain(int& argc, char* argv[])
     : QObject{Q_NULLPTR}
+    , ifaceThread{}
+    , iface{}
     , a{argc, argv}
     , ui{this}
-    , ifaceThread{ifaceThread}
     , scriptRunning{false}
 {
+    QObject::connect(&this->ifaceThread, &QThread::started, &this->iface, &Interface::pythonInit);
+    QObject::connect(&this->ifaceThread, &QThread::finished, &this->iface, &Interface::pythonDeInit);
+    this->iface.moveToThread(&this->ifaceThread);
+    this->ifaceThread.start();
+
     QObject::connect(&this->a, &QApplication::aboutToQuit, [this] { this->shutdown(0); });
     QObject::connect(&this->ui, &AppUI::closed, [this] { this->shutdown(0); });
     QObject::connect(&this->ui, &AppUI::scriptLoad, this, &AppMain::load);
     QObject::connect(&this->ui, &AppUI::scriptRun, this, &AppMain::run);
-    QObject::connect(this, &AppMain::scriptLoaded, iface, &Interface::loadScript, Qt::QueuedConnection);
-    QObject::connect(this, &AppMain::scriptRan, iface, &Interface::runScript, Qt::QueuedConnection);
-    QObject::connect(iface, &Interface::fatalError, this, &AppMain::shutdown, Qt::QueuedConnection);
-    QObject::connect(iface, &Interface::scriptErrored, this, &AppMain::scriptError, Qt::QueuedConnection);
-    QObject::connect(iface, &Interface::runCompleted, this, &AppMain::runComplete, Qt::QueuedConnection);
-    QObject::connect(iface, &Interface::module_init, this, &AppMain::module_init, Qt::QueuedConnection);
-    QObject::connect(iface, &Interface::module_msg, this, &AppMain::module_msg, Qt::QueuedConnection);
-    QObject::connect(iface, &Interface::module_plot, this, &AppMain::module_plot, Qt::QueuedConnection);
-    QObject::connect(iface, &Interface::module_plotVec, this, &AppMain::module_plotVec, Qt::QueuedConnection);
-    QObject::connect(iface, &Interface::module_clear, this, &AppMain::module_clear, Qt::QueuedConnection);
+    QObject::connect(this, &AppMain::scriptLoaded, &this->iface, &Interface::loadScript, Qt::QueuedConnection);
+    QObject::connect(this, &AppMain::scriptRan, &this->iface, &Interface::runScript, Qt::QueuedConnection);
+    QObject::connect(&this->iface, &Interface::fatalError, this, &AppMain::shutdown, Qt::QueuedConnection);
+    QObject::connect(&this->iface, &Interface::scriptErrored, this, &AppMain::scriptError, Qt::QueuedConnection);
+    QObject::connect(&this->iface, &Interface::runCompleted, this, &AppMain::runComplete, Qt::QueuedConnection);
+    QObject::connect(&this->iface, &Interface::module_init, this, &AppMain::module_init, Qt::QueuedConnection);
+    QObject::connect(&this->iface, &Interface::module_msg, this, &AppMain::module_msg, Qt::QueuedConnection);
+    QObject::connect(&this->iface, &Interface::module_plot, this, &AppMain::module_plot, Qt::QueuedConnection);
+    QObject::connect(&this->iface, &Interface::module_plotVec, this, &AppMain::module_plotVec, Qt::QueuedConnection);
+    QObject::connect(&this->iface, &Interface::module_clear, this, &AppMain::module_clear, Qt::QueuedConnection);
 }
 
 
@@ -180,11 +186,11 @@ AppMain::shutdown(int status)
         }
     }
     if (this->scriptRunning && terminate) {
-        this->ifaceThread->terminate();
+        this->ifaceThread.terminate();
         this->scriptRunning = false;
     } else {
-        this->ifaceThread->quit();
-        this->ifaceThread->wait();
+        this->ifaceThread.quit();
+        this->ifaceThread.wait();
     }
     this->ui.close();
     this->a.exit(status);
