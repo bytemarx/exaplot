@@ -85,7 +85,3 @@ set_target_properties(app PROPERTIES
 )
 
 target_link_libraries(app PRIVATE orbital ${ADDITIONAL_LIBRARY_DEPENDENCIES})
-
-add_subdirectory("qbuttongrid")
-add_subdirectory("qplottab")
-add_subdirectory("qplot")
