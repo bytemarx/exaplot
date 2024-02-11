@@ -129,6 +129,51 @@ error:
 }
 
 
+static std::map<std::string, PlotProperty::Type> propertyMap{
+    {"title", PlotProperty::TITLE},
+    {"x_axis", PlotProperty::XAXIS},
+    {"y_axis", PlotProperty::YAXIS},
+    {"min_size", PlotProperty::MINSIZE},
+    {"min_size.w", PlotProperty::MINSIZE_W},
+    {"min_size.h", PlotProperty::MINSIZE_H},
+    {"two_dimen.x_range.min", PlotProperty::TWODIMEN_XRANGE_MIN},
+    {"two_dimen.x_range.max", PlotProperty::TWODIMEN_XRANGE_MAX},
+    {"two_dimen.y_range.min", PlotProperty::TWODIMEN_YRANGE_MIN},
+    {"two_dimen.y_range.max", PlotProperty::TWODIMEN_YRANGE_MAX},
+    {"two_dimen.line.type", PlotProperty::TWODIMEN_LINE_TYPE},
+    {"two_dimen.line.color", PlotProperty::TWODIMEN_LINE_COLOR},
+    {"two_dimen.line.style", PlotProperty::TWODIMEN_LINE_STYLE},
+    {"two_dimen.points.shape", PlotProperty::TWODIMEN_POINTS_SHAPE},
+    {"two_dimen.points.color", PlotProperty::TWODIMEN_POINTS_COLOR},
+    {"two_dimen.points.size", PlotProperty::TWODIMEN_POINTS_SIZE},
+    {"color_map.x_range.min", PlotProperty::COLORMAP_XRANGE_MIN},
+    {"color_map.x_range.max", PlotProperty::COLORMAP_XRANGE_MAX},
+    {"color_map.y_range.min", PlotProperty::COLORMAP_YRANGE_MIN},
+    {"color_map.y_range.max", PlotProperty::COLORMAP_YRANGE_MAX},
+    {"color_map.z_range.min", PlotProperty::COLORMAP_ZRANGE_MIN},
+    {"color_map.z_range.max", PlotProperty::COLORMAP_ZRANGE_MAX},
+    {"color_map.data_size.x", PlotProperty::COLORMAP_DATASIZE_X},
+    {"color_map.data_size.y", PlotProperty::COLORMAP_DATASIZE_Y},
+    {"color_map.color.min", PlotProperty::COLORMAP_COLOR_MIN},
+    {"color_map.color.max", PlotProperty::COLORMAP_COLOR_MAX},
+};
+
+
+const char*
+PlotProperty::toStr(Type t)
+{
+    for (const auto& [key, value] : propertyMap)
+        if (value == t) return key.c_str();
+    throw std::out_of_range{"Plot property has no mapping"};
+}
+
+
+PlotProperty::PlotProperty(const std::string& property)
+    : m_property{propertyMap.at(property)}
+    , m_str{property}
+{}
+
+
 OrbitalError
 OrbitalError::pyerror(OrbitalError::Type type)
 {
@@ -297,7 +342,7 @@ OrbitalCore::deinit()
 OrbitalInterface::~OrbitalInterface() = default;
 
 
-OrbitalCore::OrbitalCore(const OrbitalInterface* interface)
+OrbitalCore::OrbitalCore(OrbitalInterface* interface)
     : m_interface{interface}
     , m_tState{NULL}
 {
@@ -319,7 +364,7 @@ OrbitalCore::OrbitalCore(const OrbitalInterface* interface)
             throw std::runtime_error("Failed to initialize interpreter from config");
         }
     }
-    this->m_tState->interp->orb_passthrough = static_cast<const void*>(interface);
+    this->m_tState->interp->orb_passthrough = static_cast<void*>(interface);
     this->coreCount++;
 }
 

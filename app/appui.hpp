@@ -31,6 +31,7 @@ public:
     std::size_t plotCount() const;
     void enableRun(bool);
     void enableStop(bool);
+    void setPlotProperty(std::size_t, const orbital::PlotProperty&, const QPlotTab::Cache&);
 
 public Q_SLOTS:
     void displayError(const QString&, const QString& = "ERROR");
@@ -45,6 +46,8 @@ private Q_SLOTS:
     void loadScript();
 
 private:
+    void setPlots(const std::vector<PlotEditor::PlotInfo>&);
+
     MainWindow* mainWindow;
     About* aboutDialog;
     PlotEditor* plotEditorDialog;

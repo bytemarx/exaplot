@@ -7,8 +7,9 @@
 #include <map>
 #include <memory>
 #include <string>
-#include <variant>
 #include <vector>
+
+#include "plotproperty.hpp"
 
 
 #define ORBITAL_MODULE  "_orbital"
@@ -21,32 +22,6 @@
 
 #define ORBITAL_SCRIPT_INIT "init"  // init()
 #define ORBITAL_SCRIPT_RUN  "run"   // run(**kwargs)
-
-#define ORBITAL_PLOT_PROPERTY_TITLE                 "title"
-#define ORBITAL_PLOT_PROPERTY_XAXIS                 "x_axis"
-#define ORBITAL_PLOT_PROPERTY_YAXIS                 "y_axis"
-#define ORBITAL_PLOT_PROPERTY_MINSIZE_W             "min_size.w"
-#define ORBITAL_PLOT_PROPERTY_MINSIZE_H             "min_size.h"
-#define ORBITAL_PLOT_PROPERTY_TWODIMEN_XRANGE_MIN   "two_dimen.x_range.min"
-#define ORBITAL_PLOT_PROPERTY_TWODIMEN_XRANGE_MAX   "two_dimen.x_range.max"
-#define ORBITAL_PLOT_PROPERTY_TWODIMEN_YRANGE_MIN   "two_dimen.y_range.min"
-#define ORBITAL_PLOT_PROPERTY_TWODIMEN_YRANGE_MAX   "two_dimen.y_range.max"
-#define ORBITAL_PLOT_PROPERTY_TWODIMEN_LINE_TYPE    "two_dimen.line.type"
-#define ORBITAL_PLOT_PROPERTY_TWODIMEN_LINE_COLOR   "two_dimen.line.color"
-#define ORBITAL_PLOT_PROPERTY_TWODIMEN_LINE_STYLE   "two_dimen.line.style"
-#define ORBITAL_PLOT_PROPERTY_TWODIMEN_POINTS_SHAPE "two_dimen.points.color"
-#define ORBITAL_PLOT_PROPERTY_TWODIMEN_POINTS_COLOR "two_dimen.points.shape"
-#define ORBITAL_PLOT_PROPERTY_TWODIMEN_POINTS_SIZE  "two_dimen.points.size"
-#define ORBITAL_PLOT_PROPERTY_COLORMAP_XRANGE_MIN   "color_map.x_range.min"
-#define ORBITAL_PLOT_PROPERTY_COLORMAP_XRANGE_MAX   "color_map.x_range.max"
-#define ORBITAL_PLOT_PROPERTY_COLORMAP_YRANGE_MIN   "color_map.y_range.min"
-#define ORBITAL_PLOT_PROPERTY_COLORMAP_YRANGE_MAX   "color_map.y_range.max"
-#define ORBITAL_PLOT_PROPERTY_COLORMAP_ZRANGE_MIN   "color_map.z_range.min"
-#define ORBITAL_PLOT_PROPERTY_COLORMAP_ZRANGE_MAX   "color_map.z_range.max"
-#define ORBITAL_PLOT_PROPERTY_COLORMAP_DATASIZE_X   "color_map.data_size.x"
-#define ORBITAL_PLOT_PROPERTY_COLORMAP_DATASIZE_Y   "color_map.data_size.y"
-#define ORBITAL_PLOT_PROPERTY_COLORMAP_COLOR_MIN    "color_map.color.min"
-#define ORBITAL_PLOT_PROPERTY_COLORMAP_COLOR_MAX    "color_map.color.max"
 
 
 namespace orbital {
@@ -94,15 +69,13 @@ class OrbitalInterface
 {
 public:
     virtual ~OrbitalInterface();
-    virtual PyObject* init(const std::vector<std::string>& params, const std::vector<GridPoint>& plots) const = 0;
-    virtual PyObject* msg(const std::string& message, bool append) const = 0;
-    virtual PyObject* plot(long dataSet, const std::vector<double>& data) const = 0;
-    virtual PyObject* plotVec(long dataSet, const std::vector<std::vector<double>>& data) const = 0;
-    virtual PyObject* clear(long dataSet) const = 0;
-    virtual PyObject* setPlotProperty(
-        long plotID, const std::string& property, const std::variant<int, double, std::string>& value
-    ) const = 0;
-    virtual PyObject* getPlotProperty(long plotID, const std::string& property) const = 0;
+    virtual PyObject* init(const std::vector<std::string>& params, const std::vector<GridPoint>& plots) = 0;
+    virtual PyObject* msg(const std::string& message, bool append) = 0;
+    virtual PyObject* plot(long dataSet, const std::vector<double>& data) = 0;
+    virtual PyObject* plotVec(long dataSet, const std::vector<std::vector<double>>& data) = 0;
+    virtual PyObject* clear(long dataSet) = 0;
+    virtual PyObject* setPlotProperty(long plotID, const PlotProperty& property, const PlotProperty::Value& value) = 0;
+    virtual PyObject* getPlotProperty(long plotID, const PlotProperty& property) = 0;
 };
 
 
@@ -117,7 +90,7 @@ public:
         const std::filesystem::path& prefix);
     static int deinit();
 
-    OrbitalCore(const OrbitalInterface* interface);
+    OrbitalCore(OrbitalInterface* interface);
     ~OrbitalCore();
     OrbitalCore(const OrbitalCore&) = delete;
 

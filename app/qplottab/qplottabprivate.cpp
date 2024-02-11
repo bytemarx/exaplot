@@ -260,7 +260,7 @@ LineBoxPrivate::setColor(const QColor& color)
 QColor
 LineBoxPrivate::color() const
 {
-    return this->m_colorDialog->selectedColor();
+    return this->m_colorDialog->currentColor();
 }
 
 
@@ -390,7 +390,7 @@ PointsBoxPrivate::setColor(const QColor& color)
 QColor
 PointsBoxPrivate::color() const
 {
-    return this->m_colorDialog->selectedColor();
+    return this->m_colorDialog->currentColor();
 }
 
 

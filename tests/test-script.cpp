@@ -20,15 +20,13 @@ protected:
     class Interface : public OrbitalInterface
     {
     public:
-        PyObject* init(const std::vector<std::string>& params, const std::vector<orbital::GridPoint>& plots) const override { Py_RETURN_NONE; }
-        PyObject* msg(const std::string& message, bool append) const override { Py_RETURN_NONE; }
-        PyObject* plot(long dataSet, const std::vector<double>& data) const override { Py_RETURN_NONE; }
-        PyObject* plotVec(long dataSet, const std::vector<std::vector<double>>& data) const override { Py_RETURN_NONE; }
-        PyObject* clear(long dataSet) const override { Py_RETURN_NONE; }
-        PyObject* setPlotProperty(
-            long plotID, const std::string& property,
-            const std::variant<int, double, std::string>& value) const override { Py_RETURN_NONE; }
-        PyObject* getPlotProperty(long plotID, const std::string& property) const override { Py_RETURN_NONE; }
+        PyObject* init(const std::vector<std::string>& params, const std::vector<orbital::GridPoint>& plots) override { Py_RETURN_NONE; }
+        PyObject* msg(const std::string& message, bool append) override { Py_RETURN_NONE; }
+        PyObject* plot(long dataSet, const std::vector<double>& data) override { Py_RETURN_NONE; }
+        PyObject* plotVec(long dataSet, const std::vector<std::vector<double>>& data) override { Py_RETURN_NONE; }
+        PyObject* clear(long dataSet) override { Py_RETURN_NONE; }
+        PyObject* setPlotProperty(long plotID, const PlotProperty& property, const PlotProperty::Value& value) override { Py_RETURN_NONE; }
+        PyObject* getPlotProperty(long plotID, const PlotProperty& property) override { Py_RETURN_NONE; }
 
     private:
         ModuleTest* m_tester;

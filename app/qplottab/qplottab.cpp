@@ -1,57 +1,61 @@
 #include <QIntValidator>
 
 #include "qplottabprivate.hpp"
+#include "plotproperty.hpp"
+
+
+using PlotProperty = orbital::PlotProperty;
 
 
 decltype(QPlotTab::toolTips) QPlotTab::toolTips = {
-    .title = {},
-    .xAxis = {},
-    .yAxis = {},
+    .title = PlotProperty::toStr(PlotProperty::TITLE),
+    .xAxis = PlotProperty::toStr(PlotProperty::XAXIS),
+    .yAxis = PlotProperty::toStr(PlotProperty::YAXIS),
     .minSize = {
-        .minSize = {},
-        .width = {},
-        .height = {}
+        .minSize = PlotProperty::toStr(PlotProperty::MINSIZE),
+        .width = PlotProperty::toStr(PlotProperty::MINSIZE_W),
+        .height = PlotProperty::toStr(PlotProperty::MINSIZE_H)
     },
     .twoDimen = {
         .xRange = {
-            .min = {},
-            .max = {}
+            .min = PlotProperty::toStr(PlotProperty::TWODIMEN_XRANGE_MIN),
+            .max = PlotProperty::toStr(PlotProperty::TWODIMEN_XRANGE_MAX)
         },
         .yRange = {
-            .min = {},
-            .max = {}
+            .min = PlotProperty::toStr(PlotProperty::TWODIMEN_YRANGE_MIN),
+            .max = PlotProperty::toStr(PlotProperty::TWODIMEN_YRANGE_MAX)
         },
         .line = {
-            .type = {},
-            .color = {},
-            .style = {}
+            .type = PlotProperty::toStr(PlotProperty::TWODIMEN_LINE_TYPE),
+            .color = PlotProperty::toStr(PlotProperty::TWODIMEN_LINE_COLOR),
+            .style = PlotProperty::toStr(PlotProperty::TWODIMEN_LINE_STYLE)
         },
         .points = {
-            .shape = {},
-            .color = {},
-            .size = {}
+            .shape = PlotProperty::toStr(PlotProperty::TWODIMEN_POINTS_SHAPE),
+            .color = PlotProperty::toStr(PlotProperty::TWODIMEN_POINTS_COLOR),
+            .size = PlotProperty::toStr(PlotProperty::TWODIMEN_POINTS_SIZE)
         }
     },
     .colorMap = {
         .xRange = {
-            .min = {},
-            .max = {}
+            .min = PlotProperty::toStr(PlotProperty::COLORMAP_XRANGE_MIN),
+            .max = PlotProperty::toStr(PlotProperty::COLORMAP_XRANGE_MAX)
         },
         .yRange = {
-            .min = {},
-            .max = {}
+            .min = PlotProperty::toStr(PlotProperty::COLORMAP_YRANGE_MIN),
+            .max = PlotProperty::toStr(PlotProperty::COLORMAP_YRANGE_MAX)
         },
         .zRange = {
-            .min = {},
-            .max = {}
+            .min = PlotProperty::toStr(PlotProperty::COLORMAP_ZRANGE_MIN),
+            .max = PlotProperty::toStr(PlotProperty::COLORMAP_ZRANGE_MAX)
         },
         .dataSize = {
-            .x = {},
-            .y = {}
+            .x = PlotProperty::toStr(PlotProperty::COLORMAP_DATASIZE_X),
+            .y = PlotProperty::toStr(PlotProperty::COLORMAP_DATASIZE_Y)
         },
         .color = {
-            .min = {},
-            .max = {}
+            .min = PlotProperty::toStr(PlotProperty::COLORMAP_COLOR_MIN),
+            .max = PlotProperty::toStr(PlotProperty::COLORMAP_COLOR_MAX)
         }
     }
 };

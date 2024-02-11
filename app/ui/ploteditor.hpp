@@ -23,6 +23,7 @@ public:
 
     void reset();
     std::vector<PlotInfo> plots() const;
+    void setPlot(std::size_t plot, const QPlotTab::Cache& attributes);
 
 public Q_SLOTS:
     void open() override;

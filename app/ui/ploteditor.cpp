@@ -42,18 +42,6 @@ PlotEditor::PlotEditor(QWidget* parent)
 
 
 void
-PlotEditor::open()
-{
-    this->cache.plotTabs = std::vector<QPlotTab::Cache>{};
-    for (const auto& tab : this->plotTabs)
-        this->cache.plotTabs.push_back(tab->cache());
-    this->cache.arrangement = this->ui.buttonGrid->arrangement();
-    this->cache.buttonGridStatus = this->ui.label_buttonGridStatus->pixmap();
-    return QDialog::open();
-}
-
-
-void
 PlotEditor::reset()
 {
     this->ui.tabWidget_plotTabs->clear();
@@ -79,6 +67,25 @@ PlotEditor::plots() const
         });
     }
     return plotInfo;
+}
+
+
+void
+PlotEditor::setPlot(std::size_t plot, const QPlotTab::Cache& attributes)
+{
+    this->plotTabs.at(plot)->setCache(attributes);
+}
+
+
+void
+PlotEditor::open()
+{
+    this->cache.plotTabs = std::vector<QPlotTab::Cache>{};
+    for (const auto& tab : this->plotTabs)
+        this->cache.plotTabs.push_back(tab->cache());
+    this->cache.arrangement = this->ui.buttonGrid->arrangement();
+    this->cache.buttonGridStatus = this->ui.label_buttonGridStatus->pixmap();
+    return QDialog::open();
 }
 
 

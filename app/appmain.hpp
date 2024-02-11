@@ -18,17 +18,13 @@ class Interface : public QObject, public orbital::OrbitalInterface
 public:
     Interface(QObject* parent = nullptr);
 
-    PyObject* init(
-        const std::vector<std::string>& params,
-        const std::vector<orbital::GridPoint>& plots) const override;
-    PyObject* msg(const std::string& message, bool append) const override;
-    PyObject* plot(long dataSet, const std::vector<double>& data) const override;
-    PyObject* plotVec(long dataSet, const std::vector<std::vector<double>>& data) const override;
-    PyObject* clear(long dataSet) const override;
-    PyObject* setPlotProperty(
-        long plotID, const std::string& property,
-        const std::variant<int, double, std::string>& value) const override;
-    PyObject* getPlotProperty(long plotID, const std::string& property) const override;
+    PyObject* init(const std::vector<std::string>& params, const std::vector<orbital::GridPoint>& plots) override;
+    PyObject* msg(const std::string& message, bool append) override;
+    PyObject* plot(long dataSet, const std::vector<double>& data) override;
+    PyObject* plotVec(long dataSet, const std::vector<std::vector<double>>& data) override;
+    PyObject* clear(long dataSet) override;
+    PyObject* setPlotProperty(long plotID, const orbital::PlotProperty& property, const orbital::PlotProperty::Value& value) override;
+    PyObject* getPlotProperty(long plotID, const orbital::PlotProperty& property) override;
 
 Q_SIGNALS:
     void fatalError(int);
@@ -39,6 +35,7 @@ Q_SIGNALS:
     void module_plot(long, const std::vector<double>&) const;
     void module_plotVec(long, const std::vector<std::vector<double>>&) const;
     void module_clear(long) const;
+    void module_setPlotProperty(std::size_t plotIdx, const orbital::PlotProperty& property, const QPlotTab::Cache& properties) const;
 
 public Q_SLOTS:
     void pythonInit();
@@ -80,6 +77,7 @@ public Q_SLOTS:
     void module_plot(long, const std::vector<double>&);
     void module_plotVec(long, const std::vector<std::vector<double>>&);
     void module_clear(long);
+    void module_setPlotProperty(std::size_t, const orbital::PlotProperty&, const QPlotTab::Cache&);
 
 private:
     void reset();

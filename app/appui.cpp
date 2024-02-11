@@ -137,6 +137,90 @@ AppUI::enableStop(bool enable)
 
 
 void
+AppUI::setPlotProperty(
+    std::size_t plotIdx,
+    const orbital::PlotProperty& property,
+    const QPlotTab::Cache& properties)
+{
+    auto plot = this->plot(plotIdx);
+    using PlotProperty = orbital::PlotProperty;
+    switch (property) {
+    case PlotProperty::TITLE:
+        plot->setTitle(properties.title);
+        break;
+    case PlotProperty::XAXIS:
+        plot->setLabelX(properties.xAxis);
+        break;
+    case PlotProperty::YAXIS:
+        plot->setLabelY(properties.yAxis);
+        break;
+    case PlotProperty::MINSIZE_W:
+        plot->setMinimumWidth(properties.minSize.width);
+        break;
+    case PlotProperty::MINSIZE_H:
+        plot->setMinimumHeight(properties.minSize.height);
+        break;
+    case PlotProperty::TWODIMEN_XRANGE_MIN:
+    case PlotProperty::TWODIMEN_XRANGE_MAX:
+        plot->plot2D()->setRangeX({properties.twoDimen.xRange.min, properties.twoDimen.xRange.max});
+        break;
+    case PlotProperty::TWODIMEN_YRANGE_MIN:
+    case PlotProperty::TWODIMEN_YRANGE_MAX:
+        plot->plot2D()->setRangeY({properties.twoDimen.yRange.min, properties.twoDimen.yRange.max});
+        break;
+    case PlotProperty::TWODIMEN_LINE_TYPE:
+        plot->plot2D()->setLineStyle(properties.twoDimen.line.type);
+        break;
+    case PlotProperty::TWODIMEN_LINE_COLOR:
+    case PlotProperty::TWODIMEN_LINE_STYLE:
+        {
+            QPen pen{properties.twoDimen.line.color};
+            pen.setStyle(properties.twoDimen.line.style);
+            plot->plot2D()->setPen(pen);
+        }
+        break;
+    case PlotProperty::TWODIMEN_POINTS_SHAPE:
+    case PlotProperty::TWODIMEN_POINTS_COLOR:
+    case PlotProperty::TWODIMEN_POINTS_SIZE:
+        plot->plot2D()->setScatStyle({
+            properties.twoDimen.points.shape,
+            properties.twoDimen.points.color,
+            properties.twoDimen.points.size
+        });
+        break;
+    case PlotProperty::COLORMAP_XRANGE_MIN:
+    case PlotProperty::COLORMAP_XRANGE_MAX:
+        plot->plotColorMap()->setRangeX({properties.colorMap.xRange.min, properties.colorMap.xRange.max});
+        break;
+    case PlotProperty::COLORMAP_YRANGE_MIN:
+    case PlotProperty::COLORMAP_YRANGE_MAX:
+        plot->plotColorMap()->setRangeY({properties.colorMap.yRange.min, properties.colorMap.yRange.max});
+        break;
+    case PlotProperty::COLORMAP_ZRANGE_MIN:
+    case PlotProperty::COLORMAP_ZRANGE_MAX:
+        plot->plotColorMap()->setRangeZ({properties.colorMap.zRange.min, properties.colorMap.zRange.max});
+        break;
+    case PlotProperty::COLORMAP_DATASIZE_X:
+    case PlotProperty::COLORMAP_DATASIZE_Y:
+        plot->plotColorMap()->setDataSize(properties.colorMap.dataSize.x, properties.colorMap.dataSize.y);
+        break;
+    case PlotProperty::COLORMAP_COLOR_MIN:
+    case PlotProperty::COLORMAP_COLOR_MAX:
+        {
+            QCPColorGradient colorGradient;
+            colorGradient.setColorStopAt(0, properties.colorMap.color.min);
+            colorGradient.setColorStopAt(1, properties.colorMap.color.max);
+            plot->plotColorMap()->setColorGradient(colorGradient);
+        }
+        break;
+    default:
+        return this->displayError(QString{"Invalid plot property (%1)"}.arg(property));
+    }
+    this->plotEditorDialog->setPlot(plotIdx, properties);
+}
+
+
+void
 AppUI::displayError(const QString& msg, const QString& title)
 {
     QMessageBox::critical(this->mainWindow, title, msg);

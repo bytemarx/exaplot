@@ -21,12 +21,12 @@ typedef struct _is {
     } threads;
 
     // CUSTOM ORBITAL MODIFICATION
-    const void *orb_passthrough;
+    void *orb_passthrough;
 
 } PyInterpreterState;
 
 typedef struct s_orbital_state {
-    const orbital::OrbitalInterface* iface;
+    orbital::OrbitalInterface* iface;
 } orbital_state;
 
 

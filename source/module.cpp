@@ -28,7 +28,7 @@ orbitalExec(PyObject* module)
         goto error;
     }
 
-    mState->iface = static_cast<const OrbitalInterface*>(interp->orb_passthrough);
+    mState->iface = static_cast<OrbitalInterface*>(interp->orb_passthrough);
 
     return 0;
 error:
@@ -243,80 +243,90 @@ orbital__set_plot_property(PyObject* module, PyObject* args)
         return NULL;
     }
 
-    std::string prop{c_prop};
-    std::variant<int, double, std::string> value;
+    try {
+        PlotProperty prop{c_prop};
+        PlotProperty::Value value;
 
-    // TODO: refactor this abomination
-    if (prop.compare(ORBITAL_PLOT_PROPERTY_TITLE) == 0 ||
-        prop.compare(ORBITAL_PLOT_PROPERTY_XAXIS) == 0 ||
-        prop.compare(ORBITAL_PLOT_PROPERTY_YAXIS) == 0 ||
-        prop.compare(ORBITAL_PLOT_PROPERTY_TWODIMEN_LINE_TYPE) == 0 ||
-        prop.compare(ORBITAL_PLOT_PROPERTY_TWODIMEN_LINE_COLOR) == 0 ||
-        prop.compare(ORBITAL_PLOT_PROPERTY_TWODIMEN_LINE_STYLE) == 0 ||
-        prop.compare(ORBITAL_PLOT_PROPERTY_TWODIMEN_POINTS_SHAPE) == 0 ||
-        prop.compare(ORBITAL_PLOT_PROPERTY_TWODIMEN_POINTS_COLOR) == 0 ||
-        prop.compare(ORBITAL_PLOT_PROPERTY_COLORMAP_COLOR_MIN) == 0 ||
-        prop.compare(ORBITAL_PLOT_PROPERTY_COLORMAP_COLOR_MAX) == 0)
+        switch (prop) {
+        case PlotProperty::TITLE:
+        case PlotProperty::XAXIS:
+        case PlotProperty::YAXIS:
+        case PlotProperty::TWODIMEN_LINE_TYPE:
+        case PlotProperty::TWODIMEN_LINE_COLOR:
+        case PlotProperty::TWODIMEN_LINE_STYLE:
+        case PlotProperty::TWODIMEN_POINTS_SHAPE:
+        case PlotProperty::TWODIMEN_POINTS_COLOR:
+        case PlotProperty::COLORMAP_COLOR_MIN:
+        case PlotProperty::COLORMAP_COLOR_MAX:
+            if (!PyUnicode_Check(pyBorrowed_value)) {
+                PyErr_Format(PyExc_TypeError, "%s must be type 'str'", c_prop);
+                return NULL;
+            }
+            {
+                auto c_value = PyUnicode_AsUTF8(pyBorrowed_value);
+                if (c_value == NULL) return NULL;
+                value = std::string{c_value};
+            }
+            break;
+        case PlotProperty::MINSIZE_W:
+        case PlotProperty::MINSIZE_H:
+        case PlotProperty::COLORMAP_DATASIZE_X:
+        case PlotProperty::COLORMAP_DATASIZE_Y:
+            if (!PyLong_Check(pyBorrowed_value)) {
+                PyErr_Format(PyExc_TypeError, "%s must be type 'int'", c_prop);
+                return NULL;
+            }
+            {
+                auto long_value = PyLong_AsLong(pyBorrowed_value);
+                if (long_value <= 0) {
+                    if (!PyErr_Occurred())
+                        PyErr_Format(PyExc_ValueError, "%s must be greater than zero", c_prop);
+                    return NULL;
+                }
+                if (long_value > std::numeric_limits<int>::max()) {
+                    PyErr_Format(PyExc_OverflowError, "Value must not exceed %d", std::numeric_limits<int>::max());
+                    return NULL;
+                }
+                value = static_cast<int>(long_value);
+            }
+            break;
+        case PlotProperty::TWODIMEN_XRANGE_MIN:
+        case PlotProperty::TWODIMEN_XRANGE_MAX:
+        case PlotProperty::TWODIMEN_YRANGE_MIN:
+        case PlotProperty::TWODIMEN_YRANGE_MAX:
+        case PlotProperty::TWODIMEN_POINTS_SIZE:
+        case PlotProperty::COLORMAP_XRANGE_MIN:
+        case PlotProperty::COLORMAP_XRANGE_MAX:
+        case PlotProperty::COLORMAP_YRANGE_MIN:
+        case PlotProperty::COLORMAP_YRANGE_MAX:
+        case PlotProperty::COLORMAP_ZRANGE_MIN:
+        case PlotProperty::COLORMAP_ZRANGE_MAX:
+            if (!PyFloat_Check(pyBorrowed_value) && !PyLong_Check(pyBorrowed_value)) {
+                PyErr_Format(PyExc_TypeError, "%s must be type 'numbers.Real'", c_prop);
+                return NULL;
+            }
+            {
+                auto double_value = PyFloat_AsDouble(pyBorrowed_value);
+                if (PyErr_Occurred())
+                    return NULL;
+                if (prop == PlotProperty::TWODIMEN_POINTS_SIZE && double_value < 0.) {
+                    PyErr_Format(PyExc_ValueError, "%s must be positive", c_prop);
+                    return NULL;
+                }
+                value = double_value;
+            }
+            break;
+        default:
+            PyErr_Format(PyExc_KeyError, "Invalid property '%s'", c_prop);
+            return NULL;
+        }
+
+        return state->iface->setPlotProperty(plotID, prop, value);
+    } catch (const std::out_of_range&)
     {
-        if (!PyUnicode_Check(pyBorrowed_value)) {
-            PyErr_Format(PyExc_TypeError, "%s must be type 'str'", c_prop);
-            return NULL;
-        }
-        auto c_value = PyUnicode_AsUTF8(pyBorrowed_value);
-        if (c_value == NULL) return NULL;
-        value = std::string{c_value};
-    } else if (
-        prop.compare(ORBITAL_PLOT_PROPERTY_MINSIZE_W) == 0 ||
-        prop.compare(ORBITAL_PLOT_PROPERTY_MINSIZE_H) == 0 ||
-        prop.compare(ORBITAL_PLOT_PROPERTY_COLORMAP_DATASIZE_X) == 0 ||
-        prop.compare(ORBITAL_PLOT_PROPERTY_COLORMAP_DATASIZE_Y) == 0)
-    {
-        if (!PyLong_Check(pyBorrowed_value)) {
-            PyErr_Format(PyExc_TypeError, "%s must be type 'int'", c_prop);
-            return NULL;
-        }
-        auto long_value = PyLong_AsLong(pyBorrowed_value);
-        if (long_value <= 0) {
-            if (!PyErr_Occurred())
-                PyErr_Format(PyExc_ValueError, "%s must be greater than zero", c_prop);
-            return NULL;
-        }
-        if (long_value > std::numeric_limits<int>::max()) {
-            PyErr_Format(PyExc_OverflowError, "Value must not exceed %d", std::numeric_limits<int>::max());
-            return NULL;
-        }
-        value = static_cast<int>(long_value);
-    } else if (
-        prop.compare(ORBITAL_PLOT_PROPERTY_TWODIMEN_XRANGE_MIN) == 0 ||
-        prop.compare(ORBITAL_PLOT_PROPERTY_TWODIMEN_XRANGE_MAX) == 0 ||
-        prop.compare(ORBITAL_PLOT_PROPERTY_TWODIMEN_YRANGE_MIN) == 0 ||
-        prop.compare(ORBITAL_PLOT_PROPERTY_TWODIMEN_YRANGE_MAX) == 0 ||
-        prop.compare(ORBITAL_PLOT_PROPERTY_TWODIMEN_POINTS_SIZE) == 0 ||
-        prop.compare(ORBITAL_PLOT_PROPERTY_COLORMAP_XRANGE_MIN) == 0 ||
-        prop.compare(ORBITAL_PLOT_PROPERTY_COLORMAP_XRANGE_MAX) == 0 ||
-        prop.compare(ORBITAL_PLOT_PROPERTY_COLORMAP_YRANGE_MIN) == 0 ||
-        prop.compare(ORBITAL_PLOT_PROPERTY_COLORMAP_YRANGE_MAX) == 0 ||
-        prop.compare(ORBITAL_PLOT_PROPERTY_COLORMAP_ZRANGE_MIN) == 0 ||
-        prop.compare(ORBITAL_PLOT_PROPERTY_COLORMAP_ZRANGE_MAX) == 0)
-    {
-        if (!PyFloat_Check(pyBorrowed_value)) {
-            PyErr_Format(PyExc_TypeError, "%s must be type 'float'", c_prop);
-            return NULL;
-        }
-        auto double_value = PyFloat_AsDouble(pyBorrowed_value);
-        if (PyErr_Occurred())
-            return NULL;
-        if (prop.compare("two_dimen.points.size") == 0 && double_value < 0.) {
-            PyErr_SetString(PyExc_ValueError, "two_dimen.points.size must be positive");
-            return NULL;
-        }
-        value = double_value;
-    } else {
         PyErr_Format(PyExc_KeyError, "Unknown property '%s'", c_prop);
         return NULL;
     }
-
-    return state->iface->setPlotProperty(plotID, prop, value);
 }
 
 
@@ -336,7 +346,13 @@ orbital__get_plot_property(PyObject* module, PyObject* args)
         return NULL;
     }
 
-    return state->iface->getPlotProperty(plotID, std::string{c_prop});
+    try {
+        return state->iface->getPlotProperty(plotID, PlotProperty{c_prop});
+    } catch (const std::out_of_range&)
+    {
+        PyErr_Format(PyExc_KeyError, "Unknown property '%s'", c_prop);
+        return NULL;
+    }
 }
 
 
