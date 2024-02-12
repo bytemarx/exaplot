@@ -38,5 +38,6 @@ PyObject* orbital_msg(PyObject*, PyObject*, PyObject*);
 PyObject* orbital_plot(PyObject*, PyObject* const*, Py_ssize_t);
 PyObject* orbital__set_plot_property(PyObject*, PyObject*);
 PyObject* orbital__get_plot_property(PyObject*, PyObject*);
+PyObject* orbital__show_plot(PyObject*, PyObject*);
 
 }

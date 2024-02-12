@@ -78,6 +78,13 @@ PlotEditor::setPlot(std::size_t plot, const QPlotTab::Cache& attributes)
 
 
 void
+PlotEditor::setSelectedPlot(std::size_t plot, QPlot::Type selected)
+{
+    this->plotTabs.at(plot)->setSelected(selected);
+}
+
+
+void
 PlotEditor::open()
 {
     this->cache.plotTabs = std::vector<QPlotTab::Cache>{};

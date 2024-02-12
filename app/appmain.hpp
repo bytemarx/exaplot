@@ -25,6 +25,7 @@ public:
     PyObject* clear(long dataSet) override;
     PyObject* setPlotProperty(long plotID, const orbital::PlotProperty& property, const orbital::PlotProperty::Value& value) override;
     PyObject* getPlotProperty(long plotID, const orbital::PlotProperty& property) override;
+    PyObject* showPlot(long plotID, std::size_t plotType) override;
 
 Q_SIGNALS:
     void fatalError(int);
@@ -36,6 +37,7 @@ Q_SIGNALS:
     void module_plotVec(long, const std::vector<std::vector<double>>&) const;
     void module_clear(long) const;
     void module_setPlotProperty(std::size_t plotIdx, const orbital::PlotProperty& property, const QPlotTab::Cache& properties) const;
+    void module_showPlot(std::size_t plotIdx, QPlot::Type plotType);
 
 public Q_SLOTS:
     void pythonInit();
@@ -78,6 +80,7 @@ public Q_SLOTS:
     void module_plotVec(long, const std::vector<std::vector<double>>&);
     void module_clear(long);
     void module_setPlotProperty(std::size_t, const orbital::PlotProperty&, const QPlotTab::Cache&);
+    void module_showPlot(std::size_t, QPlot::Type plotType);
 
 private:
     void reset();

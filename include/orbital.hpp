@@ -19,6 +19,7 @@
 #define ORBITAL_PLOT        "plot"                  // orbital.plot(data_set, *data)
 #define ORBITAL_SET_PLOT    "_set_plot_property"    // orbital._set_plot_property(plot_id, prop, value)
 #define ORBITAL_GET_PLOT    "_get_plot_property"    // orbital._get_plot_property(plot_id, prop)
+#define ORBITAL_SHOW_PLOT   "_show_plot"            // orbital._show_plot(plot_id, plot_type)
 
 #define ORBITAL_SCRIPT_INIT "init"  // init()
 #define ORBITAL_SCRIPT_RUN  "run"   // run(**kwargs)
@@ -76,6 +77,7 @@ public:
     virtual PyObject* clear(long dataSet) = 0;
     virtual PyObject* setPlotProperty(long plotID, const PlotProperty& property, const PlotProperty::Value& value) = 0;
     virtual PyObject* getPlotProperty(long plotID, const PlotProperty& property) = 0;
+    virtual PyObject* showPlot(long plotID, std::size_t plotType) = 0;
 };
 
 

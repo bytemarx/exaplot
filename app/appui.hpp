@@ -32,6 +32,7 @@ public:
     void enableRun(bool);
     void enableStop(bool);
     void setPlotProperty(std::size_t, const orbital::PlotProperty&, const QPlotTab::Cache&);
+    void showPlot(std::size_t, QPlot::Type);
 
 public Q_SLOTS:
     void displayError(const QString&, const QString& = "ERROR");

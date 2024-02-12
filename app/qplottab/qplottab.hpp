@@ -261,6 +261,7 @@ public:
     const SubTab2D* tab2D() const;
     SubTabColorMap* tabColorMap();
     const SubTabColorMap* tabColorMap() const;
+    void setSelected(QPlot::Type);
     QPlot::Type selected() const;
     void setTitleToolTip(const QString&);
     void setXAxisToolTip(const QString&);

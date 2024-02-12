@@ -221,6 +221,14 @@ AppUI::setPlotProperty(
 
 
 void
+AppUI::showPlot(std::size_t plotIdx, QPlot::Type plotType)
+{
+    this->plot(plotIdx)->setType(plotType);
+    this->plotEditorDialog->setSelectedPlot(plotIdx, plotType);
+}
+
+
+void
 AppUI::displayError(const QString& msg, const QString& title)
 {
     QMessageBox::critical(this->mainWindow, title, msg);

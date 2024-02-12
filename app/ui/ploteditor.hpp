@@ -24,6 +24,7 @@ public:
     void reset();
     std::vector<PlotInfo> plots() const;
     void setPlot(std::size_t plot, const QPlotTab::Cache& attributes);
+    void setSelectedPlot(std::size_t plot, QPlot::Type selected);
 
 public Q_SLOTS:
     void open() override;

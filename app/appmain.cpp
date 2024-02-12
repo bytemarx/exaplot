@@ -221,7 +221,7 @@ Interface::setPlotProperty(
         return NULL;
     }
     emit this->module_setPlotProperty(plotIdx, property, properties);
-    this->plots.at(plotIdx).attributes = properties;
+    // this->plots.at(plotIdx).attributes = properties;
     Py_RETURN_NONE;
 }
 
@@ -314,6 +314,32 @@ Interface::getPlotProperty(long plotID, const orbital::PlotProperty& property)
     }
 
     return pyOwned_value;
+}
+
+
+PyObject*
+Interface::showPlot(long plotID, std::size_t plotType)
+{
+    if (plotID < 1) {
+        PyErr_SetString(PyExc_IndexError, "Invalid plot ID");
+        return NULL;
+    }
+    auto i = static_cast<std::size_t>(plotID - 1);
+    if (i >= this->plots.size()) {
+        PyErr_SetString(PyExc_IndexError, "Plot ID out of range");
+        return NULL;
+    }
+
+    auto& plot = this->plots.at(i);
+    switch (plotType) {
+    case 0: plot.selected = QPlot::Type::TWODIMEN; break;
+    case 1: plot.selected = QPlot::Type::COLORMAP; break;
+    default:
+        PyErr_Format(PyExc_ValueError, "Invalid plot type: %zu", plotType);
+        return NULL;
+    }
+    emit this->module_showPlot(i, plot.selected);
+    Py_RETURN_NONE;
 }
 
 
@@ -424,6 +450,7 @@ AppMain::AppMain(int& argc, char* argv[])
     QObject::connect(&this->iface, &Interface::module_plotVec, this, &AppMain::module_plotVec, Qt::QueuedConnection);
     QObject::connect(&this->iface, &Interface::module_clear, this, &AppMain::module_clear, Qt::QueuedConnection);
     QObject::connect(&this->iface, &Interface::module_setPlotProperty, this, &AppMain::module_setPlotProperty, Qt::QueuedConnection);
+    QObject::connect(&this->iface, &Interface::module_showPlot, this, &AppMain::module_showPlot, Qt::QueuedConnection);
 }
 
 
@@ -557,6 +584,13 @@ AppMain::module_setPlotProperty(
     const QPlotTab::Cache& properties)
 {
     this->ui.setPlotProperty(plotIdx, property, properties);
+}
+
+
+void
+AppMain::module_showPlot(std::size_t plotIdx, QPlot::Type plotType)
+{
+    this->ui.showPlot(plotIdx, plotType);
 }
 
 

@@ -356,5 +356,28 @@ orbital__get_plot_property(PyObject* module, PyObject* args)
 }
 
 
+PyObject*
+orbital__show_plot(PyObject* module, PyObject* args)
+{
+    orbital_state* state = getModuleState(module);
+
+    long plotID = 0;
+    Py_ssize_t plotType = 0;
+
+    if (!PyArg_ParseTuple(args, "ln", &plotID, &plotType)) {
+        return NULL;
+    }
+    if (plotID <= 0) {
+        PyErr_SetString(PyExc_ValueError, "plot_id must be greater than zero");
+        return NULL;
+    }
+    if (plotType < 0) {
+        PyErr_SetString(PyExc_ValueError, "plot_type must be a positive integer");
+        return NULL;
+    }
+    return state->iface->showPlot(plotID, static_cast<std::size_t>(plotType));
+}
+
+
 }
 }

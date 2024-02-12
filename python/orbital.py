@@ -6,6 +6,7 @@ from _orbital import (
     plot as _plot,
     _set_plot_property,
     _get_plot_property,
+    _show_plot,
 )
 
 
@@ -51,6 +52,13 @@ class _PlotProperties:
             return f"{self.min, self.max}"
 
     class _Tab(_Property):
+        def show(self):
+            plot_type = {
+                "two_dimen": 0,
+                "color_map": 1,
+            }[self._id]
+            _show_plot(self._n, plot_type)
+
         @property
         def x_range(self):
             return _PlotProperties.Range(self._n, f"{self._id}.x_range")

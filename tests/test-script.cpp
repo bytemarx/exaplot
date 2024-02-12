@@ -27,6 +27,7 @@ protected:
         PyObject* clear(long dataSet) override { Py_RETURN_NONE; }
         PyObject* setPlotProperty(long plotID, const PlotProperty& property, const PlotProperty::Value& value) override { Py_RETURN_NONE; }
         PyObject* getPlotProperty(long plotID, const PlotProperty& property) override { Py_RETURN_NONE; }
+        PyObject* showPlot(long plotID, std::size_t plotType) override { Py_RETURN_NONE; }
 
     private:
         ModuleTest* m_tester;

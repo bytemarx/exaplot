@@ -364,6 +364,17 @@ QPlotTab::tabColorMap() const
 }
 
 
+void
+QPlotTab::setSelected(QPlot::Type selected)
+{
+    switch (selected) {
+        default:
+        case QPlot::Type::TWODIMEN: this->m_tabWidget->setCurrentIndex(0); break;
+        case QPlot::Type::COLORMAP: this->m_tabWidget->setCurrentIndex(1); break;
+    }
+}
+
+
 QPlot::Type
 QPlotTab::selected() const
 {

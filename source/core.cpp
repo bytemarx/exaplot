@@ -43,6 +43,12 @@ moduleMethods[] =
         METH_VARARGS,
         NULL
     },
+    {
+        ORBITAL_SHOW_PLOT,
+        (PyCFunction)orbital__show_plot,
+        METH_VARARGS,
+        NULL
+    },
     {NULL, NULL}
 };
 
