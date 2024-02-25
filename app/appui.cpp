@@ -109,9 +109,10 @@ AppUI::setScriptStatus(const QString& message)
 
 
 QPlot*
-AppUI::plot(std::size_t n)
+AppUI::plot(std::size_t plotIdx)
 {
-    return this->mainWindow->plot(n);
+    assert(plotIdx < this->mainWindow->plotCount());
+    return this->mainWindow->plot(plotIdx);
 }
 
 

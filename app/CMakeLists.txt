@@ -53,8 +53,9 @@ set(APP_SOURCES
 	${QPLOTTAB_SOURCES}
 	${QCUSTOMPLOT_SOURCES}
 	${QPLOT_SOURCES}
-	appui.cpp
+	appinterface.cpp
 	appmain.cpp
+	appui.cpp
 	main.cpp
 	resources.qrc
 )

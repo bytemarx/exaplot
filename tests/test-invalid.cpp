@@ -16,11 +16,11 @@ namespace testing {
 class InvalidTest : public ModuleTest
 {
 public:
-    void init(const std::vector<std::string>& params, const std::vector<orbital::GridPoint>& plots) override;
-    void msg(const std::string& message, bool append) override;
-    void plot(long dataSet, const std::vector<double>& data) override;
-    void plotVec(long dataSet, const std::vector<std::vector<double>>& data) override;
-    void clear(long dataSet) override;
+    void init(const std::vector<std::string>&, const std::vector<orbital::GridPoint>&) override;
+    void msg(const std::string&, bool) override;
+    void plot2D(std::size_t, double, double) override;
+    void plot2DVec(std::size_t, const std::vector<double>&, const std::vector<double>&) override;
+    void clear(std::size_t) override;
 protected:
     InvalidTest() { this->scriptsDir = this->scriptsDir / "invalid"; }
 };
@@ -60,23 +60,25 @@ TEST_F(InvalidTest, TestPlot)
 }
 
 void
-InvalidTest::plot(
-    [[maybe_unused]] long dataSet,
-    [[maybe_unused]] const std::vector<double>& data)
+InvalidTest::plot2D(
+    [[maybe_unused]] std::size_t plotID,
+    [[maybe_unused]] double x,
+    [[maybe_unused]] double y)
 {
     ASSERT_FALSE(true);
 }
 
 void
-InvalidTest::plotVec(
-    [[maybe_unused]] long dataSet,
-    [[maybe_unused]] const std::vector<std::vector<double>>& data)
+InvalidTest::plot2DVec(
+    [[maybe_unused]] std::size_t plotID,
+    [[maybe_unused]] const std::vector<double>& x,
+    [[maybe_unused]] const std::vector<double>& y)
 {
     ASSERT_FALSE(true);
 }
 
 void
-InvalidTest::clear([[maybe_unused]] long dataSet)
+InvalidTest::clear([[maybe_unused]] std::size_t plotID)
 {
     ASSERT_FALSE(true);
 }

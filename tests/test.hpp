@@ -23,23 +23,26 @@ class ModuleTest : public ::testing::Test
 public:
     virtual void init(const std::vector<std::string>& params, const std::vector<orbital::GridPoint>& plots) = 0;
     virtual void msg(const std::string& message, bool append) = 0;
-    virtual void plot(long dataSet, const std::vector<double>& data) = 0;
-    virtual void plotVec(long dataSet, const std::vector<std::vector<double>>& data) = 0;
-    virtual void clear(long dataSet) = 0;
+    virtual void plot2D(std::size_t plotID, double x, double y) = 0;
+    virtual void plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y) = 0;
+    virtual void clear(std::size_t plotID) = 0;
 
 private:
     class Interface : public OrbitalInterface
     {
     public:
         Interface(ModuleTest* tester);
-        PyObject* init(const std::vector<std::string>& params, const std::vector<orbital::GridPoint>& plots) override;
-        PyObject* msg(const std::string& message, bool append) override;
-        PyObject* plot(long dataSet, const std::vector<double>& data) override;
-        PyObject* plotVec(long dataSet, const std::vector<std::vector<double>>& data) override;
-        PyObject* clear(long dataSet) override;
-        PyObject* setPlotProperty(long plotID, const PlotProperty& property, const PlotProperty::Value& value) override { Py_RETURN_NONE; }
-        PyObject* getPlotProperty(long plotID, const PlotProperty& property) override { Py_RETURN_NONE; }
-        PyObject* showPlot(long plotID, std::size_t plotType) override { Py_RETURN_NONE; }
+        PyObject* init(const std::vector<std::string>&, const std::vector<orbital::GridPoint>&) override;
+        PyObject* msg(const std::string&, bool) override;
+        PyObject* plot2D(std::size_t, double, double) override;
+        PyObject* plot2DVec(std::size_t, const std::vector<double>&, const std::vector<double>&) override;
+        PyObject* plotCM(std::size_t, int, int, double) override { Py_RETURN_NONE; }
+        PyObject* plotCMVec(std::size_t, int, const std::vector<double>&) override { Py_RETURN_NONE; }
+        PyObject* clear(std::size_t) override;
+        PyObject* setPlotProperty(std::size_t, const PlotProperty&, const PlotProperty::Value&) override { Py_RETURN_NONE; }
+        PyObject* getPlotProperty(std::size_t, const PlotProperty&) override { Py_RETURN_NONE; }
+        PyObject* showPlot(std::size_t, std::size_t) override { Py_RETURN_NONE; }
+        Py_ssize_t currentPlotType(std::size_t) override { return 0; }
 
     private:
         ModuleTest* m_tester;

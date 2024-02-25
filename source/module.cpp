@@ -1,5 +1,6 @@
 #include "internal.hpp"
 
+#include <functional>
 #include <limits>
 
 
@@ -44,8 +45,7 @@ orbital_init(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject
 
     for (decltype(nargs) i = 0; i < nargs; ++i) {
         if (!PyUnicode_Check(args[i])) {
-            PyErr_Format(PyExc_TypeError,
-                ORBITAL_INIT "() parameter #%zd must be type 'string'", i + 1);
+            PyErr_Format(PyExc_TypeError, ORBITAL_INIT "() argument #%zd must be type 'str'", i + 1);
             return NULL;
         }
         params.push_back(PyUnicode_AsUTF8(args[i]));
@@ -79,22 +79,22 @@ orbital_init(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject
             } else if (PyList_Check(pyBorrowed_plots)) {
                 auto n_plots = PyList_GET_SIZE(pyBorrowed_plots);
                 if (n_plots == 0) {
-                    PyErr_SetString(PyExc_ValueError,
-                        ORBITAL_INIT "() plots list is missing entries");
+                    PyErr_SetString(PyExc_ValueError, ORBITAL_INIT "() plots list is missing entries");
                     return NULL;
                 }
-                if (n_plots > 64)
-                    n_plots = 64;
+                if (n_plots > 64) {
+                    PyErr_SetString(PyExc_ValueError, ORBITAL_INIT "() that's too many plots "
+                                    "why do you need this many plots, what are you doing with all these plots??");
+                    return NULL;
+                }
                 for (decltype(n_plots) i_plot = 0; i_plot < n_plots; ++i_plot) {
                     PyObject* pyBorrowed_plot = PyList_GET_ITEM(pyBorrowed_plots, i_plot);
                     if (!PyTuple_Check(pyBorrowed_plot)) {
-                        PyErr_Format(PyExc_TypeError,
-                            ORBITAL_INIT "() plot #%zd must be type 'tuple'", i_plot + 1);
+                        PyErr_Format(PyExc_TypeError, ORBITAL_INIT "() plot #%zd must be type 'tuple'", i_plot + 1);
                         return NULL;
                     }
                     if (PyTuple_GET_SIZE(pyBorrowed_plot) != 4) {
-                        PyErr_Format(PyExc_TypeError,
-                            ORBITAL_INIT "() plot #%zd must be a 4-tuple", i_plot + 1);
+                        PyErr_Format(PyExc_TypeError, ORBITAL_INIT "() plot #%zd must be a 4-tuple", i_plot + 1);
                         return NULL;
                     }
                     long p[4];
@@ -163,64 +163,148 @@ orbital_msg(PyObject* module, PyObject* args, PyObject* kwargs)
 }
 
 
+static PyObject*
+plot2D(orbital_state* state, std::size_t plotID, PyObject* const* args, Py_ssize_t nargs)
+{
+    if (nargs != 2) {
+        PyErr_Format(PyExc_TypeError, ORBITAL_PLOT "() takes 2 positional arguments but %zd were given", nargs);
+        return NULL;
+    }
+    auto x = PyFloat_AsDouble(args[0]);
+    if (PyErr_Occurred()) return NULL;
+    auto y = PyFloat_AsDouble(args[1]);
+    if (PyErr_Occurred()) return NULL;
+    return state->iface->plot2D(plotID, x, y);
+}
+
+
+static PyObject*
+plot2DVec(orbital_state* state, std::size_t plotID, PyObject* const* args, Py_ssize_t nargs)
+{
+    if (nargs != 2) {
+        PyErr_Format(PyExc_TypeError, ORBITAL_PLOT "() takes 2 positional arguments but %zd were given", nargs);
+        return NULL;
+    }
+
+    auto pyBorrowed_xData = args[0];
+    auto pyBorrowed_yData = args[1];
+
+    if (!PyList_Check(pyBorrowed_yData)) {
+        PyErr_SetString(PyExc_TypeError, ORBITAL_PLOT "() 'y' argument must be type 'list'");
+        return NULL;
+    }
+
+    auto n_xData = PyList_GET_SIZE(pyBorrowed_xData);
+    std::vector<double> xData(n_xData);
+    for (decltype(n_xData) i = 0; i < n_xData; ++i) {
+        auto x = PyFloat_AsDouble(PyList_GET_ITEM(pyBorrowed_xData, i));
+        if (PyErr_Occurred()) return NULL;
+        xData[i] = x;
+    }
+
+    auto n_yData = PyList_GET_SIZE(pyBorrowed_yData);
+    std::vector<double> yData(n_yData);
+    for (decltype(n_yData) i = 0; i < n_yData; ++i) {
+        auto y = PyFloat_AsDouble(PyList_GET_ITEM(pyBorrowed_yData, i));
+        if (PyErr_Occurred()) return NULL;
+        yData[i] = y;
+    }
+
+    return state->iface->plot2DVec(plotID, xData, yData);
+}
+
+
+static PyObject*
+plotCM(orbital_state* state, std::size_t plotID, PyObject* const* args, Py_ssize_t nargs)
+{
+    if (nargs != 3) {
+        PyErr_Format(PyExc_TypeError, ORBITAL_PLOT "() takes 3 positional arguments but %zd were given", nargs);
+        return NULL;
+    }
+    auto x = PyLong_AsLong(args[0]);
+    if (PyErr_Occurred()) return NULL;
+    auto y = PyLong_AsLong(args[1]);
+    if (PyErr_Occurred()) return NULL;
+    auto value = PyFloat_AsDouble(args[2]);
+    if (PyErr_Occurred()) return NULL;
+    return state->iface->plotCM(plotID, x, y, value);
+}
+
+
+static PyObject*
+plotCMVec(orbital_state* state, std::size_t plotID, PyObject* const* args, Py_ssize_t nargs)
+{
+    if (nargs != 2) {
+        PyErr_Format(PyExc_TypeError, ORBITAL_PLOT "() takes 2 positional arguments but %zd were given", nargs);
+        return NULL;
+    }
+
+    auto y = PyLong_AsLong(args[0]);
+    if (PyErr_Occurred()) return NULL;
+
+    // orbital_plot verifies the second argument is a list
+    auto pyBorrowed_values = args[1];
+    auto n_values = PyList_GET_SIZE(pyBorrowed_values);
+    std::vector<double> values(n_values);
+    for (decltype(n_values) i = 0; i < n_values; ++i) {
+        auto value = PyFloat_AsDouble(PyList_GET_ITEM(pyBorrowed_values, i));
+        if (PyErr_Occurred()) return NULL;
+        values[i] = value;
+    }
+
+    return state->iface->plotCMVec(plotID, y, values);
+}
+
+
 PyObject*
 orbital_plot(PyObject* module, PyObject* const* args, Py_ssize_t nargs)
 {
-    orbital_state* state = getModuleState(module);
+    assert(nargs >= 0);
+    auto state = getModuleState(module);
 
     if (nargs == 0) {
-        PyErr_SetString(PyExc_TypeError, ORBITAL_PLOT "() missing 1 required positional argument: 'data_set'");
+        PyErr_SetString(PyExc_TypeError, ORBITAL_PLOT "() missing 1 required positional argument: 'plot_id'");
         return NULL;
     }
 
-    PyObject* pyBorrowed_dataSet = args[0];
-    if (!PyLong_Check(pyBorrowed_dataSet)) {
-        PyErr_SetString(PyExc_TypeError, ORBITAL_PLOT "() data_set parameter must be type 'int'");
+    auto pyBorrowed_plotID = args[0];
+    if (!PyLong_Check(pyBorrowed_plotID)) {
+        PyErr_SetString(PyExc_TypeError, ORBITAL_PLOT "() 'plot_id' argument must be type 'int'");
         return NULL;
     }
-    long dataSet = PyLong_AsLong(pyBorrowed_dataSet);
-    if (dataSet < 0) {
-        if (!PyErr_Occurred())
-            PyErr_SetString(PyExc_ValueError, "data_set parameter must be positive");
+    auto plotID = PyLong_AsSize_t(pyBorrowed_plotID);
+    if (plotID == (size_t)-1 && PyErr_Occurred()) {
         return NULL;
     }
 
     if (nargs == 1) {
-        return state->iface->clear(dataSet);
+        return state->iface->clear(plotID);
+    }
+    nargs -= 1;
+
+    // TODO: The zeroth data set (AKA the "hidden plot")
+    if (plotID == 0) {
+        Py_RETURN_NONE;
     }
 
-    // detect overload
-    if (PyList_Check(args[1])) {
-        std::vector<std::vector<double>> vectorData(nargs - 1);
-        for (decltype(nargs) i = 1; i < nargs; ++i) {
-            PyObject* pyBorrowed_vectorData = args[i];
-            if (!PyList_Check(pyBorrowed_vectorData)) {
-                PyErr_Format(PyExc_TypeError, ORBITAL_PLOT "() data argument #%zd must be type 'list'", i);
-                return NULL;
-            }
-            auto n_data = PyList_GET_SIZE(pyBorrowed_vectorData);
-            std::vector<double> data(n_data);
-            for (decltype(n_data) i_data = 0; i_data < n_data; ++i_data) {
-                double dataVal = PyFloat_AsDouble(PyList_GET_ITEM(pyBorrowed_vectorData, i_data));
-                if (PyErr_Occurred()) {
-                    return NULL;
-                }
-                data[i_data] = dataVal;
-            }
-            vectorData[i - 1] = std::move(data);
+    std::function<PyObject*(orbital_state*, long, PyObject* const*, Py_ssize_t)> plotFn;
+    switch (state->iface->currentPlotType(plotID)) {
+    case 0:
+        plotFn = PyList_Check(args[1]) ? plot2DVec : plot2D;
+        break;
+    case 1:
+        if (nargs < 2) {
+            PyErr_SetString(PyExc_TypeError, ORBITAL_PLOT "() missing required positional argument: 'col'");
+            return NULL;
         }
-        return state->iface->plotVec(dataSet, vectorData);
-    } else {
-        std::vector<double> data(nargs - 1);
-        for (decltype(nargs) i = 1; i < nargs; ++i) {
-            double dataVal = PyFloat_AsDouble(args[i]);
-            if (PyErr_Occurred()) {
-                return NULL;
-            }
-            data[i - 1] = dataVal;
-        }
-        return state->iface->plot(dataSet, data);
+        plotFn = PyList_Check(args[2]) ? plotCMVec : plotCM;
+        break;
+    default:
+        PyErr_Format(PyExc_SystemError, "invalid plot type: %zd", state->iface->currentPlotType(plotID));
+    case -1:
+        return NULL;
     }
+    return plotFn(state, plotID, &args[1], nargs);
 }
 
 

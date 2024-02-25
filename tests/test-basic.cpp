@@ -18,9 +18,9 @@ class BasicTest : public ModuleTest
 public:
     void init(const std::vector<std::string>& params, const std::vector<orbital::GridPoint>& plots) override;
     void msg(const std::string& message, bool append) override;
-    void plot(long dataSet, const std::vector<double>& data) override;
-    void plotVec(long dataSet, const std::vector<std::vector<double>>& data) override;
-    void clear(long dataSet) override;
+    void plot2D(std::size_t plotID, double x, double y) override;
+    void plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y) override;
+    void clear(std::size_t plotID) override;
 protected:
     BasicTest() { this->scriptsDir = this->scriptsDir / "basic"; }
 };
@@ -64,7 +64,7 @@ BasicTest::msg(const std::string& message, bool append)
     ASSERT_FALSE(append);
 }
 
-// orbital.plot(1, 1, 2, 3, 4.4, 5.5)
+// orbital.plot(1, 1, 2.2)
 
 TEST_F(BasicTest, TestPlot)
 {
@@ -72,11 +72,11 @@ TEST_F(BasicTest, TestPlot)
 }
 
 void
-BasicTest::plot(long dataSet, const std::vector<double>& data)
+BasicTest::plot2D(std::size_t plotID, double x, double y)
 {
-    ASSERT_EQ(dataSet, 1);
-    std::vector<double> expected{1, 2, 3, 4.4, 5.5};
-    ASSERT_EQ(data, expected);
+    ASSERT_EQ(plotID, 1);
+    ASSERT_EQ(x, 1);
+    ASSERT_EQ(y, 2.2);
 }
 
 // orbital.plotVec(2, [0, 1, 2, 3], [1, 2, 3.3, 4.4])
@@ -87,11 +87,13 @@ TEST_F(BasicTest, TestPlotVec)
 }
 
 void
-BasicTest::plotVec(long dataSet, const std::vector<std::vector<double>>& data)
+BasicTest::plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y)
 {
-    ASSERT_EQ(dataSet, 2);
-    std::vector<std::vector<double>> expected{{0, 1, 2, 3}, {1, 2, 3.3, 4.4}};
-    ASSERT_EQ(data, expected);
+    ASSERT_EQ(plotID, 2);
+    std::vector<double> expected_x{0, 1, 2, 3};
+    ASSERT_EQ(x, expected_x);
+    std::vector<double> expected_y{1, 2, 3.3, 4.4};
+    ASSERT_EQ(y, expected_y);
 }
 
 // orbital.plot(3)
@@ -102,9 +104,9 @@ TEST_F(BasicTest, TestClear)
 }
 
 void
-BasicTest::clear(long dataSet)
+BasicTest::clear(std::size_t plotID)
 {
-    ASSERT_EQ(dataSet, 3);
+    ASSERT_EQ(plotID, 3);
 }
 
 

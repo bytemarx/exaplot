@@ -72,12 +72,15 @@ public:
     virtual ~OrbitalInterface();
     virtual PyObject* init(const std::vector<std::string>& params, const std::vector<GridPoint>& plots) = 0;
     virtual PyObject* msg(const std::string& message, bool append) = 0;
-    virtual PyObject* plot(long dataSet, const std::vector<double>& data) = 0;
-    virtual PyObject* plotVec(long dataSet, const std::vector<std::vector<double>>& data) = 0;
-    virtual PyObject* clear(long dataSet) = 0;
-    virtual PyObject* setPlotProperty(long plotID, const PlotProperty& property, const PlotProperty::Value& value) = 0;
-    virtual PyObject* getPlotProperty(long plotID, const PlotProperty& property) = 0;
-    virtual PyObject* showPlot(long plotID, std::size_t plotType) = 0;
+    virtual PyObject* plot2D(std::size_t plotID, double x, double y) = 0;
+    virtual PyObject* plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y) = 0;
+    virtual PyObject* plotCM(std::size_t plotID, int x, int y, double value) = 0;
+    virtual PyObject* plotCMVec(std::size_t plotID, int y, const std::vector<double>& values) = 0;
+    virtual PyObject* clear(std::size_t plotID) = 0;
+    virtual PyObject* setPlotProperty(std::size_t plotID, const PlotProperty& property, const PlotProperty::Value& value) = 0;
+    virtual PyObject* getPlotProperty(std::size_t plotID, const PlotProperty& property) = 0;
+    virtual PyObject* showPlot(std::size_t plotID, std::size_t plotType) = 0;
+    virtual Py_ssize_t currentPlotType(std::size_t plotID) = 0;
 };
 
 

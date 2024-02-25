@@ -4,22 +4,22 @@ import orbital
 try:
     orbital.init(None)
 except TypeError as e:
-    assert(str(e) == "init() parameter #1 must be type 'string'")
+    assert(str(e) == "init() argument #1 must be type 'str'")
 
 try:
     orbital.init(1)
 except TypeError as e:
-    assert(str(e) == "init() parameter #1 must be type 'string'")
+    assert(str(e) == "init() argument #1 must be type 'str'")
 
 try:
     orbital.init(1, 2, 3)
 except TypeError as e:
-    assert(str(e) == "init() parameter #1 must be type 'string'")
+    assert(str(e) == "init() argument #1 must be type 'str'")
 
 try:
     orbital.init("a", 1)
 except TypeError as e:
-    assert(str(e) == "init() parameter #2 must be type 'string'")
+    assert(str(e) == "init() argument #2 must be type 'str'")
 
 try:
     orbital.init(plots=None)

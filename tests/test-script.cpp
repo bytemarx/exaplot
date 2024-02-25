@@ -20,14 +20,17 @@ protected:
     class Interface : public OrbitalInterface
     {
     public:
-        PyObject* init(const std::vector<std::string>& params, const std::vector<orbital::GridPoint>& plots) override { Py_RETURN_NONE; }
-        PyObject* msg(const std::string& message, bool append) override { Py_RETURN_NONE; }
-        PyObject* plot(long dataSet, const std::vector<double>& data) override { Py_RETURN_NONE; }
-        PyObject* plotVec(long dataSet, const std::vector<std::vector<double>>& data) override { Py_RETURN_NONE; }
-        PyObject* clear(long dataSet) override { Py_RETURN_NONE; }
-        PyObject* setPlotProperty(long plotID, const PlotProperty& property, const PlotProperty::Value& value) override { Py_RETURN_NONE; }
-        PyObject* getPlotProperty(long plotID, const PlotProperty& property) override { Py_RETURN_NONE; }
-        PyObject* showPlot(long plotID, std::size_t plotType) override { Py_RETURN_NONE; }
+        PyObject* init(const std::vector<std::string>&, const std::vector<orbital::GridPoint>&) override { Py_RETURN_NONE; }
+        PyObject* msg(const std::string&, bool) override { Py_RETURN_NONE; }
+        PyObject* plot2D(std::size_t, double, double) override { Py_RETURN_NONE; }
+        PyObject* plot2DVec(std::size_t, const std::vector<double>&, const std::vector<double>&) override { Py_RETURN_NONE; }
+        PyObject* plotCM(std::size_t, int, int, double) override { Py_RETURN_NONE; }
+        PyObject* plotCMVec(std::size_t, int, const std::vector<double>&) override { Py_RETURN_NONE; }
+        PyObject* clear(std::size_t) override { Py_RETURN_NONE; }
+        PyObject* setPlotProperty(std::size_t, const PlotProperty&, const PlotProperty::Value& value) override { Py_RETURN_NONE; }
+        PyObject* getPlotProperty(std::size_t, const PlotProperty&) override { Py_RETURN_NONE; }
+        PyObject* showPlot(std::size_t, std::size_t) override { Py_RETURN_NONE; }
+        Py_ssize_t currentPlotType(std::size_t) override { return 0; }
 
     private:
         ModuleTest* m_tester;

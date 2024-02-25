@@ -109,7 +109,7 @@ class _PlotProperties:
     class ColorMap(_Tab):
         @property
         def z_range(self):
-            return _PlotProperties.Range(self._n, "{self._id}.z_range")
+            return _PlotProperties.Range(self._n, f"{self._id}.z_range")
 
         @z_range.setter
         def z_range(self, value: tuple[int, int]):
