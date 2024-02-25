@@ -123,19 +123,19 @@ PlotEditor::applyArrangement()
 void
 PlotEditor::showArrangement()
 {
-	QString arrangementStr('[');
+    QString arrangementStr('[');
     for (const auto& button : this->ui.buttonGrid->arrangement()) {
-		arrangementStr.append('[');
-		arrangementStr.append(QString::number(button.x));
-		arrangementStr.append(',');
-		arrangementStr.append(QString::number(button.dx));
-		arrangementStr.append(',');
-		arrangementStr.append(QString::number(button.y));
-		arrangementStr.append(',');
-		arrangementStr.append(QString::number(button.dy));
-		arrangementStr.append("],");
-	}
-	arrangementStr.back() = QChar(']');
+        arrangementStr.append('[');
+        arrangementStr.append(QString::number(button.x));
+        arrangementStr.append(',');
+        arrangementStr.append(QString::number(button.dx));
+        arrangementStr.append(',');
+        arrangementStr.append(QString::number(button.y));
+        arrangementStr.append(',');
+        arrangementStr.append(QString::number(button.dy));
+        arrangementStr.append("],");
+    }
+    arrangementStr.back() = QChar(']');
 
     QMessageBox messageBox;
     messageBox.setText(arrangementStr);

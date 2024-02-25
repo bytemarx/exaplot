@@ -54,12 +54,12 @@ public:
     void queue();
     void redraw();
     void clear();
-	void setTitle(const QString&);
-	QString title() const;
-	void setLabelX(const QString&);
-	QString labelX() const;
-	void setLabelY(const QString&);
-	QString labelY() const;
+    void setTitle(const QString&);
+    QString title() const;
+    void setLabelX(const QString&);
+    QString labelX() const;
+    void setLabelY(const QString&);
+    QString labelY() const;
     void setType(Plot::Type plot);
     Plot::Type type() const;
     Plot2D* plot2D();

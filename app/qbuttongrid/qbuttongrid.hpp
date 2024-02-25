@@ -13,13 +13,13 @@ template<typename T> class Matrix;
 
 class QButtonGrid : public QWidget
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
     using GridPoint = orbital::GridPoint;
-	explicit QButtonGrid(QWidget* parent = Q_NULLPTR);
+    explicit QButtonGrid(QWidget* parent = Q_NULLPTR);
     QButtonGrid(const QButtonGrid&) = delete;
-	~QButtonGrid();
+    ~QButtonGrid();
 
     QList<GridPoint> arrangement() const;
     bool setArrangement(const QList<GridPoint>&);
