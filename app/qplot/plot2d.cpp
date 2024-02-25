@@ -39,6 +39,14 @@ Plot2D::clear()
 
 
 void
+Plot2D::replot()
+{
+    this->m_plot->replot(QCustomPlot::rpQueuedReplot);
+    this->m_plot->rescaleAxes();
+}
+
+
+void
 Plot2D::setRangeX(const QCPRange& range)
 {
     this->m_plot->xAxis->setRange(range);

@@ -16,6 +16,7 @@ PlotColorMap::PlotColorMap(
     : Plot{title, labelX, labelY}
     , m_map{new QCPColorMap{m_plot->xAxis, m_plot->yAxis}}
     , m_colorScale{new QCPColorScale{m_plot}}
+    , m_rescaleData{false}
 {
     QCPMarginGroup* marginGroup = new QCPMarginGroup{this->m_plot};
     this->m_plot->axisRect()->setMarginGroup(QCP::msBottom | QCP::msTop, marginGroup);
@@ -32,6 +33,8 @@ PlotColorMap::PlotColorMap(
     this->m_colorScale->axis()->axisRect()->setRangeZoom(
         Qt::Orientation::Horizontal | Qt::Orientation::Vertical);
     this->m_colorScale->setMarginGroup(QCP::msBottom | QCP::msTop, marginGroup);
+    this->m_map->setColorScale(this->m_colorScale);
+    this->m_plot->plotLayout()->addElement(1, 1, this->m_colorScale);
 }
 
 
@@ -45,7 +48,17 @@ PlotColorMap::type() const
 void
 PlotColorMap::clear()
 {
-    this->m_map->data()->clear();
+    this->m_map->data()->fill(this->m_colorScale->dataRange().lower);
+}
+
+
+void
+PlotColorMap::replot()
+{
+    this->m_plot->replot(QCustomPlot::rpQueuedReplot);
+    if (this->m_rescaleData)
+        this->m_map->rescaleDataRange();
+    this->m_plot->rescaleAxes();
 }
 
 
@@ -130,4 +143,11 @@ void
 PlotColorMap::setCell(int x, int y, double z)
 {
     this->m_map->data()->setCell(x, y, z);
+}
+
+
+void
+PlotColorMap::setRescaleData(bool rescaleData)
+{
+    this->m_rescaleData = rescaleData;
 }

@@ -18,6 +18,7 @@ public:
 	);
 	Type type() const override;
 	void clear() override;
+	void replot() override;
 	void setRangeX(const QCPRange&);
 	const QCPRange rangeX() const;
 	void setRangeY(const QCPRange&);

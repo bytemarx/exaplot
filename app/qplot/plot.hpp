@@ -19,6 +19,7 @@ public:
 	virtual ~Plot();
 	virtual Type type() const = 0;
 	virtual void clear() = 0;
+	virtual void replot() = 0;
 	QCustomPlot* widget();
 
 private Q_SLOTS:

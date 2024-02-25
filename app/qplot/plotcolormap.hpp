@@ -22,6 +22,7 @@ public:
     );
     Type type() const override;
     void clear() override;
+    void replot() override;
 	void setRangeX(const QCPRange&);
 	QCPRange rangeX() const;
 	void setRangeY(const QCPRange&);
@@ -34,8 +35,10 @@ public:
     void setColorGradient(const QCPColorGradient&);
     QCPColorGradient colorGradient() const;
     void setCell(int, int, double);
+    void setRescaleData(bool);
 
 private:
     QCPColorMap* m_map;
     QCPColorScale* m_colorScale;
+    bool m_rescaleData;
 };

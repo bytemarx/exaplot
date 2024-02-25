@@ -33,8 +33,7 @@ void
 QPlot::redraw()
 {
     if (this->m_queued) {
-        this->plot()->widget()->replot(QCustomPlot::rpQueuedReplot);
-        this->plot()->widget()->rescaleAxes();
+        this->plot()->replot();
         this->m_queued = false;
     }
 }
