@@ -121,3 +121,10 @@ Plot2D::addData(double x, double y)
 {
     this->m_graph->addData(x, y);
 }
+
+
+void
+Plot2D::addData(const QVector<double>& x, const QVector<double>& y)
+{
+    this->m_graph->addData(x, y);
+}

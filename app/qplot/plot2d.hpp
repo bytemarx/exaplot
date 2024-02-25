@@ -1,5 +1,7 @@
 #pragma once
 
+#include <QVector>
+
 #include "plot.hpp"
 
 
@@ -30,6 +32,7 @@ public:
 	void setPen(const QPen&);
 	QPen pen() const;
 	void addData(double x, double y);
+	void addData(const QVector<double>& x, const QVector<double>& y);
 
 private:
 	QCPGraph* m_graph;
