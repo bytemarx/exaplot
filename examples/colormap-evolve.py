@@ -17,18 +17,12 @@ def run(**kwargs):
     ring_density = float(kwargs["Ring Density"])
 
     def f(x, y, phi):
-        r = math.sqrt(x**2 + y**2)
-        if r > 14.25:
-            return 0
-        r = ring_density * r + 0.01
+        r = ring_density * math.sqrt(x**2 + y**2) + 0.01
         return 4 * x * (math.cos(r + 2 + phi) / (r - math.sin(r + 2 + phi) / r))
-    
-    def plot_frame(phi):
-        for row in range(100):
-            y = 0.1 * row - 5.0
-            values = [f(0.1 * col - 5.0, y, phi) for col in range(100)]
-            plot(row, values)
-    
-    for t in range(200):
-        plot_frame(-0.1 * t)
-        time.sleep(0.05)
+
+    for t in range(500):
+        plot([
+            [f(0.1 * col - 5.0, 0.1 * row - 5.0, -0.1 * t) for col in range(100)]
+            for row in range(100)
+        ])
+        time.sleep(0.02)

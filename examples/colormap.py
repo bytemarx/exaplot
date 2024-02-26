@@ -16,10 +16,7 @@ def run(**kwargs):
     ring_density = float(kwargs["Ring Density"])
 
     def f(x, y):
-        r = math.sqrt(x**2 + y**2)
-        if r > 14.25:
-            return 0
-        r = ring_density * r + 0.01
+        r = ring_density * math.sqrt(x**2 + y**2) + 0.01
         return 4 * x * (math.cos(r + 2) / (r - math.sin(r + 2) / r))
 
     for row in range(100):
