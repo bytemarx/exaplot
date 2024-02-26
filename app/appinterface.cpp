@@ -71,10 +71,31 @@ Interface::plotCMVec(std::size_t plotID, int row, const std::vector<double>& val
         return NULL;
     }
     if (values.size() > static_cast<std::size_t>(plot.attributes.colorMap.dataSize.x)) {
-        PyErr_SetString(PyExc_ValueError, ORBITAL_PLOT "() 'values' argument has too many values");
+        PyErr_SetString(PyExc_ValueError, ORBITAL_PLOT "() 'values' argument contains too many values");
         return NULL;
     }
     emit this->module_plotCMVec(plotID - 1, row, values);
+    Py_RETURN_NONE;
+}
+
+
+PyObject*
+Interface::plotCMFrame(std::size_t plotID, const std::vector<std::vector<double>>& frame)
+{
+    auto plot = this->plots.at(plotID - 1);
+    if (frame.size() > static_cast<std::size_t>(plot.attributes.colorMap.dataSize.y)) {
+        PyErr_SetString(PyExc_ValueError, ORBITAL_PLOT "() 'frame' argument contains too many rows");
+        return NULL;
+    }
+    std::size_t i = 0;
+    for (const auto& row : frame) {
+        if (row.size() > static_cast<std::size_t>(plot.attributes.colorMap.dataSize.x)) {
+            PyErr_Format(PyExc_ValueError, ORBITAL_PLOT "() frame[%zd] contains too many values", i);
+            return NULL;
+        }
+        i += 1;
+    }
+    emit this->module_plotCMFrame(plotID - 1, frame);
     Py_RETURN_NONE;
 }
 

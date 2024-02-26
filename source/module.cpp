@@ -256,6 +256,48 @@ plotCMVec(orbital_state* state, std::size_t plotID, PyObject* const* args, Py_ss
 }
 
 
+static PyObject*
+plotCMFrame(orbital_state* state, std::size_t plotID, PyObject* const* args, Py_ssize_t nargs)
+{
+    auto pyBorrowed_frame = args[0];
+    if (!PyList_Check(pyBorrowed_frame)) {
+        PyErr_SetString(PyExc_TypeError, ORBITAL_PLOT "() 'frame' argument must be type 'list[list[Real]]'");
+        return NULL;
+    }
+
+    auto n_rows = PyList_GET_SIZE(pyBorrowed_frame);
+    if (n_rows == 0) {
+        Py_RETURN_NONE;
+    }
+    if (!PyList_Check(PyList_GET_ITEM(pyBorrowed_frame, 0))) {
+        PyErr_SetString(PyExc_TypeError, ORBITAL_PLOT "() 'frame' argument must be type 'list[list[Real]]'");
+        return NULL;
+    }
+    auto n_cols = PyList_GET_SIZE(PyList_GET_ITEM(pyBorrowed_frame, 0));
+    std::vector<std::vector<double>> frame(n_rows, std::vector<double>(n_cols));
+
+    for (decltype(n_rows) i = 0; i < n_rows; ++i) {
+        auto pyBorrowed_row = PyList_GET_ITEM(pyBorrowed_frame, i);
+        if (!PyList_Check(pyBorrowed_row)) {
+            PyErr_SetString(PyExc_TypeError, ORBITAL_PLOT "() 'frame' argument contains non-list type object (frame[%zd])");
+            return NULL;
+        }
+        if (PyList_GET_SIZE(pyBorrowed_row) != n_cols) {
+            // TODO: consider using std::move to allow vectors of differing lengths without sacrificing performance
+            PyErr_SetString(PyExc_ValueError, ORBITAL_PLOT "() 'frame' argument must contain lists of equal size (frame[%zd])");
+            return NULL;
+        }
+        for (decltype(n_cols) j = 0; j < n_cols; ++j) {
+            auto value = PyFloat_AsDouble(PyList_GET_ITEM(pyBorrowed_row, j));
+            if (PyErr_Occurred()) return NULL;
+            frame[i][j] = value;
+        }
+    }
+
+    return state->iface->plotCMFrame(plotID, frame);
+}
+
+
 PyObject*
 orbital_plot(PyObject* module, PyObject* const* args, Py_ssize_t nargs)
 {
@@ -289,15 +331,11 @@ orbital_plot(PyObject* module, PyObject* const* args, Py_ssize_t nargs)
 
     std::function<PyObject*(orbital_state*, long, PyObject* const*, Py_ssize_t)> plotFn;
     switch (state->iface->currentPlotType(plotID)) {
-    case 0:
+    case 0: // 2D
         plotFn = PyList_Check(args[1]) ? plot2DVec : plot2D;
         break;
-    case 1:
-        if (nargs < 2) {
-            PyErr_SetString(PyExc_TypeError, ORBITAL_PLOT "() missing required positional argument: 'col'");
-            return NULL;
-        }
-        plotFn = PyList_Check(args[2]) ? plotCMVec : plotCM;
+    case 1: // color map
+        plotFn = nargs == 1 ? plotCMFrame : PyList_Check(args[2]) ? plotCMVec : plotCM;
         break;
     default:
         PyErr_Format(PyExc_SystemError, "invalid plot type: %zd", state->iface->currentPlotType(plotID));

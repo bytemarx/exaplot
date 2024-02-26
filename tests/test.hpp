@@ -38,6 +38,7 @@ private:
         PyObject* plot2DVec(std::size_t, const std::vector<double>&, const std::vector<double>&) override;
         PyObject* plotCM(std::size_t, int, int, double) override { Py_RETURN_NONE; }
         PyObject* plotCMVec(std::size_t, int, const std::vector<double>&) override { Py_RETURN_NONE; }
+        PyObject* plotCMFrame(std::size_t, const std::vector<std::vector<double>>&) override { Py_RETURN_NONE; }
         PyObject* clear(std::size_t) override;
         PyObject* setPlotProperty(std::size_t, const PlotProperty&, const PlotProperty::Value&) override { Py_RETURN_NONE; }
         PyObject* getPlotProperty(std::size_t, const PlotProperty&) override { Py_RETURN_NONE; }

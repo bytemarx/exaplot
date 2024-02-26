@@ -24,6 +24,7 @@ public:
     PyObject* plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y) override;
     PyObject* plotCM(std::size_t plotID, int col, int row, double value) override;
     PyObject* plotCMVec(std::size_t plotID, int row, const std::vector<double>& values) override;
+    PyObject* plotCMFrame(std::size_t plotID, const std::vector<std::vector<double>>& frame) override;
     PyObject* clear(std::size_t plotID) override;
     PyObject* setPlotProperty(std::size_t plotID, const orbital::PlotProperty& property, const orbital::PlotProperty::Value& value) override;
     PyObject* getPlotProperty(std::size_t plotID, const orbital::PlotProperty& property) override;
@@ -40,6 +41,7 @@ Q_SIGNALS:
     void module_plot2DVec(std::size_t plotIdx, const std::vector<double>&, const std::vector<double>&) const;
     void module_plotCM(std::size_t plotIdx, int, int, double) const;
     void module_plotCMVec(std::size_t plotIdx, int, const std::vector<double>&) const;
+    void module_plotCMFrame(std::size_t plotIdx, const std::vector<std::vector<double>>&) const;
     void module_clear(std::size_t plotIdx) const;
     void module_setPlotProperty(std::size_t plotIdx, const orbital::PlotProperty&, const QPlotTab::Cache&) const;
     void module_showPlot(std::size_t plotIdx, QPlot::Type);

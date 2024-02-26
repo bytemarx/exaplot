@@ -33,6 +33,7 @@ AppMain::AppMain(int& argc, char* argv[])
     QObject::connect(&this->iface, &Interface::module_plot2DVec, this, &AppMain::module_plot2DVec, Qt::QueuedConnection);
     QObject::connect(&this->iface, &Interface::module_plotCM, this, &AppMain::module_plotCM, Qt::QueuedConnection);
     QObject::connect(&this->iface, &Interface::module_plotCMVec, this, &AppMain::module_plotCMVec, Qt::QueuedConnection);
+    QObject::connect(&this->iface, &Interface::module_plotCMFrame, this, &AppMain::module_plotCMFrame, Qt::QueuedConnection);
     QObject::connect(&this->iface, &Interface::module_clear, this, &AppMain::module_clear, Qt::QueuedConnection);
     QObject::connect(&this->iface, &Interface::module_setPlotProperty, this, &AppMain::module_setPlotProperty, Qt::QueuedConnection);
     QObject::connect(&this->iface, &Interface::module_showPlot, this, &AppMain::module_showPlot, Qt::QueuedConnection);
@@ -175,6 +176,23 @@ AppMain::module_plotCMVec(std::size_t plotIdx, int y, const std::vector<double>&
         : values.size();
     for (decltype(x_end) x = 0; x < x_end; ++x)
         plot->plotColorMap()->setCell(x, y, values[x]);
+    plot->queue();
+}
+
+
+void
+AppMain::module_plotCMFrame(std::size_t plotIdx, const std::vector<std::vector<double>>& frame)
+{
+    auto plot = this->ui.plot(plotIdx);
+    int y = 0;
+    for (const auto& row : frame) {
+        auto x_end = static_cast<std::size_t>(plot->plotColorMap()->getDataSizeX()) < row.size()
+            ? static_cast<std::size_t>(plot->plotColorMap()->getDataSizeX())
+            : row.size();
+        for (decltype(x_end) x = 0; x < x_end; ++x)
+            plot->plotColorMap()->setCell(x, y, row[x]);
+        y += 1;
+    }
     plot->queue();
 }
 

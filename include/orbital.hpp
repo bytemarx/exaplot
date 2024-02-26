@@ -76,6 +76,7 @@ public:
     virtual PyObject* plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y) = 0;
     virtual PyObject* plotCM(std::size_t plotID, int x, int y, double value) = 0;
     virtual PyObject* plotCMVec(std::size_t plotID, int y, const std::vector<double>& values) = 0;
+    virtual PyObject* plotCMFrame(std::size_t plotID, const std::vector<std::vector<double>>& frame) = 0;
     virtual PyObject* clear(std::size_t plotID) = 0;
     virtual PyObject* setPlotProperty(std::size_t plotID, const PlotProperty& property, const PlotProperty::Value& value) = 0;
     virtual PyObject* getPlotProperty(std::size_t plotID, const PlotProperty& property) = 0;
