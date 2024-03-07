@@ -2,6 +2,8 @@
 
 #include "orbital.hpp"
 
+#include <optional>
+
 
 typedef struct _is {
     PyInterpreterState *next;
@@ -26,13 +28,32 @@ typedef struct _is {
 } PyInterpreterState;
 
 typedef struct s_orbital_state {
+    PyTypeObject* type_RunParam;
     orbital::OrbitalInterface* iface;
 } orbital_state;
 
 
+typedef struct {
+    PyObject_HEAD
+    orbital::RunParamType type;
+    PyObject* value;
+    PyObject* display;
+} PyRunParam;
+
+
+namespace orbital {
+
+orbital_state* getModuleStateFromObject(PyObject*);
+
+}
+
+
 extern "C" {
 
-int orbitalExec(PyObject* module);
+int moduleSlot_initTypes(PyObject*);
+int moduleSlot_initInterface(PyObject*);
+int module_traverse(PyObject*, visitproc, void*);
+int module_clear(PyObject*);
 PyObject* orbital_init(PyObject*, PyObject* const*, Py_ssize_t, PyObject*);
 PyObject* orbital_msg(PyObject*, PyObject*, PyObject*);
 PyObject* orbital_plot(PyObject*, PyObject* const*, Py_ssize_t);

@@ -56,13 +56,14 @@ moduleMethods[] =
 static PyModuleDef_Slot
 moduleSlots[] =
 {
-    {Py_mod_exec, (void*)orbitalExec},
+    {Py_mod_exec, (void*)moduleSlot_initInterface},
+    {Py_mod_exec, (void*)moduleSlot_initTypes},
     {Py_mod_multiple_interpreters, Py_MOD_PER_INTERPRETER_GIL_SUPPORTED},
     {0, NULL},
 };
 
 
-PyModuleDef
+static PyModuleDef
 moduleDef =
 {
     .m_base = PyModuleDef_HEAD_INIT,
@@ -71,10 +72,23 @@ moduleDef =
     .m_size = sizeof(orbital_state),
     .m_methods = moduleMethods,
     .m_slots = moduleSlots,
-    .m_traverse = NULL,
-    .m_clear = NULL,
+    .m_traverse = module_traverse,
+    .m_clear = module_clear,
     .m_free = NULL,
 };
+
+
+orbital_state*
+getModuleStateFromObject(PyObject* object)
+{
+    auto module = PyType_GetModuleByDef(Py_TYPE(object), &moduleDef);
+    if (module == NULL) {
+        PyErr_Clear();
+        return NULL;
+    }
+
+    return static_cast<orbital_state*>(PyModule_GetState(module));
+}
 
 
 PyMODINIT_FUNC

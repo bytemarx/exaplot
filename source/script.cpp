@@ -81,9 +81,10 @@ ScriptModule::reload()
 
 
 OrbitalError
-ScriptModule::run(const std::map<std::string, std::string>& kwargs)
+ScriptModule::run(const std::vector<RunParam>& args)
 {
     this->ensureThreadState();
+    OrbitalError status{OrbitalError::NONE};
     PyObject* pyOwned_runFn = NULL;
     PyObject* pyOwned_args = NULL;
     PyObject* pyOwned_kwargs = NULL;
@@ -98,22 +99,53 @@ ScriptModule::run(const std::map<std::string, std::string>& kwargs)
     pyOwned_kwargs = PyDict_New();
     if (pyOwned_kwargs == NULL) goto error;
 
-    for (const auto& entry : kwargs) {
+    for (const auto& arg : args) {
         int result;
-        PyObject* pyOwned_val = PyUnicode_FromString(entry.second.c_str());
+        PyObject* pyOwned_val = NULL;
+        if (arg.value.empty()) {
+            pyOwned_val = Py_None;
+        } else {
+            try {
+                switch (arg.type) {
+                default:
+                case RunParamType::STRING:
+                    pyOwned_val = PyUnicode_FromString(arg.value.c_str());
+                    break;
+                case RunParamType::INT:
+                    pyOwned_val = PyLong_FromLong(std::stol(arg.value));
+                    break;
+                case RunParamType::FLOAT:
+                    pyOwned_val = PyFloat_FromDouble(std::stod(arg.value));
+                    break;
+                }
+            } catch (std::invalid_argument const& e) {
+                status = OrbitalError{
+                    OrbitalError::ARGUMENT,
+                    std::string{"Invalid argument for parameter '"}.append(arg.identifier).append("'")
+                };
+                goto done;
+            } catch (std::out_of_range const& e) {
+                status = OrbitalError{
+                    OrbitalError::ARGUMENT,
+                    std::string{"Out of range for parameter '"}.append(arg.identifier).append("'")
+                };
+                goto done;
+            }
+        }
         if (pyOwned_val == NULL) goto error;
-        result = PyDict_SetItemString(pyOwned_kwargs, entry.first.c_str(), pyOwned_val);
+        result = PyDict_SetItemString(pyOwned_kwargs, arg.identifier.c_str(), pyOwned_val);
         Py_DECREF(pyOwned_val);
         if (result != 0) goto error;
     }
     pyOwned_result = PyObject_Call(pyOwned_runFn, pyOwned_args, pyOwned_kwargs);
     if (pyOwned_result == NULL) goto error;
 
+done:
     Py_DECREF(pyOwned_result);
     Py_DECREF(pyOwned_kwargs);
     Py_DECREF(pyOwned_args);
     Py_DECREF(pyOwned_runFn);
-    return OrbitalError{OrbitalError::NONE};
+    return status;
 
 error:
     Py_XDECREF(pyOwned_kwargs);

@@ -135,28 +135,28 @@ MainWindow::setMessage(const QString& message)
 
 
 void
-MainWindow::initArgs(const std::vector<std::string>& params)
+MainWindow::initArgs(const std::vector<std::pair<std::string, std::string>>& params)
 {
     this->m_ui.tableWidget_args->clearContents();
     this->m_ui.tableWidget_args->setRowCount(static_cast<int>(params.size()));
     int i = 0;
     for (const auto& param : params) {
-        this->m_ui.tableWidget_args->setVerticalHeaderItem(i++, new QTableWidgetItem{QString::fromStdString(param)});
+        this->m_ui.tableWidget_args->setVerticalHeaderItem(i, new QTableWidgetItem{QString::fromStdString(param.first)});
+        this->m_ui.tableWidget_args->setItem(i, 0, new QTableWidgetItem{QString::fromStdString(param.second)});
+        i += 1;
     }
 }
 
 
-std::map<std::string, std::string>
+std::vector<std::string>
 MainWindow::scriptArgs() const
 {
-    std::map<std::string, std::string> kwargs;
+    std::vector<std::string> args(this->m_ui.tableWidget_args->rowCount());
     for (int row = 0; row < this->m_ui.tableWidget_args->rowCount(); ++row) {
-        auto param = this->m_ui.tableWidget_args->verticalHeaderItem(row)->text().toStdString();
         auto arg = this->m_ui.tableWidget_args->item(row, 0);
-        if (arg != nullptr && !arg->text().isEmpty())
-            kwargs[param] = arg->text().toStdString();
+        args[row] = arg != nullptr && !arg->text().isEmpty() ? arg->text().toStdString() : "";
     }
-    return kwargs;
+    return args;
 }
 
 

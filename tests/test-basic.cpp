@@ -16,7 +16,7 @@ namespace testing {
 class BasicTest : public ModuleTest
 {
 public:
-    void init(const std::vector<std::string>& params, const std::vector<orbital::GridPoint>& plots) override;
+    void init(const std::vector<orbital::RunParam>& params, const std::vector<orbital::GridPoint>& plots) override;
     void msg(const std::string& message, bool append) override;
     void plot2D(std::size_t plotID, double x, double y) override;
     void plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y) override;
@@ -25,7 +25,7 @@ protected:
     BasicTest() { this->scriptsDir = this->scriptsDir / "basic"; }
 };
 
-// orbital.init("a", "b", "c", "d")
+// orbital.init(a='', b='', c=1, d=10.0)
 
 TEST_F(BasicTest, TestInit)
 {
@@ -34,19 +34,43 @@ TEST_F(BasicTest, TestInit)
 
 void
 BasicTest::init(
-    const std::vector<std::string>& params,
+    const std::vector<orbital::RunParam>& params,
     const std::vector<orbital::GridPoint>& plots)
 {
     ASSERT_EQ(params.size(), 4);
-    const char* expected[] = {
-        "a",
-        "b",
-        "c",
-        "d"
+    std::vector<orbital::RunParam> expected{
+        {
+            .identifier = "a",
+            .type = orbital::RunParamType::STRING,
+            .value = "",
+            .display = "a"
+        },
+        {
+            .identifier = "b",
+            .type = orbital::RunParamType::STRING,
+            .value = "",
+            .display = "b"
+        },
+        {
+            .identifier = "c",
+            .type = orbital::RunParamType::INT,
+            .value = "1",
+            .display = "c"
+        },
+        {
+            .identifier = "d",
+            .type = orbital::RunParamType::FLOAT,
+            .value = "10.0",
+            .display = "d"
+        },
     };
     std::size_t i = 0;
     for (const auto& param : params) {
-        ASSERT_STREQ(param.c_str(), expected[i++]);
+        ASSERT_STREQ(param.identifier.c_str(), expected[i].identifier.c_str());
+        ASSERT_EQ(param.type, expected[i].type);
+        ASSERT_STREQ(param.value.c_str(), expected[i].value.c_str());
+        ASSERT_STREQ(param.display.c_str(), expected[i].display.c_str());
+        i++;
     }
 }
 

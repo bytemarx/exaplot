@@ -80,7 +80,7 @@ AppUI::clear()
 }
 
 
-std::map<std::string, std::string>
+std::vector<std::string>
 AppUI::scriptArgs() const
 {
     return this->mainWindow->scriptArgs();
@@ -95,7 +95,7 @@ AppUI::setMessage(const QString& message)
 
 
 void
-AppUI::initArgs(const std::vector<std::string>& params)
+AppUI::initArgs(const std::vector<std::pair<std::string, std::string>>& params)
 {
     this->mainWindow->initArgs(params);
 }

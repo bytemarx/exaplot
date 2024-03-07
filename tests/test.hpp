@@ -21,7 +21,7 @@ class Interface;
 class ModuleTest : public ::testing::Test
 {
 public:
-    virtual void init(const std::vector<std::string>& params, const std::vector<orbital::GridPoint>& plots) = 0;
+    virtual void init(const std::vector<orbital::RunParam>& params, const std::vector<orbital::GridPoint>& plots) = 0;
     virtual void msg(const std::string& message, bool append) = 0;
     virtual void plot2D(std::size_t plotID, double x, double y) = 0;
     virtual void plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y) = 0;
@@ -32,7 +32,7 @@ private:
     {
     public:
         Interface(ModuleTest* tester);
-        PyObject* init(const std::vector<std::string>&, const std::vector<orbital::GridPoint>&) override;
+        PyObject* init(const std::vector<orbital::RunParam>&, const std::vector<orbital::GridPoint>&) override;
         PyObject* msg(const std::string&, bool) override;
         PyObject* plot2D(std::size_t, double, double) override;
         PyObject* plot2DVec(std::size_t, const std::vector<double>&, const std::vector<double>&) override;

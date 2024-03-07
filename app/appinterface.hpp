@@ -18,7 +18,7 @@ class Interface : public QObject, public orbital::OrbitalInterface
 public:
     Interface(QObject* parent = nullptr);
 
-    PyObject* init(const std::vector<std::string>& params, const std::vector<orbital::GridPoint>& plots) override;
+    PyObject* init(const std::vector<orbital::RunParam>& params, const std::vector<orbital::GridPoint>& plots) override;
     PyObject* msg(const std::string& message, bool append) override;
     PyObject* plot2D(std::size_t plotID, double x, double y) override;
     PyObject* plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y) override;
@@ -35,7 +35,7 @@ Q_SIGNALS:
     void fatalError(int);
     void scriptErrored(const QString&, const QString&);
     void runCompleted(const QString&);
-    void module_init(const std::vector<std::string>&, const std::vector<orbital::GridPoint>&) const;
+    void module_init(const std::vector<orbital::RunParam>&, const std::vector<orbital::GridPoint>&) const;
     void module_msg(const std::string&, bool) const;
     void module_plot2D(std::size_t plotIdx, double, double) const;
     void module_plot2DVec(std::size_t plotIdx, const std::vector<double>&, const std::vector<double>&) const;
@@ -50,7 +50,7 @@ public Q_SLOTS:
     void pythonInit();
     void pythonDeInit();
     void loadScript(const QString&);
-    void runScript(const std::map<std::string, std::string>&);
+    void runScript(const std::vector<std::string>&);
     void updatePlotProperties(const std::vector<PlotEditor::PlotInfo>&);
 
 private:
@@ -58,4 +58,5 @@ private:
     orbital::OrbitalCore* core;
     std::shared_ptr<orbital::ScriptModule> module;
     std::vector<PlotEditor::PlotInfo> plots;
+    std::vector<orbital::RunParam> params;
 };

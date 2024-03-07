@@ -23,9 +23,9 @@ public:
     bool close();
     void reset();
     void clear();
-    std::map<std::string, std::string> scriptArgs() const;
+    std::vector<std::string> scriptArgs() const;
     void setMessage(const QString&);
-    void initArgs(const std::vector<std::string>&);
+    void initArgs(const std::vector<std::pair<std::string, std::string>>&);
     void setScriptStatus(const QString& = "");
     QPlot* plot(std::size_t);
     std::size_t plotCount() const;
@@ -40,7 +40,7 @@ public Q_SLOTS:
 Q_SIGNALS:
     void closed();
     void scriptLoad(const QString&);
-    void scriptRun(const std::map<std::string, std::string>&);
+    void scriptRun(const std::vector<std::string>&);
     void plotsSet(const std::vector<PlotEditor::PlotInfo>&);
 
 private Q_SLOTS:

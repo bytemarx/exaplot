@@ -98,7 +98,7 @@ AppMain::load(const QString& file)
 
 
 void
-AppMain::run(const std::map<std::string, std::string>& kwargs)
+AppMain::run(const std::vector<std::string>& args)
 {
     if (this->scriptRunning)
         return;
@@ -106,7 +106,7 @@ AppMain::run(const std::map<std::string, std::string>& kwargs)
     this->ui.enableStop(true);
     this->ui.clear();
     this->ui.setScriptStatus("Running...");
-    emit this->scriptRan(kwargs);
+    emit this->scriptRan(args);
     this->scriptRunning = true;
 }
 
@@ -123,10 +123,14 @@ AppMain::runComplete(const QString& message)
 
 void
 AppMain::module_init(
-    const std::vector<std::string>& params,
+    const std::vector<orbital::RunParam>& params,
     const std::vector<orbital::GridPoint>& plots)
 {
-    this->ui.initArgs(params);
+    std::vector<std::pair<std::string, std::string>> paramDisplays;
+    for (const auto& param : params) {
+        paramDisplays.push_back({param.display, param.value});
+    }
+    this->ui.initArgs(paramDisplays);
 }
 
 

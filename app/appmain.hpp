@@ -21,15 +21,15 @@ public:
 
 Q_SIGNALS:
     void scriptLoaded(const QString&);
-    void scriptRan(const std::map<std::string, std::string>&);
+    void scriptRan(const std::vector<std::string>&);
 
 public Q_SLOTS:
     void shutdown(int = 0);
     void load(const QString&);
-    void run(const std::map<std::string, std::string>&);
+    void run(const std::vector<std::string>&);
     void scriptError(const QString&, const QString&);
     void runComplete(const QString&);
-    void module_init(const std::vector<std::string>&, const std::vector<orbital::GridPoint>&);
+    void module_init(const std::vector<orbital::RunParam>&, const std::vector<orbital::GridPoint>&);
     void module_msg(const std::string&, bool);
     void module_plot2D(std::size_t plotIdx, double, double);
     void module_plot2DVec(std::size_t plotIdx, const std::vector<double>&, const std::vector<double>&);

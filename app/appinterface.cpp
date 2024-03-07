@@ -13,9 +13,10 @@ Interface::Interface(QObject* parent)
 
 PyObject*
 Interface::init(
-    const std::vector<std::string>& params,
+    const std::vector<orbital::RunParam>& params,
     const std::vector<orbital::GridPoint>& plots)
 {
+    this->params = params;
     emit this->module_init(params, plots);
     Py_RETURN_NONE;
 }
@@ -453,18 +454,18 @@ Interface::loadScript(const QString& file)
 
 
 void
-Interface::runScript(const std::map<std::string, std::string>& kwargs)
+Interface::runScript(const std::vector<std::string>& args)
 {
     if (!this->module) {
         emit this->runCompleted("No script loaded");
         return;
     }
     QMutexLocker locker{&this->mutex};
-    std::cerr << "kwargs = {";
-    for (const auto& kwarg : kwargs)
-        std::cerr << "\n  " << kwarg.first << ": " << kwarg.second;
-    std::cerr << "\n}\n";
-    auto status = this->module.get()->run(kwargs);
+    assert(args.size() == this->params.size());
+    auto params = this->params;
+    for (std::size_t i = 0; i < args.size(); ++i)
+        params[i].value = args[i];
+    auto status = this->module.get()->run(params);
     if (status) {
         auto message = status.message();
         if (!status.traceback().empty())

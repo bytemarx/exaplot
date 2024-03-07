@@ -188,6 +188,7 @@ set(CFLAGS
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     list(APPEND CFLAGS
         -g
+        -O0
     )
 endif()
 

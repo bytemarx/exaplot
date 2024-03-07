@@ -1,6 +1,7 @@
 from numbers import Real
 
 from _orbital import (
+    RunParam,
     init,
     msg,
     plot as _plot,

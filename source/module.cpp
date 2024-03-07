@@ -14,15 +14,26 @@ getModuleState(PyObject* module)
 }
 
 
+static int
+PyRunParam_Check(PyObject* object)
+{
+    auto mState = getModuleStateFromObject(object);
+    if (mState == NULL)
+        return 0;
+
+    return PyObject_TypeCheck(object, mState->type_RunParam);
+}
+
+
 extern "C" {
 
 
 int
-orbitalExec(PyObject* module)
+moduleSlot_initInterface(PyObject* module)
 {
-    orbital_state* mState = getModuleState(module);
-    PyThreadState* tState = PyThreadState_Get();
-    PyInterpreterState* interp = tState->interp;
+    auto mState = getModuleState(module);
+    auto tState = PyThreadState_Get();
+    auto interp = tState->interp;
 
     assert(interp->orb_passthrough);
     if (interp->orb_passthrough == NULL) {
@@ -37,100 +48,162 @@ error:
 }
 
 
+int
+module_traverse(PyObject* module, visitproc visit, void* arg)
+{
+    auto mState = getModuleState(module);
+    Py_VISIT(mState->type_RunParam);
+    return 0;
+}
+
+
+int
+module_clear(PyObject* module)
+{
+    auto mState = getModuleState(module);
+    Py_CLEAR(mState->type_RunParam);
+    return 0;
+}
+
+
 PyObject*
 orbital_init(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
 {
-    std::vector<std::string> params;
+    std::vector<RunParam> params;
     std::vector<GridPoint> plots{{.x=0, .dx=1, .y=0, .dy=1}};
 
-    for (decltype(nargs) i = 0; i < nargs; ++i) {
-        if (!PyUnicode_Check(args[i])) {
-            PyErr_Format(PyExc_TypeError, ORBITAL_INIT "() argument #%zd must be type 'str'", i + 1);
+    if (nargs > 1) {
+        PyErr_Format(PyExc_TypeError, ORBITAL_INIT "() takes from 0 to 1 positional arguments but %zd were given", nargs);
+        return NULL;
+    }
+
+    if (nargs == 1) {
+        plots.clear();
+        auto pyBorrowed_plots = args[0];
+        if (PyLong_Check(pyBorrowed_plots)) {
+            auto n_plots = PyLong_AS_LONG(pyBorrowed_plots);
+            if (n_plots <= 0) {
+                if (!PyErr_Occurred())
+                    PyErr_Format(PyExc_ValueError,
+                        ORBITAL_INIT "() 'plots' argument must be an integer greater than zero");
+                return NULL;
+            }
+            for (decltype(n_plots) i_plot = 0; i_plot < n_plots; ++i_plot) {
+                plots.push_back({
+                    .x = static_cast<GridPoint_t>(i_plot),
+                    .dx = 1,
+                    .y = 0,
+                    .dy = 1,
+                });
+            }
+        } else if (PyList_Check(pyBorrowed_plots)) {
+            auto n_plots = PyList_GET_SIZE(pyBorrowed_plots);
+            if (n_plots == 0) {
+                PyErr_SetString(PyExc_ValueError, ORBITAL_INIT "() plots list is missing entries");
+                return NULL;
+            }
+            if (n_plots > 64) {
+                PyErr_SetString(PyExc_ValueError, ORBITAL_INIT "() that's too many plots "
+                                "why do you need this many plots, what are you doing with all these plots??");
+                return NULL;
+            }
+            for (decltype(n_plots) i_plot = 0; i_plot < n_plots; ++i_plot) {
+                auto pyBorrowed_plot = PyList_GET_ITEM(pyBorrowed_plots, i_plot);
+                if (!PyTuple_Check(pyBorrowed_plot) || PyTuple_GET_SIZE(pyBorrowed_plot) != 4) {
+                    PyErr_Format(PyExc_TypeError, ORBITAL_INIT "() 'plots[%zd]' value must be type 'tuple[int, int, int, int]'", i_plot);
+                    return NULL;
+                }
+                long p[4];
+                for (decltype(std::size(p)) i_plotPoint = 0; i_plotPoint < std::size(p); ++i_plotPoint) {
+                    auto pyBorrowed_plotPoint = PyTuple_GET_ITEM(pyBorrowed_plot, i_plotPoint);
+                    if (!PyLong_Check(pyBorrowed_plotPoint)) {
+                        PyErr_Format(PyExc_TypeError,
+                            ORBITAL_INIT "() 'plots[%zd][%zd]' value must be type 'int'",
+                            i_plot, i_plotPoint);
+                        return NULL;
+                    }
+                    auto plotPoint = PyLong_AsLong(pyBorrowed_plotPoint);
+                    if (plotPoint < 0) {
+                        if (!PyErr_Occurred())
+                            PyErr_Format(PyExc_ValueError,
+                                ORBITAL_INIT "() 'plots[%zd][%zd]' value is invalid: %ld",
+                                i_plot, i_plotPoint, plotPoint);
+                        return NULL;
+                    }
+                    p[i_plotPoint] = plotPoint;
+                }
+                plots.push_back({
+                    .x = static_cast<GridPoint_t>(p[0]),
+                    .dx = static_cast<GridPoint_t>(p[1]),
+                    .y = static_cast<GridPoint_t>(p[2]),
+                    .dy = static_cast<GridPoint_t>(p[3]),
+                });
+            }
+        } else {
+            PyErr_SetString(PyExc_TypeError, ORBITAL_INIT "() 'plots' argument must be either an 'int' or 'list' type");
             return NULL;
         }
-        params.push_back(PyUnicode_AsUTF8(args[i]));
     }
 
     if (kwnames == NULL)
         goto done;
 
     for (decltype(PyTuple_GET_SIZE(kwnames)) i = 0; i < PyTuple_GET_SIZE(kwnames); ++i) {
-        PyObject* pyBorrowed_kwname = PyTuple_GET_ITEM(kwnames, i);
+        auto pyBorrowed_paramName = PyTuple_GET_ITEM(kwnames, i);
+        auto pyBorrowed_paramInfo = args[nargs + i];
 
-        if (strcmp("plots", PyUnicode_AsUTF8(pyBorrowed_kwname)) == 0) {
-            plots.clear();
-            PyObject* pyBorrowed_plots = args[nargs + i];
-            if (PyLong_Check(pyBorrowed_plots)) {
-                auto n_plots = PyLong_AsLong(pyBorrowed_plots);
-                if (n_plots <= 0) {
-                    if (!PyErr_Occurred())
-                        PyErr_Format(PyExc_ValueError,
-                            ORBITAL_INIT "() 'plots' keyword must be an integer greater than zero");
-                    return NULL;
-                }
-                for (decltype(n_plots) i_plot = 0; i_plot < n_plots; ++i_plot) {
-                    plots.push_back({
-                        .x = static_cast<GridPoint_t>(i_plot),
-                        .dx = 1,
-                        .y = 0,
-                        .dy = 1,
-                    });
-                }
-            } else if (PyList_Check(pyBorrowed_plots)) {
-                auto n_plots = PyList_GET_SIZE(pyBorrowed_plots);
-                if (n_plots == 0) {
-                    PyErr_SetString(PyExc_ValueError, ORBITAL_INIT "() plots list is missing entries");
-                    return NULL;
-                }
-                if (n_plots > 64) {
-                    PyErr_SetString(PyExc_ValueError, ORBITAL_INIT "() that's too many plots "
-                                    "why do you need this many plots, what are you doing with all these plots??");
-                    return NULL;
-                }
-                for (decltype(n_plots) i_plot = 0; i_plot < n_plots; ++i_plot) {
-                    PyObject* pyBorrowed_plot = PyList_GET_ITEM(pyBorrowed_plots, i_plot);
-                    if (!PyTuple_Check(pyBorrowed_plot)) {
-                        PyErr_Format(PyExc_TypeError, ORBITAL_INIT "() plot #%zd must be type 'tuple'", i_plot + 1);
-                        return NULL;
-                    }
-                    if (PyTuple_GET_SIZE(pyBorrowed_plot) != 4) {
-                        PyErr_Format(PyExc_TypeError, ORBITAL_INIT "() plot #%zd must be a 4-tuple", i_plot + 1);
-                        return NULL;
-                    }
-                    long p[4];
-                    for (decltype(std::size(p)) i_plotPoint = 0; i_plotPoint < std::size(p); ++i_plotPoint) {
-                        PyObject* pyBorrowed_plotPoint = PyTuple_GET_ITEM(pyBorrowed_plot, i_plotPoint);
-                        if (!PyLong_Check(pyBorrowed_plotPoint)) {
-                            PyErr_Format(PyExc_TypeError,
-                                ORBITAL_INIT "() entry #%zd of plot #%zd must be type 'int'",
-                                i_plotPoint + 1, i_plot + 1);
-                            return NULL;
-                        }
-                        auto plotPoint = PyLong_AsLong(pyBorrowed_plotPoint);
-                        if (plotPoint < 0) {
-                            if (!PyErr_Occurred())
-                                PyErr_Format(PyExc_ValueError,
-                                    ORBITAL_INIT "() entry #%zd of plot #%zd is invalid: %ld",
-                                    i_plotPoint + 1, i_plot + 1, plotPoint);
-                            return NULL;
-                        }
-                        p[i_plotPoint] = plotPoint;
-                    }
-                    plots.push_back({
-                        .x = static_cast<GridPoint_t>(p[0]),
-                        .dx = static_cast<GridPoint_t>(p[1]),
-                        .y = static_cast<GridPoint_t>(p[2]),
-                        .dy = static_cast<GridPoint_t>(p[3]),
-                    });
-                }
+        auto identifier = PyUnicode_AsUTF8(pyBorrowed_paramName);
+        if (identifier == NULL) return NULL;
+
+        auto type = RunParamType::STRING;
+        auto defaultValue = std::string{};
+        auto display = std::string{identifier};
+
+        if (PyRunParam_Check(pyBorrowed_paramInfo)) {
+            auto pyBorrowed_runParam = reinterpret_cast<PyRunParam*>(pyBorrowed_paramInfo);
+
+            type = pyBorrowed_runParam->type;
+            if (pyBorrowed_runParam->value != NULL) {
+                auto c_value = PyUnicode_AsUTF8(pyBorrowed_runParam->value);
+                if (c_value == NULL) return NULL;
+                defaultValue = c_value;
+            }
+            if (pyBorrowed_runParam->display != NULL) {
+                auto c_display = PyUnicode_AsUTF8(pyBorrowed_runParam->display);
+                if (c_display == NULL) return NULL;
+                display = c_display;
+            }
+        } else if (PyUnicode_CheckExact(pyBorrowed_paramInfo)) {
+            auto c_defaultValue = PyUnicode_AsUTF8(pyBorrowed_paramInfo);
+            if (c_defaultValue == NULL) return NULL;
+            defaultValue = c_defaultValue;
+        } else {
+            if (PyLong_CheckExact(pyBorrowed_paramInfo)) {
+                type = RunParamType::INT;
+            } else if (PyFloat_CheckExact(pyBorrowed_paramInfo)) {
+                type = RunParamType::FLOAT;
             } else {
-                PyErr_SetString(PyExc_TypeError, ORBITAL_INIT "() plots must be either an 'int' or 'list' type");
+                PyErr_Format(PyExc_ValueError, ORBITAL_INIT "() invalid value for parameter '%U'", pyBorrowed_paramName);
                 return NULL;
             }
-        } else {
-            PyErr_Format(PyExc_TypeError, ORBITAL_INIT "() got an unexpected keyword argument '%S'", pyBorrowed_kwname);
-            return NULL;
+
+            auto pyOwned_defaultValue = PyObject_Str(pyBorrowed_paramInfo);
+            if (pyOwned_defaultValue == NULL) return NULL;
+            auto c_defaultValue = PyUnicode_AsUTF8(pyOwned_defaultValue);
+            if (c_defaultValue == NULL) {
+                Py_DECREF(pyOwned_defaultValue);
+                return NULL;
+            }
+            defaultValue = c_defaultValue;
+            Py_DECREF(pyOwned_defaultValue);
         }
+
+        params.push_back({
+            .identifier = identifier,
+            .type = type,
+            .value = defaultValue,
+            .display = display,
+        });
     }
 
 done:
@@ -498,6 +571,145 @@ orbital__show_plot(PyObject* module, PyObject* args)
         return NULL;
     }
     return state->iface->showPlot(plotID, static_cast<std::size_t>(plotType));
+}
+
+
+static char*
+RunParam_keywords[] =
+{
+    (char*)"",
+    (char*)"display",
+    NULL
+};
+
+
+static int
+PyRunParam_CheckDefaultArg(PyObject* object)
+{
+    if (PyUnicode_Check(object)) return RunParamType::STRING;
+    if (PyLong_Check(object)) return RunParamType::INT;
+    if (PyFloat_Check(object)) return RunParamType::FLOAT;
+    return -1;
+}
+
+
+static int
+PyRunParam_CheckTypeArg(PyObject* object)
+{
+    if (!PyType_Check(object)) return -1;
+    if (PyObject_IsSubclass(object, (PyObject*)&PyUnicode_Type)) return RunParamType::STRING;
+    if (PyObject_IsSubclass(object, (PyObject*)&PyLong_Type)) return RunParamType::INT;
+    if (PyObject_IsSubclass(object, (PyObject*)&PyFloat_Type)) return RunParamType::FLOAT;
+    return -1;
+}
+
+
+static int
+orbital_RunParam___init__(PyRunParam* self, PyObject* args, PyObject* kwargs)
+{
+    PyObject* pyBorrowed_defaultOrType = NULL;
+    const char* pyBorrowed_display = NULL;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|z:RunParam.__init__", RunParam_keywords,
+                                     &pyBorrowed_defaultOrType,
+                                     &pyBorrowed_display)) {
+        return -1;
+    }
+
+    self->value = NULL;
+    self->display = pyBorrowed_display != NULL ? PyUnicode_FromString(pyBorrowed_display) : NULL;
+
+    auto type = PyRunParam_CheckDefaultArg(pyBorrowed_defaultOrType);
+    switch (type) {
+    case RunParamType::STRING:
+        self->value = pyBorrowed_defaultOrType;
+        Py_INCREF(pyBorrowed_defaultOrType);
+        break;
+    case RunParamType::INT:
+    case RunParamType::FLOAT:
+        {
+            auto pyOwned_defaultValue = PyObject_Str(pyBorrowed_defaultOrType);
+            if (pyOwned_defaultValue == NULL) return -1;
+            self->value = pyOwned_defaultValue;
+        }
+        break;
+    default:
+        type = PyRunParam_CheckTypeArg(pyBorrowed_defaultOrType);
+        if (type < 0) {
+            PyErr_SetString(PyExc_TypeError, "RunParam.__init__() first argument must be type 'RunParamType' or 'type[RunParamType]'");
+            return -1;
+        }
+    }
+    self->type = static_cast<RunParamType>(type);
+
+    return 0;
+}
+
+
+static int
+PyRunParam_clear(PyRunParam* self)
+{
+    Py_CLEAR(self->value);
+    Py_CLEAR(self->display);
+    return 0;
+}
+
+
+static void
+PyRunParam_dealloc(PyRunParam* self)
+{
+    PyObject_GC_UnTrack(self);
+    PyRunParam_clear(self);
+    auto tp = Py_TYPE(self);
+    tp->tp_free(self);
+    Py_DECREF(tp);
+}
+
+
+static int
+PyRunParam_traverse(PyRunParam* self, visitproc visit, void* arg)
+{
+    Py_VISIT(self->value);
+    Py_VISIT(self->display);
+    Py_VISIT(Py_TYPE(self));
+    return 0;
+}
+
+
+static PyType_Slot
+PyRunParam_slots[] =
+{
+    {Py_tp_init, (void*)orbital_RunParam___init__},
+    {Py_tp_dealloc, (void*)PyRunParam_dealloc},
+    {Py_tp_traverse, (void*)PyRunParam_traverse},
+    {Py_tp_clear, (void*)PyRunParam_clear},
+    {0, NULL}
+};
+
+
+static PyType_Spec
+PyRunParam_spec =
+{
+    .name = ORBITAL_MODULE ".RunParam",
+    .basicsize = sizeof(PyRunParam),
+    .flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_GC | Py_TPFLAGS_IMMUTABLETYPE,
+    .slots = PyRunParam_slots,
+};
+
+
+int
+moduleSlot_initTypes(PyObject* module)
+{
+    auto mState = getModuleState(module);
+
+    mState->type_RunParam = reinterpret_cast<PyTypeObject*>(
+        PyType_FromModuleAndSpec(module, &PyRunParam_spec, NULL)
+    );
+    if (mState->type_RunParam == NULL) return -1;
+
+    if (PyModule_AddType(module, mState->type_RunParam)) return -1;
+
+    return 0;
 }
 
 

@@ -16,7 +16,7 @@ namespace testing {
 class InvalidTest : public ModuleTest
 {
 public:
-    void init(const std::vector<std::string>&, const std::vector<orbital::GridPoint>&) override;
+    void init(const std::vector<orbital::RunParam>&, const std::vector<orbital::GridPoint>&) override;
     void msg(const std::string&, bool) override;
     void plot2D(std::size_t, double, double) override;
     void plot2DVec(std::size_t, const std::vector<double>&, const std::vector<double>&) override;
@@ -33,7 +33,7 @@ TEST_F(InvalidTest, TestInit)
 
 void
 InvalidTest::init(
-    [[maybe_unused]] const std::vector<std::string>& params,
+    [[maybe_unused]] const std::vector<orbital::RunParam>& params,
     [[maybe_unused]] const std::vector<orbital::GridPoint>& plots)
 {
     ASSERT_FALSE(true);

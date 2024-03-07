@@ -20,7 +20,7 @@ protected:
     class Interface : public OrbitalInterface
     {
     public:
-        PyObject* init(const std::vector<std::string>&, const std::vector<orbital::GridPoint>&) override { Py_RETURN_NONE; }
+        PyObject* init(const std::vector<orbital::RunParam>&, const std::vector<orbital::GridPoint>&) override { Py_RETURN_NONE; }
         PyObject* msg(const std::string&, bool) override { Py_RETURN_NONE; }
         PyObject* plot2D(std::size_t, double, double) override { Py_RETURN_NONE; }
         PyObject* plot2DVec(std::size_t, const std::vector<double>&, const std::vector<double>&) override { Py_RETURN_NONE; }
@@ -47,7 +47,7 @@ TEST_F(ScriptTest, RunBasic)
     std::shared_ptr<ScriptModule> mod;
     auto status = core->load(TEST_SCRIPTS_DIR "/run/basic.py", mod);
     ASSERT_FALSE(status) << status.message() << '\n' << status.traceback();
-    status = mod->run();
+    status = mod->run({});
     ASSERT_FALSE(status) << status.message() << '\n' << status.traceback();
     delete core;
     delete iface;
@@ -61,7 +61,23 @@ TEST_F(ScriptTest, RunArgs)
     std::shared_ptr<ScriptModule> mod;
     auto status = core->load(TEST_SCRIPTS_DIR "/run/args.py", mod);
     ASSERT_FALSE(status) << status.message() << '\n' << status.traceback();
-    status = mod->run({{"a", "1"}, {"b", "2"}, {"c", "3"}});
+    status = mod->run({
+        {
+            .identifier = "a",
+            .type = RunParamType::STRING,
+            .value = "1"
+        },
+        {
+            .identifier = "b",
+            .type = RunParamType::STRING,
+            .value = "2"
+        },
+        {
+            .identifier = "c",
+            .type = RunParamType::STRING,
+            .value = "3"
+        }
+    });
     ASSERT_FALSE(status) << status.message() << '\n' << status.traceback();
     delete core;
     delete iface;
