@@ -369,6 +369,8 @@ done:
 int
 OrbitalCore::deinit()
 {
+    if (mainThreadState != _PyThreadState_UncheckedGet())
+        PyThreadState_Swap(mainThreadState);
     return Py_FinalizeEx();
 }
 
@@ -405,7 +407,7 @@ OrbitalCore::OrbitalCore(OrbitalInterface* interface)
 
 OrbitalCore::~OrbitalCore()
 {
-    if (this->m_tState != PyThreadState_Get())
+    if (this->m_tState != _PyThreadState_UncheckedGet())
         PyThreadState_Swap(this->m_tState);
     for (const auto& script : this->m_scripts) {
         if (auto h_script = script.lock()) {
