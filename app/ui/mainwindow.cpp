@@ -38,6 +38,13 @@ MainWindow::buttonRun()
 }
 
 
+QPushButton*
+MainWindow::buttonStop()
+{
+    return this->m_ui.pushButton_stop;
+}
+
+
 QAction*
 MainWindow::actionAbout()
 {

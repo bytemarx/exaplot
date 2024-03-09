@@ -21,6 +21,7 @@ protected:
     {
     public:
         PyObject* init(const std::vector<orbital::RunParam>&, const std::vector<orbital::GridPoint>&) override { Py_RETURN_NONE; }
+        PyObject* stop() override { Py_RETURN_NONE; }
         PyObject* msg(const std::string&, bool) override { Py_RETURN_NONE; }
         PyObject* plot2D(std::size_t, double, double) override { Py_RETURN_NONE; }
         PyObject* plot2DVec(std::size_t, const std::vector<double>&, const std::vector<double>&) override { Py_RETURN_NONE; }

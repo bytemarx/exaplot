@@ -24,6 +24,10 @@ AppUI::AppUI(QObject* parent)
         [this] { emit this->scriptRun(this->scriptArgs()); }
     );
     QObject::connect(
+        this->mainWindow->buttonStop(), &QPushButton::clicked,
+        [this] { emit this->scriptStop(); }
+    );
+    QObject::connect(
         this->mainWindow->actionAbout(), &QAction::triggered,
         this->aboutDialog, &About::open
     );

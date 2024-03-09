@@ -23,6 +23,7 @@ public:
     QAction* actionAbout();
     QAction* actionPlotEditor();
     QPushButton* buttonRun();
+    QPushButton* buttonStop();
     void setPlots(const std::vector<PlotEditor::PlotInfo>&);
     void setMessage(const QString&);
     void initArgs(const std::vector<std::pair<std::string, std::string>>&);

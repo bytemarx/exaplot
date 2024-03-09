@@ -15,11 +15,14 @@
 #define ORBITAL_MODULE  "_orbital"
 
 #define ORBITAL_INIT        "init"                  // orbital.init(plots = 1, **params)
+#define ORBITAL_STOP        "stop"                  // orbital.stop()
 #define ORBITAL_MSG         "msg"                   // orbital.msg(message, append = False)
 #define ORBITAL_PLOT        "plot"                  // orbital.plot(data_set, *data)
 #define ORBITAL_SET_PLOT    "_set_plot_property"    // orbital._set_plot_property(plot_id, prop, value)
 #define ORBITAL_GET_PLOT    "_get_plot_property"    // orbital._get_plot_property(plot_id, prop)
 #define ORBITAL_SHOW_PLOT   "_show_plot"            // orbital._show_plot(plot_id, plot_type)
+
+#define ORBITAL_HALT_EXC    ORBITAL_MODULE ".HaltException"
 
 #define ORBITAL_SCRIPT_RUN  "run"   // run(**kwargs)
 
@@ -84,6 +87,7 @@ class OrbitalInterface
 public:
     virtual ~OrbitalInterface();
     virtual PyObject* init(const std::vector<RunParam>& params, const std::vector<GridPoint>& plots) = 0;
+    virtual PyObject* stop() = 0;
     virtual PyObject* msg(const std::string& message, bool append) = 0;
     virtual PyObject* plot2D(std::size_t plotID, double x, double y) = 0;
     virtual PyObject* plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y) = 0;

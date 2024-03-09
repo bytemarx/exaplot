@@ -207,8 +207,16 @@ orbital_init(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject
     }
 
 done:
-    orbital_state* state = getModuleState(module);
+    auto state = getModuleState(module);
     return state->iface->init(params, plots);
+}
+
+
+PyObject*
+orbital_stop(PyObject* module, PyObject* Py_UNUSED(args))
+{
+    auto state = getModuleState(module);
+    return state->iface->stop();
 }
 
 
@@ -231,7 +239,7 @@ orbital_msg(PyObject* module, PyObject* args, PyObject* kwargs)
     std::string message{c_message};
     bool append = c_append != 0;
 
-    orbital_state* state = getModuleState(module);
+    auto state = getModuleState(module);
     return state->iface->msg(message, append);
 }
 

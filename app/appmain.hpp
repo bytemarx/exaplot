@@ -22,11 +22,13 @@ public:
 Q_SIGNALS:
     void scriptLoaded(const QString&);
     void scriptRan(const std::vector<std::string>&);
+    void scriptStopped();
 
 public Q_SLOTS:
     void shutdown(int = 0);
     void load(const QString&);
     void run(const std::vector<std::string>&);
+    void stop();
     void scriptError(const QString&, const QString&);
     void runComplete(const QString&);
     void module_init(const std::vector<orbital::RunParam>&, const std::vector<orbital::GridPoint>&);

@@ -19,6 +19,7 @@ public:
     Interface(QObject* parent = nullptr);
 
     PyObject* init(const std::vector<orbital::RunParam>& params, const std::vector<orbital::GridPoint>& plots) override;
+    PyObject* stop() override;
     PyObject* msg(const std::string& message, bool append) override;
     PyObject* plot2D(std::size_t plotID, double x, double y) override;
     PyObject* plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y) override;
@@ -51,6 +52,7 @@ public Q_SLOTS:
     void pythonDeInit();
     void loadScript(const QString&);
     void runScript(const std::vector<std::string>&);
+    void requestStop();
     void updatePlotProperties(const std::vector<PlotEditor::PlotInfo>&);
 
 private:
@@ -59,4 +61,5 @@ private:
     std::shared_ptr<orbital::ScriptModule> module;
     std::vector<PlotEditor::PlotInfo> plots;
     std::vector<orbital::RunParam> params;
+    bool stopRequested;
 };

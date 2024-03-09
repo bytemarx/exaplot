@@ -41,6 +41,7 @@ Q_SIGNALS:
     void closed();
     void scriptLoad(const QString&);
     void scriptRun(const std::vector<std::string>&);
+    void scriptStop();
     void plotsSet(const std::vector<PlotEditor::PlotInfo>&);
 
 private Q_SLOTS:

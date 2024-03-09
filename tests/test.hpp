@@ -33,6 +33,7 @@ private:
     public:
         Interface(ModuleTest* tester);
         PyObject* init(const std::vector<orbital::RunParam>&, const std::vector<orbital::GridPoint>&) override;
+        PyObject* stop() override { Py_RETURN_NONE; }
         PyObject* msg(const std::string&, bool) override;
         PyObject* plot2D(std::size_t, double, double) override;
         PyObject* plot2DVec(std::size_t, const std::vector<double>&, const std::vector<double>&) override;

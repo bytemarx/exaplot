@@ -55,6 +55,7 @@ int moduleSlot_initInterface(PyObject*);
 int module_traverse(PyObject*, visitproc, void*);
 int module_clear(PyObject*);
 PyObject* orbital_init(PyObject*, PyObject* const*, Py_ssize_t, PyObject*);
+PyObject* orbital_stop(PyObject*, PyObject*);
 PyObject* orbital_msg(PyObject*, PyObject*, PyObject*);
 PyObject* orbital_plot(PyObject*, PyObject* const*, Py_ssize_t);
 PyObject* orbital__set_plot_property(PyObject*, PyObject*);

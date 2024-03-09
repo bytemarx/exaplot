@@ -21,9 +21,11 @@ AppMain::AppMain(int& argc, char* argv[])
     QObject::connect(&this->ui, &AppUI::closed, [this] { this->shutdown(0); });
     QObject::connect(&this->ui, &AppUI::scriptLoad, this, &AppMain::load);
     QObject::connect(&this->ui, &AppUI::scriptRun, this, &AppMain::run);
+    QObject::connect(&this->ui, &AppUI::scriptStop, this, &AppMain::stop);
     QObject::connect(&this->ui, &AppUI::plotsSet, &this->iface, &Interface::updatePlotProperties, Qt::QueuedConnection);
     QObject::connect(this, &AppMain::scriptLoaded, &this->iface, &Interface::loadScript, Qt::QueuedConnection);
     QObject::connect(this, &AppMain::scriptRan, &this->iface, &Interface::runScript, Qt::QueuedConnection);
+    QObject::connect(this, &AppMain::scriptStopped, &this->iface, &Interface::requestStop);
     QObject::connect(&this->iface, &Interface::fatalError, this, &AppMain::shutdown, Qt::QueuedConnection);
     QObject::connect(&this->iface, &Interface::scriptErrored, this, &AppMain::scriptError, Qt::QueuedConnection);
     QObject::connect(&this->iface, &Interface::runCompleted, this, &AppMain::runComplete, Qt::QueuedConnection);
@@ -108,6 +110,16 @@ AppMain::run(const std::vector<std::string>& args)
     this->ui.setScriptStatus("Running...");
     emit this->scriptRan(args);
     this->scriptRunning = true;
+}
+
+
+void
+AppMain::stop()
+{
+    if (!this->scriptRunning)
+        return;
+    this->ui.enableStop(false);
+    this->iface.requestStop();
 }
 
 

@@ -7,6 +7,7 @@
 Interface::Interface(QObject* parent)
     : QObject{parent}
     , core{nullptr}
+    , stopRequested{false}
 {
 }
 
@@ -19,6 +20,15 @@ Interface::init(
     this->params = params;
     emit this->module_init(params, plots);
     Py_RETURN_NONE;
+}
+
+
+PyObject*
+Interface::stop()
+{
+    if (this->stopRequested)
+        Py_RETURN_TRUE;
+    Py_RETURN_FALSE;
 }
 
 
@@ -465,6 +475,7 @@ Interface::runScript(const std::vector<std::string>& args)
     auto params = this->params;
     for (std::size_t i = 0; i < args.size(); ++i)
         params[i].value = args[i];
+    this->stopRequested = false;
     auto status = this->module.get()->run(params);
     if (status) {
         auto message = status.message();
@@ -473,6 +484,13 @@ Interface::runScript(const std::vector<std::string>& args)
         emit this->scriptErrored(message.c_str(), QString{"ERROR::"}.append(status.type()));
     }
     emit this->runCompleted("Completed");
+}
+
+
+void
+Interface::requestStop()
+{
+    this->stopRequested = true;
 }
 
 

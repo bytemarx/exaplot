@@ -5,9 +5,12 @@
 #include <string>
 #include <utility>
 #include <vector>
-
+#include <iostream>
 
 namespace orbital {
+
+
+static PyObject* HaltException = NULL;
 
 
 static PyMethodDef
@@ -17,6 +20,12 @@ moduleMethods[] =
         ORBITAL_INIT,
         (PyCFunction)orbital_init,
         METH_FASTCALL | METH_KEYWORDS,
+        NULL
+    },
+    {
+        ORBITAL_STOP,
+        (PyCFunction)orbital_stop,
+        METH_NOARGS,
         NULL
     },
     {
@@ -345,6 +354,11 @@ OrbitalCore::init(
     if (PyStatus_Exception(status)) goto done;
 
     mainThreadState = PyThreadState_Get();
+    HaltException = PyErr_NewException(ORBITAL_HALT_EXC, PyExc_BaseException, NULL);
+    if (HaltException == NULL) {
+        PyErr_Print();
+    }
+    assert(HaltException != NULL);
 
 done:
     PyConfig_Clear(&config);
@@ -381,7 +395,7 @@ OrbitalCore::OrbitalCore(OrbitalInterface* interface)
         };
         PyStatus status = Py_NewInterpreterFromConfig(&this->m_tState, &config);
         if (PyStatus_Exception(status)) {
-            throw std::runtime_error("Failed to initialize interpreter from config");
+            throw std::runtime_error{"Failed to initialize interpreter from config"};
         }
     }
     this->m_tState->interp->orb_passthrough = static_cast<void*>(interface);

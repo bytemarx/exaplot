@@ -3,6 +3,7 @@ from numbers import Real
 from _orbital import (
     RunParam,
     init,
+    stop,
     msg,
     plot as _plot,
     _set_plot_property,

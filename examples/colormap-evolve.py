@@ -1,7 +1,7 @@
 import math
 import time
 
-from orbital import RunParam, init, plot
+from orbital import RunParam, init, stop, plot
 
 
 init(ring_density = RunParam(5.0, "Ring Density"))
@@ -20,6 +20,8 @@ def run(ring_density: float):
         return 4 * x * (math.cos(r + 2 + phi) / (r - math.sin(r + 2 + phi) / r))
 
     for t in range(500):
+        if stop():
+            return
         plot([
             [f(0.1 * col - 5.0, 0.1 * row - 5.0, -0.1 * t) for col in range(100)]
             for row in range(100)

@@ -1,7 +1,7 @@
 import math
 import time
 
-from orbital import RunParam, init, plot
+from orbital import RunParam, init, stop, plot
 
 
 init(duration = RunParam(float, display="Duration (s)"))
@@ -19,7 +19,7 @@ def run(duration: float):
         return math.sin(20 * math.pi * x) * math.exp(-x**2)
 
     x = x_i
-    while x <= x_f:
+    while x <= x_f and not stop():
         plot(x, f(x))
         time.sleep(t_delta)
         x += x_delta
