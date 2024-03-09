@@ -236,7 +236,16 @@ AppUI::showPlot(std::size_t plotIdx, QPlot::Type plotType)
 void
 AppUI::displayError(const QString& msg, const QString& title)
 {
-    QMessageBox::critical(this->mainWindow, title, msg);
+    QMessageBox msgBox{this->mainWindow};
+    msgBox.setWindowTitle(title);
+    msgBox.setText(msg);
+    msgBox.setStyleSheet(
+        "QLabel {"
+            "font-family: 'Monospace';"
+            "font-size: 10pt;"
+        "}"
+    );
+    msgBox.exec();
 }
 
 
