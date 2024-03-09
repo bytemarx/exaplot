@@ -181,14 +181,17 @@ set(SOURCES
 set(CFLAGS
     -Wsign-compare
     -fwrapv
-    -O3
     -Wall
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     list(APPEND CFLAGS
-        -g
         -O0
+        -g
+    )
+else()
+    list(APPEND CFLAGS
+        -O3
     )
 endif()
 
