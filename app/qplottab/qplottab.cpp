@@ -251,6 +251,13 @@ QPlotTab::QPlotTab(QWidget* parent)
     this->m_tabWidget->addTab(this->m_tabColorMap, "Color Map");
     this->m_layout->addWidget(this->m_frame_common);
     this->m_layout->addWidget(this->m_tabWidget);
+
+    this->setStyleSheet(
+        "QToolTip {"
+            "font-family: 'Monospace';"
+            "font-size: 10pt;"
+        "}"
+    );
 }
 
 
