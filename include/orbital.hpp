@@ -22,9 +22,8 @@
 #define ORBITAL_GET_PLOT    "_get_plot_property"    // orbital._get_plot_property(plot_id, prop)
 #define ORBITAL_SHOW_PLOT   "_show_plot"            // orbital._show_plot(plot_id, plot_type)
 
-#define ORBITAL_HALT_EXC    ORBITAL_MODULE ".HaltException"
-
-#define ORBITAL_SCRIPT_RUN  "run"   // run(**kwargs)
+#define ORBITAL_SCRIPT_MODULE   "__orbital__"
+#define ORBITAL_SCRIPT_RUN      "run"           // run(**kwargs)
 
 
 namespace orbital {

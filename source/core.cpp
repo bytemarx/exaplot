@@ -10,9 +10,6 @@
 namespace orbital {
 
 
-static PyObject* HaltException = NULL;
-
-
 static PyMethodDef
 moduleMethods[] =
 {
@@ -354,11 +351,6 @@ OrbitalCore::init(
     if (PyStatus_Exception(status)) goto done;
 
     mainThreadState = PyThreadState_Get();
-    HaltException = PyErr_NewException(ORBITAL_HALT_EXC, PyExc_BaseException, NULL);
-    if (HaltException == NULL) {
-        PyErr_Print();
-    }
-    assert(HaltException != NULL);
 
 done:
     PyConfig_Clear(&config);
