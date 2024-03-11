@@ -192,7 +192,7 @@ TEST_F(BaselineTest, Reload)
     std::shared_ptr<ScriptModule> mod;
     {
         std::ofstream file(TEST_SCRIPTS_DIR "/baseline/reload.py");
-        file << "";
+        file << "assert(True)\n";
         file.close();
         auto error = core->load(TEST_SCRIPTS_DIR "/baseline/reload.py", mod);
         ASSERT_FALSE(error) << error.message() << '\n' << error.traceback();
@@ -200,7 +200,7 @@ TEST_F(BaselineTest, Reload)
     {
         std::ofstream file;
         file.open(TEST_SCRIPTS_DIR "/baseline/reload.py");
-        file << "assert(False)";
+        file << "assert(False)\n";
         file.close();
         auto error = mod->reload();
         ASSERT_TRUE(error);
@@ -220,6 +220,20 @@ TEST_F(BaselineTest, NotIsolatedWithinCore)
     auto error = core->load(TEST_SCRIPTS_DIR "/baseline/reload2-0.py", mod0);
     ASSERT_FALSE(error) << error.message() << '\n' << error.traceback();
     error = core->load(TEST_SCRIPTS_DIR "/baseline/reload2-1.py", mod1);
+    ASSERT_FALSE(error) << error.message() << '\n' << error.traceback();
+    delete core;
+    delete iface;
+}
+
+
+TEST_F(BaselineTest, AccessGlobalVariableInRun)
+{
+    Interface* iface = new Interface;
+    OrbitalCore* core = new OrbitalCore{iface};
+    std::shared_ptr<ScriptModule> mod;
+    auto error = core->load(TEST_SCRIPTS_DIR "/baseline/global-variable.py", mod);
+    ASSERT_FALSE(error) << error.message() << '\n' << error.traceback();
+    error = mod->run({});
     ASSERT_FALSE(error) << error.message() << '\n' << error.traceback();
     delete core;
     delete iface;
