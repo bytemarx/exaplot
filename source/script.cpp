@@ -1,6 +1,6 @@
 #include "orbital.hpp"
 
-#include <cstdio>
+#include <fstream>
 
 
 namespace orbital {
@@ -32,20 +32,24 @@ ScriptModule::ensureThreadState()
 OrbitalError
 ScriptModule::load()
 {
-    FILE* fp = fopen(this->m_file.c_str(), "r");
-    if (fp == NULL)
+    std::ifstream ifs{this->m_file, std::ios::binary | std::ios::ate};
+    if (!ifs.is_open())
         return OrbitalError{OrbitalError::IMPORT, "Failed to open file"};
-    fseek(fp, 0, SEEK_END);
-    size_t size = ftell(fp);
-    fseek(fp, 0, SEEK_SET);
-    char* code = (char*)malloc(size + 1);
+    auto end = ifs.tellg();
+    ifs.seekg(0, std::ios::beg);
+    auto size = static_cast<size_t>(end - ifs.tellg());
+    if (size == 0) {
+        ifs.close();
+        return OrbitalError{OrbitalError::IMPORT, "File is empty"};
+    }
+    auto code = static_cast<char*>(malloc(size + 1));
     if (code == NULL) {
-        fclose(fp);
+        ifs.close();
         return OrbitalError{OrbitalError::SYSTEM, "Memory allocation failed"};
     }
-    fread(code, 1, size, fp);
+    ifs.read(code, size);
     code[size] = 0;
-    fclose(fp);
+    ifs.close();
 
     this->ensureThreadState();
     PyObject* codeObject = Py_CompileString(code, this->m_file.c_str(), Py_file_input);
