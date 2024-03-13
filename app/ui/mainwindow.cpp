@@ -108,6 +108,7 @@ MainWindow::setPlots(const std::vector<PlotEditor::PlotInfo>& plots)
             plots[i].attributes.twoDimen.points.color,
             plots[i].attributes.twoDimen.points.size
         });
+        plot->plot2D()->setRescaleAxes(plots[i].attributes.twoDimen.autoRescaleAxes);
         plot->plotColorMap()->setRangeX({
             plots[i].attributes.colorMap.xRange.min,
             plots[i].attributes.colorMap.xRange.max
@@ -128,6 +129,8 @@ MainWindow::setPlots(const std::vector<PlotEditor::PlotInfo>& plots)
         color.setColorStopAt(0, plots[i].attributes.colorMap.color.min);
         color.setColorStopAt(1, plots[i].attributes.colorMap.color.max);
         plot->plotColorMap()->setColorGradient(color);
+        plot->plotColorMap()->setRescaleAxes(plots[i].attributes.colorMap.autoRescaleAxes);
+        plot->plotColorMap()->setRescaleData(plots[i].attributes.colorMap.autoRescaleData);
     }
 
     emit this->plotsSet(plots);

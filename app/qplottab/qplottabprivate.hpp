@@ -1,5 +1,13 @@
 #pragma once
 
+#include <QCheckBox>
+#include <QColorDialog>
+#include <QComboBox>
+#include <QDoubleSpinBox>
+#include <QGroupBox>
+#include <QHBoxLayout>
+#include <QPushButton>
+#include <QScrollArea>
 #include <QSpacerItem>
 
 #include "qplottab.hpp"
@@ -75,6 +83,24 @@ private:
     QLabel* m_label_height;
     QIntEdit* m_intEdit_width;
     QIntEdit* m_intEdit_height;
+};
+
+
+class AutoRescalePrivate : public QGroupBox
+{
+    Q_OBJECT
+
+public:
+    explicit AutoRescalePrivate(QWidget* parent, const QString& label, bool checked = false);
+
+    void set(bool);
+    bool get() const;
+    void setToolTip(const QString&);
+
+private:
+    QHBoxLayout* m_layout;
+    QLabel* m_label;
+    QCheckBox* m_checkBox;
 };
 
 
@@ -232,6 +258,8 @@ public:
     const QPlotTab::LineBox* lineBox() const override;
     QPlotTab::PointsBox* pointsBox() override;
     const QPlotTab::PointsBox* pointsBox() const override;
+    void setAutoRescaleAxes(bool) override;
+    bool autoRescaleAxes() const override;
 
 private:
     QVBoxLayout* m_layout;
@@ -242,6 +270,7 @@ private:
     RangeBoxPrivate* m_rangeBox_y;
     LineBoxPrivate* m_lineBox;
     PointsBoxPrivate* m_pointsBox;
+    AutoRescalePrivate* m_autoRescaleAxes;
     QSpacerItem* m_spacer;
 };
 
@@ -263,6 +292,10 @@ public:
     const QPlotTab::DataSizeBox* dataSizeBox() const override;
     QPlotTab::ColorBox* colorBox() override;
     const QPlotTab::ColorBox* colorBox() const override;
+    void setAutoRescaleAxes(bool) override;
+    bool autoRescaleAxes() const override;
+    void setAutoRescaleData(bool) override;
+    bool autoRescaleData() const override;
 
 private:
     QVBoxLayout* m_layout;
@@ -274,5 +307,7 @@ private:
     RangeBoxPrivate* m_rangeBox_z;
     DataSizeBoxPrivate* m_dataSizeBox;
     ColorBoxPrivate* m_colorBox;
+    AutoRescalePrivate* m_autoRescaleAxes;
+    AutoRescalePrivate* m_autoRescaleData;
     QSpacerItem* m_spacer;
 };

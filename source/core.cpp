@@ -172,6 +172,7 @@ static std::map<std::string, PlotProperty::Type> propertyMap{
     {"two_dimen.points.shape", PlotProperty::TWODIMEN_POINTS_SHAPE},
     {"two_dimen.points.color", PlotProperty::TWODIMEN_POINTS_COLOR},
     {"two_dimen.points.size", PlotProperty::TWODIMEN_POINTS_SIZE},
+    {"two_dimen.autorescale_axes", PlotProperty::TWODIMEN_AUTORS_AXES},
     {"color_map.x_range.min", PlotProperty::COLORMAP_XRANGE_MIN},
     {"color_map.x_range.max", PlotProperty::COLORMAP_XRANGE_MAX},
     {"color_map.y_range.min", PlotProperty::COLORMAP_YRANGE_MIN},
@@ -182,6 +183,8 @@ static std::map<std::string, PlotProperty::Type> propertyMap{
     {"color_map.data_size.y", PlotProperty::COLORMAP_DATASIZE_Y},
     {"color_map.color.min", PlotProperty::COLORMAP_COLOR_MIN},
     {"color_map.color.max", PlotProperty::COLORMAP_COLOR_MAX},
+    {"color_map.autorescale_axes", PlotProperty::COLORMAP_AUTORS_AXES},
+    {"color_map.autorescale_data", PlotProperty::COLORMAP_AUTORS_DATA},
 };
 
 

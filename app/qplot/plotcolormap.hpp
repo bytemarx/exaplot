@@ -18,7 +18,9 @@ public:
         const QCPRange& rangeZ = QCPRange{0, 1},
         int sizeX = 21,
         int sizeY = 21,
-        const QCPColorGradient& color = QCPColorGradient::GradientPreset::gpGrayscale
+        const QCPColorGradient& color = QCPColorGradient::GradientPreset::gpGrayscale,
+        bool rescaleAxes = true,
+        bool rescaleData = true
     );
     Type type() const override;
     void clear() override;
@@ -35,10 +37,12 @@ public:
     void setColorGradient(const QCPColorGradient&);
     QCPColorGradient colorGradient() const;
     void setCell(int, int, double);
+    void setRescaleAxes(bool);
     void setRescaleData(bool);
 
 private:
     QCPColorMap* m_map;
     QCPColorScale* m_colorScale;
+    bool m_rescaleAxes;
     bool m_rescaleData;
 };

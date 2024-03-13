@@ -120,6 +120,43 @@ MinSizeFramePrivate::height() const
 }
 
 
+AutoRescalePrivate::AutoRescalePrivate(
+    QWidget* parent,
+    const QString& label,
+    bool checked)
+    : QGroupBox{parent}
+    , m_layout{new QHBoxLayout{this}}
+    , m_label{new QLabel{label, this}}
+    , m_checkBox{new QCheckBox{this}}
+{
+    this->m_checkBox->setChecked(checked);
+    this->m_checkBox->setLayoutDirection(Qt::RightToLeft);
+    this->m_layout->addWidget(this->m_label);
+    this->m_layout->addWidget(this->m_checkBox);
+}
+
+
+void
+AutoRescalePrivate::set(bool checked)
+{
+    this->m_checkBox->setChecked(checked);
+}
+
+
+bool
+AutoRescalePrivate::get() const
+{
+    return this->m_checkBox->isChecked();
+}
+
+
+void
+AutoRescalePrivate::setToolTip(const QString& text)
+{
+    this->m_label->setToolTip(text);
+}
+
+
 RangeBoxPrivate::RangeBoxPrivate(
     QWidget* parent,
     const QString& title,
@@ -610,6 +647,7 @@ SubTab2DPrivate::SubTab2DPrivate(QWidget* parent)
     , m_rangeBox_y{new RangeBoxPrivate{m_contents, "Y-Range", -10, 10}}
     , m_lineBox{new LineBoxPrivate{m_contents, "Line"}}
     , m_pointsBox{new PointsBoxPrivate{m_contents, "Points"}}
+    , m_autoRescaleAxes{new AutoRescalePrivate{m_contents, "Auto-Rescale Axes"}}
     , m_spacer{new QSpacerItem{0, 0, QSizePolicy::Minimum, QSizePolicy::Expanding}}
 {
     this->m_rangeBox_x->setMinToolTip(QPlotTab::toolTips.twoDimen.xRange.min);
@@ -622,12 +660,14 @@ SubTab2DPrivate::SubTab2DPrivate(QWidget* parent)
     this->m_pointsBox->setShapeToolTip(QPlotTab::toolTips.twoDimen.points.shape);
     this->m_pointsBox->setColorToolTip(QPlotTab::toolTips.twoDimen.points.color);
     this->m_pointsBox->setSizeToolTip(QPlotTab::toolTips.twoDimen.points.size);
+    this->m_autoRescaleAxes->setToolTip(QPlotTab::toolTips.twoDimen.autoRescaleAxes);
     this->m_scrollArea->setFrameShape(QFrame::NoFrame);
     this->m_scrollArea->setWidgetResizable(true);
     this->m_layout_contents->addWidget(this->m_rangeBox_x);
     this->m_layout_contents->addWidget(this->m_rangeBox_y);
     this->m_layout_contents->addWidget(this->m_lineBox);
     this->m_layout_contents->addWidget(this->m_pointsBox);
+    this->m_layout_contents->addWidget(this->m_autoRescaleAxes);
     this->m_layout_contents->addItem(this->m_spacer);
     this->m_scrollArea->setWidget(this->m_contents);
     this->m_layout->setContentsMargins(0, 0, 0, 0);
@@ -691,6 +731,20 @@ SubTab2DPrivate::pointsBox() const
 }
 
 
+void
+SubTab2DPrivate::setAutoRescaleAxes(bool checked)
+{
+    this->m_autoRescaleAxes->set(checked);
+}
+
+
+bool
+SubTab2DPrivate::autoRescaleAxes() const
+{
+    return this->m_autoRescaleAxes->get();
+}
+
+
 SubTabColorMapPrivate::SubTabColorMapPrivate(QWidget* parent)
     : QWidget{parent}
     , m_layout{new QVBoxLayout{this}}
@@ -702,6 +756,8 @@ SubTabColorMapPrivate::SubTabColorMapPrivate(QWidget* parent)
     , m_rangeBox_z{new RangeBoxPrivate{m_contents, "Z-Range", 0, 1}}
     , m_dataSizeBox{new DataSizeBoxPrivate{m_contents, "Data Size", 21, 21}}
     , m_colorBox{new ColorBoxPrivate{m_contents, "Color"}}
+    , m_autoRescaleAxes{new AutoRescalePrivate{m_contents, "Auto-Rescale Axes"}}
+    , m_autoRescaleData{new AutoRescalePrivate{m_contents, "Auto-Rescale Data"}}
     , m_spacer{new QSpacerItem{0, 0, QSizePolicy::Minimum, QSizePolicy::Expanding}}
 {
     this->m_rangeBox_x->setMinToolTip(QPlotTab::toolTips.colorMap.xRange.min);
@@ -714,6 +770,8 @@ SubTabColorMapPrivate::SubTabColorMapPrivate(QWidget* parent)
     this->m_dataSizeBox->setYToolTip(QPlotTab::toolTips.colorMap.dataSize.y);
     this->m_colorBox->setMinToolTip(QPlotTab::toolTips.colorMap.color.min);
     this->m_colorBox->setMaxToolTip(QPlotTab::toolTips.colorMap.color.max);
+    this->m_autoRescaleAxes->setToolTip(QPlotTab::toolTips.colorMap.autoRescaleAxes);
+    this->m_autoRescaleData->setToolTip(QPlotTab::toolTips.colorMap.autoRescaleData);
     this->m_scrollArea->setFrameShape(QFrame::NoFrame);
     this->m_scrollArea->setWidgetResizable(true);
     this->m_layout_contents->addWidget(this->m_rangeBox_x);
@@ -721,6 +779,8 @@ SubTabColorMapPrivate::SubTabColorMapPrivate(QWidget* parent)
     this->m_layout_contents->addWidget(this->m_rangeBox_z);
     this->m_layout_contents->addWidget(this->m_dataSizeBox);
     this->m_layout_contents->addWidget(this->m_colorBox);
+    this->m_layout_contents->addWidget(this->m_autoRescaleAxes);
+    this->m_layout_contents->addWidget(this->m_autoRescaleData);
     this->m_layout_contents->addItem(this->m_spacer);
     this->m_scrollArea->setWidget(this->m_contents);
     this->m_layout->setContentsMargins(0, 0, 0, 0);
@@ -795,4 +855,32 @@ const QPlotTab::ColorBox*
 SubTabColorMapPrivate::colorBox() const
 {
     return static_cast<const QPlotTab::ColorBox*>(this->m_colorBox);
+}
+
+
+void
+SubTabColorMapPrivate::setAutoRescaleAxes(bool checked)
+{
+    this->m_autoRescaleAxes->set(checked);
+}
+
+
+bool
+SubTabColorMapPrivate::autoRescaleAxes() const
+{
+    return this->m_autoRescaleAxes->get();
+}
+
+
+void
+SubTabColorMapPrivate::setAutoRescaleData(bool checked)
+{
+    this->m_autoRescaleData->set(checked);
+}
+
+
+bool
+SubTabColorMapPrivate::autoRescaleData() const
+{
+    return this->m_autoRescaleData->get();
 }

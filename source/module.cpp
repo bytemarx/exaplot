@@ -451,6 +451,8 @@ orbital__set_plot_property(PyObject* module, PyObject* args)
         PlotProperty::Value value;
 
         switch (prop) {
+
+        // 'str' types
         case PlotProperty::TITLE:
         case PlotProperty::XAXIS:
         case PlotProperty::YAXIS:
@@ -471,6 +473,8 @@ orbital__set_plot_property(PyObject* module, PyObject* args)
                 value = std::string{c_value};
             }
             break;
+
+        // 'int' types
         case PlotProperty::MINSIZE_W:
         case PlotProperty::MINSIZE_H:
         case PlotProperty::COLORMAP_DATASIZE_X:
@@ -493,6 +497,8 @@ orbital__set_plot_property(PyObject* module, PyObject* args)
                 value = static_cast<int>(long_value);
             }
             break;
+
+        // 'numbers.Real' types
         case PlotProperty::TWODIMEN_XRANGE_MIN:
         case PlotProperty::TWODIMEN_XRANGE_MAX:
         case PlotProperty::TWODIMEN_YRANGE_MIN:
@@ -519,6 +525,18 @@ orbital__set_plot_property(PyObject* module, PyObject* args)
                 value = double_value;
             }
             break;
+
+        // 'bool' types
+        case PlotProperty::TWODIMEN_AUTORS_AXES:
+        case PlotProperty::COLORMAP_AUTORS_AXES:
+        case PlotProperty::COLORMAP_AUTORS_DATA:
+            if (!PyBool_Check(pyBorrowed_value)) {
+                PyErr_Format(PyExc_TypeError, "%s must be type 'bool'", c_prop);
+                return NULL;
+            }
+            value = pyBorrowed_value == Py_True;
+            break;
+
         default:
             PyErr_Format(PyExc_KeyError, "Invalid property '%s'", c_prop);
             return NULL;

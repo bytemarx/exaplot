@@ -14,50 +14,53 @@ decltype(QPlotTab::toolTips) QPlotTab::toolTips = {
     .minSize = {
         .minSize = PlotProperty::toStr(PlotProperty::MINSIZE),
         .width = PlotProperty::toStr(PlotProperty::MINSIZE_W),
-        .height = PlotProperty::toStr(PlotProperty::MINSIZE_H)
+        .height = PlotProperty::toStr(PlotProperty::MINSIZE_H),
     },
     .twoDimen = {
         .xRange = {
             .min = PlotProperty::toStr(PlotProperty::TWODIMEN_XRANGE_MIN),
-            .max = PlotProperty::toStr(PlotProperty::TWODIMEN_XRANGE_MAX)
+            .max = PlotProperty::toStr(PlotProperty::TWODIMEN_XRANGE_MAX),
         },
         .yRange = {
             .min = PlotProperty::toStr(PlotProperty::TWODIMEN_YRANGE_MIN),
-            .max = PlotProperty::toStr(PlotProperty::TWODIMEN_YRANGE_MAX)
+            .max = PlotProperty::toStr(PlotProperty::TWODIMEN_YRANGE_MAX),
         },
         .line = {
             .type = PlotProperty::toStr(PlotProperty::TWODIMEN_LINE_TYPE),
             .color = PlotProperty::toStr(PlotProperty::TWODIMEN_LINE_COLOR),
-            .style = PlotProperty::toStr(PlotProperty::TWODIMEN_LINE_STYLE)
+            .style = PlotProperty::toStr(PlotProperty::TWODIMEN_LINE_STYLE),
         },
         .points = {
             .shape = PlotProperty::toStr(PlotProperty::TWODIMEN_POINTS_SHAPE),
             .color = PlotProperty::toStr(PlotProperty::TWODIMEN_POINTS_COLOR),
-            .size = PlotProperty::toStr(PlotProperty::TWODIMEN_POINTS_SIZE)
-        }
+            .size = PlotProperty::toStr(PlotProperty::TWODIMEN_POINTS_SIZE),
+        },
+        .autoRescaleAxes = PlotProperty::toStr(PlotProperty::TWODIMEN_AUTORS_AXES),
     },
     .colorMap = {
         .xRange = {
             .min = PlotProperty::toStr(PlotProperty::COLORMAP_XRANGE_MIN),
-            .max = PlotProperty::toStr(PlotProperty::COLORMAP_XRANGE_MAX)
+            .max = PlotProperty::toStr(PlotProperty::COLORMAP_XRANGE_MAX),
         },
         .yRange = {
             .min = PlotProperty::toStr(PlotProperty::COLORMAP_YRANGE_MIN),
-            .max = PlotProperty::toStr(PlotProperty::COLORMAP_YRANGE_MAX)
+            .max = PlotProperty::toStr(PlotProperty::COLORMAP_YRANGE_MAX),
         },
         .zRange = {
             .min = PlotProperty::toStr(PlotProperty::COLORMAP_ZRANGE_MIN),
-            .max = PlotProperty::toStr(PlotProperty::COLORMAP_ZRANGE_MAX)
+            .max = PlotProperty::toStr(PlotProperty::COLORMAP_ZRANGE_MAX),
         },
         .dataSize = {
             .x = PlotProperty::toStr(PlotProperty::COLORMAP_DATASIZE_X),
-            .y = PlotProperty::toStr(PlotProperty::COLORMAP_DATASIZE_Y)
+            .y = PlotProperty::toStr(PlotProperty::COLORMAP_DATASIZE_Y),
         },
         .color = {
             .min = PlotProperty::toStr(PlotProperty::COLORMAP_COLOR_MIN),
-            .max = PlotProperty::toStr(PlotProperty::COLORMAP_COLOR_MAX)
-        }
-    }
+            .max = PlotProperty::toStr(PlotProperty::COLORMAP_COLOR_MAX),
+        },
+        .autoRescaleAxes = PlotProperty::toStr(PlotProperty::COLORMAP_AUTORS_AXES),
+        .autoRescaleData = PlotProperty::toStr(PlotProperty::COLORMAP_AUTORS_DATA),
+    },
 };
 
 
@@ -74,7 +77,7 @@ QPlotTab::MinSizeFrame::cache() const
 {
     return {
         .width = this->width(),
-        .height = this->height()
+        .height = this->height(),
     };
 }
 
@@ -92,7 +95,7 @@ QPlotTab::RangeBox::cache() const
 {
     return {
         .min = this->min(),
-        .max = this->max()
+        .max = this->max(),
     };
 }
 
@@ -112,7 +115,7 @@ QPlotTab::LineBox::cache() const
     return {
         .type = this->type(),
         .color = this->color(),
-        .style = this->style()
+        .style = this->style(),
     };
 }
 
@@ -132,7 +135,7 @@ QPlotTab::PointsBox::cache() const
     return {
         .shape = this->shape(),
         .color = this->color(),
-        .size = this->size()
+        .size = this->size(),
     };
 }
 
@@ -150,7 +153,7 @@ QPlotTab::DataSizeBox::cache() const
 {
     return {
         .x = this->x(),
-        .y = this->y()
+        .y = this->y(),
     };
 }
 
@@ -168,7 +171,7 @@ QPlotTab::ColorBox::cache() const
 {
     return {
         .min = this->min(),
-        .max = this->max()
+        .max = this->max(),
     };
 }
 
@@ -180,6 +183,7 @@ QPlotTab::SubTab2D::setCache(const QPlotTab::SubTab2D::Cache& cache)
     this->rangeBoxY()->setCache(cache.yRange);
     this->lineBox()->setCache(cache.line);
     this->pointsBox()->setCache(cache.points);
+    this->setAutoRescaleAxes(cache.autoRescaleAxes);
 }
 
 
@@ -190,7 +194,8 @@ QPlotTab::SubTab2D::cache() const
         .xRange = this->rangeBoxX()->cache(),
         .yRange = this->rangeBoxY()->cache(),
         .line = this->lineBox()->cache(),
-        .points = this->pointsBox()->cache()
+        .points = this->pointsBox()->cache(),
+        .autoRescaleAxes = this->autoRescaleAxes(),
     };
 }
 
@@ -202,6 +207,8 @@ void QPlotTab::SubTabColorMap::setCache(const QPlotTab::SubTabColorMap::Cache& c
     this->rangeBoxZ()->setCache(cache.zRange);
     this->dataSizeBox()->setCache(cache.dataSize);
     this->colorBox()->setCache(cache.color);
+    this->setAutoRescaleAxes(cache.autoRescaleAxes);
+    this->setAutoRescaleData(cache.autoRescaleData);
 }
 
 
@@ -213,7 +220,9 @@ QPlotTab::SubTabColorMap::cache() const
         .yRange = this->rangeBoxY()->cache(),
         .zRange = this->rangeBoxZ()->cache(),
         .dataSize = this->dataSizeBox()->cache(),
-        .color = this->colorBox()->cache()
+        .color = this->colorBox()->cache(),
+        .autoRescaleAxes = this->autoRescaleAxes(),
+        .autoRescaleData = this->autoRescaleData(),
     };
 }
 
@@ -282,7 +291,7 @@ QPlotTab::cache() const
         .yAxis = this->m_lineEdit_yAxis->text(),
         .minSize = this->m_minSizeFrame->cache(),
         .twoDimen = this->m_tab2D->cache(),
-        .colorMap = this->m_tabColorMap->cache()
+        .colorMap = this->m_tabColorMap->cache(),
     };
 }
 

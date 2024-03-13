@@ -245,6 +245,7 @@ Interface::setPlotProperty(
         }
         break;
     case PlotProperty::TWODIMEN_POINTS_SIZE: properties.twoDimen.points.size = std::get<double>(value); break;
+    case PlotProperty::TWODIMEN_AUTORS_AXES: properties.twoDimen.autoRescaleAxes = std::get<bool>(value); break;
     case PlotProperty::COLORMAP_XRANGE_MIN: properties.colorMap.xRange.min = std::get<double>(value); break;
     case PlotProperty::COLORMAP_XRANGE_MAX: properties.colorMap.xRange.max = std::get<double>(value); break;
     case PlotProperty::COLORMAP_YRANGE_MIN: properties.colorMap.yRange.min = std::get<double>(value); break;
@@ -273,6 +274,8 @@ Interface::setPlotProperty(
             properties.colorMap.color.max = color;
         }
         break;
+    case PlotProperty::COLORMAP_AUTORS_AXES: properties.colorMap.autoRescaleAxes = std::get<bool>(value); break;
+    case PlotProperty::COLORMAP_AUTORS_DATA: properties.colorMap.autoRescaleData = std::get<bool>(value); break;
     default:
         PyErr_Format(PyExc_KeyError, "invalid property '%s'", property.c_str());
         return NULL;
@@ -354,6 +357,7 @@ Interface::getPlotProperty(std::size_t plotID, const orbital::PlotProperty& prop
         break;
     case PlotProperty::TWODIMEN_POINTS_COLOR: pyOwned_value = PyUnicode_FromString(attributes.twoDimen.points.color.name().toStdString().c_str()); break;
     case PlotProperty::TWODIMEN_POINTS_SIZE: pyOwned_value = PyFloat_FromDouble(attributes.twoDimen.points.size); break;
+    case PlotProperty::TWODIMEN_AUTORS_AXES: pyOwned_value = attributes.twoDimen.autoRescaleAxes ? Py_True : Py_False; break;
     case PlotProperty::COLORMAP_XRANGE_MIN: pyOwned_value = PyFloat_FromDouble(attributes.colorMap.xRange.min); break;
     case PlotProperty::COLORMAP_XRANGE_MAX: pyOwned_value = PyFloat_FromDouble(attributes.colorMap.xRange.max); break;
     case PlotProperty::COLORMAP_YRANGE_MIN: pyOwned_value = PyFloat_FromDouble(attributes.colorMap.yRange.min); break;
@@ -364,6 +368,8 @@ Interface::getPlotProperty(std::size_t plotID, const orbital::PlotProperty& prop
     case PlotProperty::COLORMAP_DATASIZE_Y: pyOwned_value = PyLong_FromLong(static_cast<long>(attributes.colorMap.dataSize.y)); break;
     case PlotProperty::COLORMAP_COLOR_MIN: pyOwned_value = PyUnicode_FromString(attributes.colorMap.color.min.name().toStdString().c_str()); break;
     case PlotProperty::COLORMAP_COLOR_MAX: pyOwned_value = PyUnicode_FromString(attributes.colorMap.color.max.name().toStdString().c_str()); break;
+    case PlotProperty::COLORMAP_AUTORS_AXES: pyOwned_value = attributes.colorMap.autoRescaleAxes ? Py_True : Py_False; break;
+    case PlotProperty::COLORMAP_AUTORS_DATA: pyOwned_value = attributes.colorMap.autoRescaleData ? Py_True : Py_False; break;
     default:
         PyErr_Format(PyExc_KeyError, "invalid property '%s'", property.c_str());
         return NULL;

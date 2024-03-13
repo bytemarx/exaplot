@@ -83,7 +83,7 @@ class _PlotProperties:
             self.y_range.min = value[0]
             self.y_range.max = value[1]
 
-    class TwoDimen(_Tab):
+    class TwoDimen(_Tab, autorescale_axes=bool):
         @property
         def line(self):
             return _PlotProperties.Line(self._n, f"{self._id}.line")
@@ -108,7 +108,7 @@ class _PlotProperties:
             self.points.color = value[1]
             self.points.size = value[2]
 
-    class ColorMap(_Tab):
+    class ColorMap(_Tab, autorescale_axes=bool, autorescale_data=bool):
         @property
         def z_range(self):
             return _PlotProperties.Range(self._n, f"{self._id}.z_range")

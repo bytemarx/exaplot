@@ -9,10 +9,12 @@ Plot2D::Plot2D(
     const QCPRange& rangeY,
     QCPGraph::LineStyle lineStyle,
     const QCPScatterStyle& scatStyle,
-    const QPen& pen
+    const QPen& pen,
+    bool rescaleAxes
 )
     : Plot{title, labelX, labelY}
     , m_graph{m_plot->addGraph()}
+    , m_rescaleAxes{rescaleAxes}
 {
     if (this->m_graph == nullptr)
         throw std::runtime_error{"Failed to add graph"};
@@ -42,7 +44,8 @@ void
 Plot2D::replot()
 {
     this->m_plot->replot(QCustomPlot::rpQueuedReplot);
-    this->m_plot->rescaleAxes();
+    if (this->m_rescaleAxes)
+        this->m_plot->rescaleAxes();
 }
 
 
@@ -127,4 +130,11 @@ void
 Plot2D::addData(const QVector<double>& x, const QVector<double>& y)
 {
     this->m_graph->addData(x, y);
+}
+
+
+void
+Plot2D::setRescaleAxes(bool rescaleAxes)
+{
+    this->m_rescaleAxes = rescaleAxes;
 }

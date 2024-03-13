@@ -193,6 +193,9 @@ AppUI::setPlotProperty(
             properties.twoDimen.points.size
         });
         break;
+    case PlotProperty::TWODIMEN_AUTORS_AXES:
+        plot->plot2D()->setRescaleAxes(properties.twoDimen.autoRescaleAxes);
+        break;
     case PlotProperty::COLORMAP_XRANGE_MIN:
     case PlotProperty::COLORMAP_XRANGE_MAX:
         plot->plotColorMap()->setRangeX({properties.colorMap.xRange.min, properties.colorMap.xRange.max});
@@ -217,6 +220,12 @@ AppUI::setPlotProperty(
             colorGradient.setColorStopAt(1, properties.colorMap.color.max);
             plot->plotColorMap()->setColorGradient(colorGradient);
         }
+        break;
+    case PlotProperty::COLORMAP_AUTORS_AXES:
+        plot->plotColorMap()->setRescaleAxes(properties.colorMap.autoRescaleAxes);
+        break;
+    case PlotProperty::COLORMAP_AUTORS_DATA:
+        plot->plotColorMap()->setRescaleData(properties.colorMap.autoRescaleData);
         break;
     default:
         return this->displayError(QString{"Invalid plot property (%1)"}.arg(property));

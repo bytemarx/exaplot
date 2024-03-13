@@ -11,7 +11,7 @@ namespace orbital {
 class PlotProperty
 {
 public:
-    typedef std::variant<int, double, std::string> Value;
+    typedef std::variant<int, double, std::string, bool> Value;
     enum Type {
         TITLE,                  // str
         XAXIS,                  // str
@@ -29,6 +29,7 @@ public:
         TWODIMEN_POINTS_SHAPE,  // str
         TWODIMEN_POINTS_COLOR,  // str
         TWODIMEN_POINTS_SIZE,   // float
+        TWODIMEN_AUTORS_AXES,   // bool
         COLORMAP_XRANGE_MIN,    // float
         COLORMAP_XRANGE_MAX,    // float
         COLORMAP_YRANGE_MIN,    // float
@@ -38,7 +39,9 @@ public:
         COLORMAP_DATASIZE_X,    // int
         COLORMAP_DATASIZE_Y,    // int
         COLORMAP_COLOR_MIN,     // str
-        COLORMAP_COLOR_MAX      // str
+        COLORMAP_COLOR_MAX,     // str
+        COLORMAP_AUTORS_AXES,   // bool
+        COLORMAP_AUTORS_DATA,   // bool
     };
 
     static const char* toStr(Type);

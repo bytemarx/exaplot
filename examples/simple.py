@@ -7,6 +7,9 @@ from orbital import RunParam, init, stop, plot
 init(duration = RunParam(float, display="Duration (s)"))
 plot = plot[1]
 plot.title = "Simple Plot Example"
+plot.two_dimen.x_range = -2.5, 2.5
+plot.two_dimen.y_range = -1, 1
+plot.two_dimen.autorescale_axes = True
 
 
 def run(duration: float):

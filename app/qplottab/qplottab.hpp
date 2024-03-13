@@ -1,18 +1,11 @@
 #pragma once
 
-#include <QWidget>
-#include <QVBoxLayout>
-#include <QScrollArea>
-#include <QGroupBox>
-#include <QHBoxLayout>
+#include <QFormLayout>
+#include <QFrame>
 #include <QLabel>
 #include <QLineEdit>
-#include <QFormLayout>
-#include <QComboBox>
-#include <QDoubleSpinBox>
-#include <QPushButton>
-#include <QColorDialog>
-#include <QFrame>
+#include <QVBoxLayout>
+#include <QWidget>
 
 #include "qcustomplot.h"
 #include "qplot.hpp"
@@ -171,6 +164,7 @@ public:
             RangeBox::Cache yRange;
             LineBox::Cache line;
             PointsBox::Cache points;
+            bool autoRescaleAxes;
         } Cache;
         typedef struct
         {
@@ -178,6 +172,7 @@ public:
             RangeBox::ToolTips yRange;
             LineBox::ToolTips line;
             PointsBox::ToolTips points;
+            QString autoRescaleAxes;
         } ToolTips;
         void setCache(const Cache&);
         Cache cache() const;
@@ -189,6 +184,8 @@ public:
         virtual const LineBox* lineBox() const = 0;
         virtual PointsBox* pointsBox() = 0;
         virtual const PointsBox* pointsBox() const = 0;
+        virtual void setAutoRescaleAxes(bool) = 0;
+        virtual bool autoRescaleAxes() const = 0;
     };
 
     class SubTabColorMap
@@ -201,6 +198,8 @@ public:
             RangeBox::Cache zRange;
             DataSizeBox::Cache dataSize;
             ColorBox::Cache color;
+            bool autoRescaleAxes;
+            bool autoRescaleData;
         } Cache;
         typedef struct
         {
@@ -209,6 +208,8 @@ public:
             RangeBox::ToolTips zRange;
             DataSizeBox::ToolTips dataSize;
             ColorBox::ToolTips color;
+            QString autoRescaleAxes;
+            QString autoRescaleData;
         } ToolTips;
         void setCache(const Cache&);
         Cache cache() const;
@@ -222,6 +223,10 @@ public:
         virtual const DataSizeBox* dataSizeBox() const = 0;
         virtual ColorBox* colorBox() = 0;
         virtual const ColorBox* colorBox() const = 0;
+        virtual void setAutoRescaleAxes(bool) = 0;
+        virtual bool autoRescaleAxes() const = 0;
+        virtual void setAutoRescaleData(bool) = 0;
+        virtual bool autoRescaleData() const = 0;
     };
 
     typedef struct

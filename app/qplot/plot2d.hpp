@@ -16,7 +16,8 @@ public:
         const QCPRange& rangeY = QCPRange{-10, 10},
         QCPGraph::LineStyle lineStyle = QCPGraph::LineStyle::lsNone,
         const QCPScatterStyle& scatStyle = QCPScatterStyle{},
-        const QPen& pen = QPen{}
+        const QPen& pen = QPen{},
+        bool rescaleAxes = true
     );
     Type type() const override;
     void clear() override;
@@ -33,7 +34,9 @@ public:
     QPen pen() const;
     void addData(double x, double y);
     void addData(const QVector<double>& x, const QVector<double>& y);
+    void setRescaleAxes(bool);
 
 private:
     QCPGraph* m_graph;
+    bool m_rescaleAxes;
 };
