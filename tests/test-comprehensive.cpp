@@ -17,7 +17,7 @@ class ComprehensiveTest : public ModuleTest
 {
 public:
     void init(const std::vector<orbital::RunParam>& params, const std::vector<orbital::GridPoint>& plots) override;
-    void msg(const std::string& message, bool append) override {};
+    void msg(const std::string& message, bool append) override;
     void plot2D(std::size_t plotID, double x, double y) override {};
     void plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y) override {};
     void clear(std::size_t plotID) override {};
@@ -142,6 +142,18 @@ ComprehensiveTest::init(
         ASSERT_STREQ(param.display.c_str(), expected[i].display.c_str());
         i++;
     }
+}
+
+TEST_F(ComprehensiveTest, TestMsg)
+{
+    this->run("test-comprehensive-msg.py");
+}
+
+void
+ComprehensiveTest::msg(const std::string& message, bool append)
+{
+    ASSERT_STREQ(message.c_str(), "test");
+    ASSERT_TRUE(append);
 }
 
 
