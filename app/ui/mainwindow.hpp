@@ -25,7 +25,7 @@ public:
     QPushButton* buttonRun();
     QPushButton* buttonStop();
     void setPlots(const std::vector<PlotEditor::PlotInfo>&);
-    void setMessage(const QString&, bool);
+    void setMessage(const QString& = {}, bool = false);
     void initArgs(const std::vector<std::pair<std::string, std::string>>&);
     std::vector<std::string> scriptArgs() const;
     void setScriptStatus(const QString&);
