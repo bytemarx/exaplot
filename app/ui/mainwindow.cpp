@@ -138,9 +138,12 @@ MainWindow::setPlots(const std::vector<PlotEditor::PlotInfo>& plots)
 
 
 void
-MainWindow::setMessage(const QString& message)
+MainWindow::setMessage(const QString& message, bool append)
 {
-    this->m_ui.plainTextEdit_messages->setPlainText(message);
+    if (append)
+        this->m_ui.plainTextEdit_messages->appendPlainText(message);
+    else
+        this->m_ui.plainTextEdit_messages->setPlainText(message);
 }
 
 

@@ -92,9 +92,9 @@ AppUI::scriptArgs() const
 
 
 void
-AppUI::setMessage(const QString& message)
+AppUI::setMessage(const QString& message, bool append)
 {
-    this->mainWindow->setMessage(message);
+    this->mainWindow->setMessage(message, append);
 }
 
 

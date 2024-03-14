@@ -149,7 +149,7 @@ AppMain::module_init(
 void
 AppMain::module_msg(const std::string& message, bool append)
 {
-    this->ui.setMessage(QString::fromStdString(message));
+    this->ui.setMessage(QString::fromStdString(message), append);
 }
 
 
