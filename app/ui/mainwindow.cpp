@@ -59,6 +59,13 @@ MainWindow::actionPlotEditor()
 }
 
 
+/**
+ * @brief Resets plot area with new plots specified by the given `PlotInfo`s. Primarily uses
+ * the return of `PlotEditor::plots()` as the input. The ideal control flow for altering many
+ * plots at once is to configure them in the plot editor first and then call this method.
+ * 
+ * @param plots 
+ */
 void
 MainWindow::setPlots(const std::vector<PlotEditor::PlotInfo>& plots)
 {
@@ -137,6 +144,12 @@ MainWindow::setPlots(const std::vector<PlotEditor::PlotInfo>& plots)
 }
 
 
+/**
+ * @brief Updates the script message box.
+ * 
+ * @param message 
+ * @param append 
+ */
 void
 MainWindow::setMessage(const QString& message, bool append)
 {
@@ -147,6 +160,11 @@ MainWindow::setMessage(const QString& message, bool append)
 }
 
 
+/**
+ * @brief Initialize the main window based on the arguments passed to the 'init' function.
+ * 
+ * @param params 
+ */
 void
 MainWindow::initArgs(const std::vector<std::pair<std::string, std::string>>& params)
 {
@@ -161,6 +179,11 @@ MainWindow::initArgs(const std::vector<std::pair<std::string, std::string>>& par
 }
 
 
+/**
+ * @brief Returns the current script run arguments.
+ * 
+ * @return std::vector<std::string> 
+ */
 std::vector<std::string>
 MainWindow::scriptArgs() const
 {
@@ -173,6 +196,11 @@ MainWindow::scriptArgs() const
 }
 
 
+/**
+ * @brief Updates the script status box.
+ * 
+ * @param message 
+ */
 void
 MainWindow::setScriptStatus(const QString& message)
 {
@@ -180,6 +208,12 @@ MainWindow::setScriptStatus(const QString& message)
 }
 
 
+/**
+ * @brief Retrieves the specified plot.
+ * 
+ * @param n 
+ * @return QPlot* 
+ */
 QPlot*
 MainWindow::plot(std::size_t n)
 {
@@ -187,6 +221,11 @@ MainWindow::plot(std::size_t n)
 }
 
 
+/**
+ * @brief Returns the current number of plots.
+ * 
+ * @return std::size_t 
+ */
 std::size_t
 MainWindow::plotCount() const
 {
@@ -194,6 +233,11 @@ MainWindow::plotCount() const
 }
 
 
+/**
+ * @brief Sets the enable state of the "Run" button.
+ * 
+ * @param enable 
+ */
 void
 MainWindow::enableRun(bool enable)
 {
@@ -201,6 +245,11 @@ MainWindow::enableRun(bool enable)
 }
 
 
+/**
+ * @brief Sets the enable state of the "Stop" button.
+ * 
+ * @param enable 
+ */
 void
 MainWindow::enableStop(bool enable)
 {
