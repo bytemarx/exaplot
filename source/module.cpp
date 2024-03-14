@@ -70,7 +70,7 @@ PyObject*
 orbital_init(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
 {
     std::vector<RunParam> params;
-    std::vector<GridPoint> plots{{.x=0, .dx=1, .y=0, .dy=1}};
+    std::vector<GridPoint> plots{{.x=0, .dx=0, .y=0, .dy=0}};
 
     if (nargs > 1) {
         PyErr_Format(PyExc_TypeError, ORBITAL_INIT "() takes from 0 to 1 positional arguments but %zd were given", nargs);
@@ -91,9 +91,9 @@ orbital_init(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject
             for (decltype(n_plots) i_plot = 0; i_plot < n_plots; ++i_plot) {
                 plots.push_back({
                     .x = static_cast<GridPoint_t>(i_plot),
-                    .dx = 1,
+                    .dx = 0,
                     .y = 0,
-                    .dy = 1,
+                    .dy = 0,
                 });
             }
         } else if (PyList_Check(pyBorrowed_plots)) {
