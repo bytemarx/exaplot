@@ -142,7 +142,8 @@ AppMain::module_init(
     for (const auto& param : params) {
         paramDisplays.push_back({param.display, param.value});
     }
-    this->ui.initArgs(paramDisplays);
+    auto result = this->ui.init(plots, paramDisplays);
+    emit this->iface.initializationCompleted(result);
 }
 
 

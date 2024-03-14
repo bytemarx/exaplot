@@ -72,6 +72,7 @@ AppUI::reset()
     this->plotEditorDialog->reset();
     this->mainWindow->setPlots(this->plotEditorDialog->plots());
     this->mainWindow->plot(0)->clear();
+    this->mainWindow->setMessage();
 }
 
 
@@ -98,10 +99,17 @@ AppUI::setMessage(const QString& message, bool append)
 }
 
 
-void
-AppUI::initArgs(const std::vector<std::pair<std::string, std::string>>& params)
+bool
+AppUI::init(
+    const std::vector<orbital::GridPoint>& arrangement,
+    const std::vector<std::pair<std::string, std::string>>& params)
 {
+    if (!this->plotEditorDialog->setArrangement(arrangement))
+        return false;
+
+    this->mainWindow->setPlots(this->plotEditorDialog->plots());
     this->mainWindow->initArgs(params);
+    return true;
 }
 
 

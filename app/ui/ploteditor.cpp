@@ -84,6 +84,16 @@ PlotEditor::setSelectedPlot(std::size_t plot, QPlot::Type selected)
 }
 
 
+bool
+PlotEditor::setArrangement(const std::vector<orbital::GridPoint>& arrangement)
+{
+    if (!this->ui.buttonGrid->setArrangement(arrangement))
+        return false;
+    this->applyArrangement();
+    return true;
+}
+
+
 void
 PlotEditor::open()
 {
@@ -125,7 +135,7 @@ PlotEditor::showArrangement()
 {
     QString arrangementStr('[');
     for (const auto& button : this->ui.buttonGrid->arrangement()) {
-        arrangementStr.append('[');
+        arrangementStr.append('(');
         arrangementStr.append(QString::number(button.x));
         arrangementStr.append(',');
         arrangementStr.append(QString::number(button.dx));
@@ -133,7 +143,7 @@ PlotEditor::showArrangement()
         arrangementStr.append(QString::number(button.y));
         arrangementStr.append(',');
         arrangementStr.append(QString::number(button.dy));
-        arrangementStr.append("],");
+        arrangementStr.append("),");
     }
     arrangementStr.back() = QChar(']');
 

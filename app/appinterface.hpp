@@ -35,6 +35,7 @@ public:
 Q_SIGNALS:
     void fatalError(int);
     void scriptErrored(const QString&, const QString&);
+    void initializationCompleted(bool);
     void runCompleted(const QString&);
     void module_init(const std::vector<orbital::RunParam>&, const std::vector<orbital::GridPoint>&) const;
     void module_msg(const std::string&, bool) const;

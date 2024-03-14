@@ -25,7 +25,7 @@ public:
     void clear();
     std::vector<std::string> scriptArgs() const;
     void setMessage(const QString&, bool);
-    void initArgs(const std::vector<std::pair<std::string, std::string>>&);
+    bool init(const std::vector<orbital::GridPoint>&, const std::vector<std::pair<std::string, std::string>>&);
     void setScriptStatus(const QString& = "");
     QPlot* plot(std::size_t);
     std::size_t plotCount() const;

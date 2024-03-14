@@ -19,6 +19,21 @@ Interface::init(
 {
     this->params = params;
     emit this->module_init(params, plots);
+    QEventLoop waitLoop;
+    bool status = true;
+    auto conn = QObject::connect(
+        this, &Interface::initializationCompleted,
+        [&](bool result){ status = result; waitLoop.quit(); }
+    );
+    waitLoop.exec();
+    if (!QObject::disconnect(conn)) {
+        PyErr_SetString(PyExc_SystemError, "!!!Failed to disconnect wait loop!!!");
+        return NULL;
+    }
+    if (!status) {
+        PyErr_SetString(PyExc_ValueError, "Invalid plot arrangement");
+        return NULL;
+    }
     Py_RETURN_NONE;
 }
 
