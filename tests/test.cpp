@@ -204,7 +204,7 @@ TEST_F(BaselineTest, Reload)
         file.close();
         auto error = mod->reload();
         ASSERT_TRUE(error);
-        ASSERT_STREQ(error.traceback().c_str(), "  File \"" TEST_SCRIPTS_DIR "/baseline/reload.py\", line 1, in <module>\n    assert(False)\n");
+        ASSERT_STREQ(error.traceback().c_str(), "  File \"" TEST_SCRIPTS_DIR "/baseline/reload.py\", line 1, in <module>\n    assert(False)\n           ^^^^^\n");
     }
     delete core;
     delete iface;
