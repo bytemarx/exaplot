@@ -37,7 +37,7 @@ updateIds(const Matrix<QButtonGridNode*>* m)
  */
 static bool
 isArrangementValid(
-    const QList<GridPoint>& arrangement,
+    const std::vector<GridPoint>& arrangement,
     GridPoint_t& cols,
     GridPoint_t& rows)
 {
@@ -126,12 +126,12 @@ QButtonGrid::~QButtonGrid()
 /**
  * @brief Returns the current button arrangement.
  * 
- * @return QList<GridPoint> 
+ * @return std::vector<GridPoint> 
  */
-QList<GridPoint>
+std::vector<GridPoint>
 QButtonGrid::arrangement() const
 {
-    QList<GridPoint> arrangement;
+    std::vector<GridPoint> arrangement;
     for (decltype(this->m->nRows()) r = 0; r < this->m->nRows(); ++r) {
         for (decltype(this->m->nCols()) c = 0; c < this->m->nCols(); ++c) {
             if (this->m->itemAt(c, r)->isRoot()) {
@@ -155,7 +155,7 @@ QButtonGrid::arrangement() const
  * @param arrangement 
  */
 bool
-QButtonGrid::setArrangement(const QList<GridPoint>& arrangement)
+QButtonGrid::setArrangement(const std::vector<GridPoint>& arrangement)
 {
     GridPoint_t cols;
     GridPoint_t rows;

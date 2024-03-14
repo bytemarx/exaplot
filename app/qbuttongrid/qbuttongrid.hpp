@@ -1,10 +1,11 @@
 #pragma once
 
 #include <QWidget>
-#include <QList>
 #include <QGridLayout>
 
 #include "orbital.hpp"
+
+#include <vector>
 
 
 class QButtonGridNode;
@@ -21,8 +22,8 @@ public:
     QButtonGrid(const QButtonGrid&) = delete;
     ~QButtonGrid();
 
-    QList<GridPoint> arrangement() const;
-    bool setArrangement(const QList<GridPoint>&);
+    std::vector<GridPoint> arrangement() const;
+    bool setArrangement(const std::vector<GridPoint>&);
     std::size_t nRows() const;
     std::size_t nCols() const;
     std::size_t nButtons() const;

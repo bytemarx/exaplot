@@ -36,7 +36,7 @@ private:
     struct
     {
         std::vector<QPlotTab::Cache> plotTabs;
-        QList<orbital::GridPoint> arrangement;
+        std::vector<orbital::GridPoint> arrangement;
         QPixmap buttonGridStatus;
     } cache;
 

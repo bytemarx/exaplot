@@ -58,7 +58,7 @@ PlotEditor::plots() const
     std::vector<PlotInfo> plotInfo;
     auto arrangement = this->ui.buttonGrid->arrangement();
     // TODO: tighter coupling between button grid arrangement and plot tabs
-    assert(arrangement.size() == static_cast<qsizetype>(this->plotTabs.size()));
+    assert(arrangement.size() == this->plotTabs.size());
     for (std::size_t i = 0; i < this->plotTabs.size(); ++i) {
         plotInfo.push_back({
             .position = arrangement[i],
