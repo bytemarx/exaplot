@@ -1,10 +1,9 @@
 import math
 import time
 
-from orbital import RunParam, init, stop, plot
+from orbital import RunParam, init, plot, stop
 
-
-init(ring_density = RunParam(5.0, "Ring Density"))
+init(ring_density=RunParam(5.0, "Ring Density"))
 plot = plot[1]
 plot.title = "Color Map Example"
 plot.color_map.data_size = 100, 100
