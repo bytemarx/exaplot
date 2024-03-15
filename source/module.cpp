@@ -267,26 +267,25 @@ plot2DVec(orbital_state* state, std::size_t plotID, PyObject* const* args, Py_ss
         return NULL;
     }
 
-    auto pyBorrowed_xData = args[0];
-    auto pyBorrowed_yData = args[1];
-
-    if (!PyList_Check(pyBorrowed_yData)) {
-        PyErr_SetString(PyExc_TypeError, ORBITAL_PLOT "() 'y' argument must be type 'list'");
+    auto pyBorrowed_xData = PySequence_Fast(args[0], ORBITAL_PLOT "() 'x' argument must be type 'Sequence'");
+    if (pyBorrowed_xData == NULL)
         return NULL;
-    }
+    auto pyBorrowed_yData = PySequence_Fast(args[1], ORBITAL_PLOT "() 'y' argument must be type 'Sequence'");
+    if (pyBorrowed_yData == NULL)
+        return NULL;
 
-    auto n_xData = PyList_GET_SIZE(pyBorrowed_xData);
+    auto n_xData = PySequence_Fast_GET_SIZE(pyBorrowed_xData);
     std::vector<double> xData(n_xData);
     for (decltype(n_xData) i = 0; i < n_xData; ++i) {
-        auto x = PyFloat_AsDouble(PyList_GET_ITEM(pyBorrowed_xData, i));
+        auto x = PyFloat_AsDouble(PySequence_Fast_GET_ITEM(pyBorrowed_xData, i));
         if (PyErr_Occurred()) return NULL;
         xData[i] = x;
     }
 
-    auto n_yData = PyList_GET_SIZE(pyBorrowed_yData);
+    auto n_yData = PySequence_Fast_GET_SIZE(pyBorrowed_yData);
     std::vector<double> yData(n_yData);
     for (decltype(n_yData) i = 0; i < n_yData; ++i) {
-        auto y = PyFloat_AsDouble(PyList_GET_ITEM(pyBorrowed_yData, i));
+        auto y = PyFloat_AsDouble(PySequence_Fast_GET_ITEM(pyBorrowed_yData, i));
         if (PyErr_Occurred()) return NULL;
         yData[i] = y;
     }
@@ -323,12 +322,13 @@ plotCMVec(orbital_state* state, std::size_t plotID, PyObject* const* args, Py_ss
     auto y = PyLong_AsLong(args[0]);
     if (PyErr_Occurred()) return NULL;
 
-    // orbital_plot verifies the second argument is a list
-    auto pyBorrowed_values = args[1];
-    auto n_values = PyList_GET_SIZE(pyBorrowed_values);
+    auto pyBorrowed_values = PySequence_Fast(args[1], ORBITAL_PLOT "() 'values' argument must be type 'Sequence'");
+    if (pyBorrowed_values == NULL)
+        return NULL;
+    auto n_values = PySequence_Fast_GET_SIZE(pyBorrowed_values);
     std::vector<double> values(n_values);
     for (decltype(n_values) i = 0; i < n_values; ++i) {
-        auto value = PyFloat_AsDouble(PyList_GET_ITEM(pyBorrowed_values, i));
+        auto value = PyFloat_AsDouble(PySequence_Fast_GET_ITEM(pyBorrowed_values, i));
         if (PyErr_Occurred()) return NULL;
         values[i] = value;
     }
@@ -340,36 +340,32 @@ plotCMVec(orbital_state* state, std::size_t plotID, PyObject* const* args, Py_ss
 static PyObject*
 plotCMFrame(orbital_state* state, std::size_t plotID, PyObject* const* args, Py_ssize_t nargs)
 {
-    auto pyBorrowed_frame = args[0];
-    if (!PyList_Check(pyBorrowed_frame)) {
-        PyErr_SetString(PyExc_TypeError, ORBITAL_PLOT "() 'frame' argument must be type 'list[list[Real]]'");
+    auto pyBorrowed_frame = PySequence_Fast(args[0], ORBITAL_PLOT "() 'frame' argument must be type 'Sequence[Sequence[Real]]'");
+    if (pyBorrowed_frame == NULL)
         return NULL;
-    }
 
-    auto n_rows = PyList_GET_SIZE(pyBorrowed_frame);
+    auto n_rows = PySequence_Fast_GET_SIZE(pyBorrowed_frame);
     if (n_rows == 0) {
         Py_RETURN_NONE;
     }
-    if (!PyList_Check(PyList_GET_ITEM(pyBorrowed_frame, 0))) {
-        PyErr_SetString(PyExc_TypeError, ORBITAL_PLOT "() 'frame' argument must be type 'list[list[Real]]'");
+    if (!PySequence_Check(PySequence_Fast_GET_ITEM(pyBorrowed_frame, 0))) {
+        PyErr_SetString(PyExc_TypeError, ORBITAL_PLOT "() 'frame' argument must be type 'Sequence[Sequence[Real]]'");
         return NULL;
     }
-    auto n_cols = PyList_GET_SIZE(PyList_GET_ITEM(pyBorrowed_frame, 0));
+    auto n_cols = PySequence_Size(PySequence_Fast_GET_ITEM(pyBorrowed_frame, 0));
     std::vector<std::vector<double>> frame(n_rows, std::vector<double>(n_cols));
 
     for (decltype(n_rows) i = 0; i < n_rows; ++i) {
-        auto pyBorrowed_row = PyList_GET_ITEM(pyBorrowed_frame, i);
-        if (!PyList_Check(pyBorrowed_row)) {
-            PyErr_SetString(PyExc_TypeError, ORBITAL_PLOT "() 'frame' argument contains non-list type object (frame[%zd])");
+        auto pyBorrowed_row = PySequence_Fast(PySequence_Fast_GET_ITEM(pyBorrowed_frame, i), ORBITAL_PLOT "() 'frame' argument contains non-Sequence type object (frame[%zd])");
+        if (pyBorrowed_row == NULL)
             return NULL;
-        }
-        if (PyList_GET_SIZE(pyBorrowed_row) != n_cols) {
+        if (PySequence_Fast_GET_SIZE(pyBorrowed_row) != n_cols) {
             // TODO: consider using std::move to allow vectors of differing lengths without sacrificing performance
-            PyErr_SetString(PyExc_ValueError, ORBITAL_PLOT "() 'frame' argument must contain lists of equal size (frame[%zd])");
+            PyErr_SetString(PyExc_ValueError, ORBITAL_PLOT "() 'frame' argument must contain sequences of equal size (frame[%zd])");
             return NULL;
         }
         for (decltype(n_cols) j = 0; j < n_cols; ++j) {
-            auto value = PyFloat_AsDouble(PyList_GET_ITEM(pyBorrowed_row, j));
+            auto value = PyFloat_AsDouble(PySequence_Fast_GET_ITEM(pyBorrowed_row, j));
             if (PyErr_Occurred()) return NULL;
             frame[i][j] = value;
         }
@@ -413,10 +409,10 @@ orbital_plot(PyObject* module, PyObject* const* args, Py_ssize_t nargs)
     std::function<PyObject*(orbital_state*, long, PyObject* const*, Py_ssize_t)> plotFn;
     switch (state->iface->currentPlotType(plotID)) {
     case 0: // 2D
-        plotFn = PyList_Check(args[1]) ? plot2DVec : plot2D;
+        plotFn = PySequence_Check(args[1]) ? plot2DVec : plot2D;
         break;
     case 1: // color map
-        plotFn = nargs == 1 ? plotCMFrame : PyList_Check(args[2]) ? plotCMVec : plotCM;
+        plotFn = nargs == 1 ? plotCMFrame : PySequence_Check(args[2]) ? plotCMVec : plotCM;
         break;
     default:
         PyErr_Format(PyExc_SystemError, "invalid plot type: %zd", state->iface->currentPlotType(plotID));

@@ -54,7 +54,7 @@ except TypeError as e:
 try:
     orbital.plot[1]([0], 0)
 except TypeError as e:
-    assert(str(e) == "plot() 'y' argument must be type 'list'")
+    assert(str(e) == "plot() 'y' argument must be type 'Sequence'")
 
 try:
     orbital.plot[1]([0], [""])
