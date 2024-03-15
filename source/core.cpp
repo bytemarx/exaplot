@@ -1,6 +1,7 @@
 #include "internal.hpp"
 
 #include <cstdarg>
+#include <cstdlib>
 #include <limits>
 #include <string>
 #include <utility>
@@ -338,7 +339,10 @@ OrbitalCore::init(
     // third-party modules
     status = PyWideStringList_Append(
         &config.module_search_paths,
-        (prefix / "site-packages").wstring().c_str()
+        (std::getenv("PYTHONPATH")
+            ? std::filesystem::path{std::getenv("PYTHONPATH")}
+            : prefix / "site-packages"
+        ).wstring().c_str()
     );
     if (PyStatus_Exception(status)) goto done;
 
