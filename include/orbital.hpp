@@ -12,7 +12,9 @@
 #include "plotproperty.hpp"
 
 
-#define ORBITAL_MODULE  "_orbital"
+#define ORBITAL_MODULE      "_orbital"
+#define ORBITAL_RUNPARAM    "RunParam"
+#define ORBITAL_INTERRUPT   "_Interrupt"
 
 #define ORBITAL_INIT        "init"                  // orbital.init(plots = 1, **params)
 #define ORBITAL_STOP        "stop"                  // orbital.stop()
@@ -60,6 +62,7 @@ struct OrbitalError
     constexpr static Type RELOAD = "RELOAD";
     constexpr static Type SYSTEM = "SYSTEM";
     constexpr static Type ARGUMENT = "ARGUMENT";
+    constexpr static Type INTERRUPT = "INTERRUPT";
     constexpr static Type UNDEFINED = "UNDEFINED";
 
     static OrbitalError pyerror(Type);
@@ -70,6 +73,8 @@ struct OrbitalError
         const std::string& tb = "");
 
     explicit operator bool() const noexcept { return strcmp(this->m_type, NONE) != 0; }
+    bool operator==(const Type& other) const noexcept { return !this->operator==(other); }
+    bool operator!=(const Type& other) const noexcept { return strcmp(this->m_type, other); }
     auto type() const { return this->m_type; }
     auto message() const { return this->m_message; }
     auto traceback() const { return this->m_traceback; }

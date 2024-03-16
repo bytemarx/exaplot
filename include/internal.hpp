@@ -29,6 +29,7 @@ typedef struct _is {
 
 typedef struct s_orbital_state {
     PyTypeObject* type_RunParam;
+    PyObject* obj_InterruptException;
     orbital::OrbitalInterface* iface;
 } orbital_state;
 
@@ -51,6 +52,7 @@ orbital_state* getModuleStateFromObject(PyObject*);
 extern "C" {
 
 int moduleSlot_initTypes(PyObject*);
+int moduleSlot_initExceptions(PyObject*);
 int moduleSlot_initInterface(PyObject*);
 int module_traverse(PyObject*, visitproc, void*);
 int module_clear(PyObject*);

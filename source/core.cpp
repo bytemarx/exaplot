@@ -65,6 +65,7 @@ moduleSlots[] =
 {
     {Py_mod_exec, (void*)moduleSlot_initInterface},
     {Py_mod_exec, (void*)moduleSlot_initTypes},
+    {Py_mod_exec, (void*)moduleSlot_initExceptions},
     {Py_mod_multiple_interpreters, Py_MOD_PER_INTERPRETER_GIL_SUPPORTED},
     {0, NULL},
 };

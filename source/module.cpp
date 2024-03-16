@@ -53,6 +53,7 @@ module_traverse(PyObject* module, visitproc visit, void* arg)
 {
     auto mState = getModuleState(module);
     Py_VISIT(mState->type_RunParam);
+    Py_VISIT(mState->obj_InterruptException);
     return 0;
 }
 
@@ -62,6 +63,7 @@ module_clear(PyObject* module)
 {
     auto mState = getModuleState(module);
     Py_CLEAR(mState->type_RunParam);
+    Py_CLEAR(mState->obj_InterruptException);
     return 0;
 }
 
@@ -765,7 +767,7 @@ PyRunParam_slots[] =
 static PyType_Spec
 PyRunParam_spec =
 {
-    .name = ORBITAL_MODULE ".RunParam",
+    .name = ORBITAL_MODULE "." ORBITAL_RUNPARAM,
     .basicsize = sizeof(PyRunParam),
     .flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_GC | Py_TPFLAGS_IMMUTABLETYPE,
     .slots = PyRunParam_slots,
@@ -783,6 +785,22 @@ moduleSlot_initTypes(PyObject* module)
     if (mState->type_RunParam == NULL) return -1;
 
     if (PyModule_AddType(module, mState->type_RunParam)) return -1;
+
+    return 0;
+}
+
+
+int
+moduleSlot_initExceptions(PyObject* module)
+{
+    auto mState = getModuleState(module);
+
+    mState->obj_InterruptException = PyErr_NewException(
+        ORBITAL_MODULE "." ORBITAL_INTERRUPT, NULL, NULL)
+    ;
+    if (mState->obj_InterruptException == NULL) return -1;
+
+    if (PyModule_AddObjectRef(module, ORBITAL_INTERRUPT, mState->obj_InterruptException) < 0) return -1;
 
     return 0;
 }
