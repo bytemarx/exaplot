@@ -66,6 +66,15 @@ module_clear(PyObject* module)
 }
 
 
+/**
+ * @brief Module `init` function
+ * 
+ * @param module 
+ * @param args 
+ * @param nargs 
+ * @param kwnames 
+ * @return PyObject* 
+ */
 PyObject*
 orbital_init(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
 {
@@ -228,6 +237,13 @@ msg_keywords[] = {
 };
 
 
+/**
+ * @brief Module `msg` function
+ * 
+ * @param module 
+ * @param args 
+ * @return PyObject* 
+ */
 PyObject*
 orbital_msg(PyObject* module, PyObject* args, PyObject* kwargs)
 {
@@ -375,6 +391,14 @@ plotCMFrame(orbital_state* state, std::size_t plotID, PyObject* const* args, Py_
 }
 
 
+/**
+ * @brief Module `plot` function
+ * 
+ * @param module 
+ * @param args 
+ * @param nargs 
+ * @return PyObject* 
+ */
 PyObject*
 orbital_plot(PyObject* module, PyObject* const* args, Py_ssize_t nargs)
 {
@@ -423,6 +447,13 @@ orbital_plot(PyObject* module, PyObject* const* args, Py_ssize_t nargs)
 }
 
 
+/**
+ * @brief Module `_set_plot_property` function
+ * 
+ * @param module 
+ * @param args 
+ * @return PyObject* 
+ */
 PyObject*
 orbital__set_plot_property(PyObject* module, PyObject* args)
 {
@@ -547,6 +578,13 @@ orbital__set_plot_property(PyObject* module, PyObject* args)
 }
 
 
+/**
+ * @brief Module `_get_plot_property` function
+ * 
+ * @param module 
+ * @param args 
+ * @return PyObject* 
+ */
 PyObject*
 orbital__get_plot_property(PyObject* module, PyObject* args)
 {
@@ -573,6 +611,13 @@ orbital__get_plot_property(PyObject* module, PyObject* args)
 }
 
 
+/**
+ * @brief Module `_show_plot` function
+ * 
+ * @param module 
+ * @param args 
+ * @return PyObject* 
+ */
 PyObject*
 orbital__show_plot(PyObject* module, PyObject* args)
 {
@@ -626,6 +671,14 @@ PyRunParam_CheckTypeArg(PyObject* object)
 }
 
 
+/**
+ * @brief `RunParam.__init__`
+ * 
+ * @param self 
+ * @param args 
+ * @param kwargs 
+ * @return int 
+ */
 static int
 orbital_RunParam___init__(PyRunParam* self, PyObject* args, PyObject* kwargs)
 {
