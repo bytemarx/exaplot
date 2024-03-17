@@ -73,8 +73,8 @@ struct OrbitalError
         const std::string& tb = "");
 
     explicit operator bool() const noexcept { return strcmp(this->m_type, NONE) != 0; }
-    bool operator==(const Type& other) const noexcept { return !this->operator==(other); }
-    bool operator!=(const Type& other) const noexcept { return strcmp(this->m_type, other); }
+    bool operator==(const Type& other) const noexcept { return strcmp(this->m_type, other) == 0; }
+    bool operator!=(const Type& other) const noexcept { return strcmp(this->m_type, other) != 0; }
     auto type() const { return this->m_type; }
     auto message() const { return this->m_message; }
     auto traceback() const { return this->m_traceback; }

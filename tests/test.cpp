@@ -245,16 +245,25 @@ TEST_F(BaselineTest, Error)
     Interface* iface = new Interface;
     OrbitalCore* core = new OrbitalCore{iface};
     std::shared_ptr<ScriptModule> mod;
+    std::filesystem::path scriptDir{TEST_SCRIPTS_DIR "/baseline/error"};
 
-    auto error = core->load(TEST_SCRIPTS_DIR "/baseline/error/runtime-error.py", mod);
+    auto error = core->load(scriptDir / "load-error.py", mod);
     ASSERT_TRUE(error);
+    ASSERT_TRUE(error == OrbitalError::IMPORT);
     ASSERT_STREQ(error.message().c_str(), "");
-    ASSERT_STREQ(error.traceback().c_str(), "  File \"" TEST_SCRIPTS_DIR "/baseline/error/runtime-error.py\", line 1, in <module>\n    raise RuntimeError\n");
+    ASSERT_STREQ(error.traceback().c_str(), "  File \"" TEST_SCRIPTS_DIR "/baseline/error/load-error.py\", line 1, in <module>\n    raise RuntimeError\n");
 
-    error = core->load(TEST_SCRIPTS_DIR "/baseline/error/runtime-error-msg.py", mod);
+    error = core->load(scriptDir / "load-error-msg.py", mod);
     ASSERT_TRUE(error);
+    ASSERT_TRUE(error == OrbitalError::IMPORT);
     ASSERT_STREQ(error.message().c_str(), "test");
-    ASSERT_STREQ(error.traceback().c_str(), "  File \"" TEST_SCRIPTS_DIR "/baseline/error/runtime-error-msg.py\", line 1, in <module>\n    raise RuntimeError('test')\n");
+    ASSERT_STREQ(error.traceback().c_str(), "  File \"" TEST_SCRIPTS_DIR "/baseline/error/load-error-msg.py\", line 1, in <module>\n    raise RuntimeError('test')\n");
+
+    error = core->load(scriptDir / "interrupt.py", mod);
+    ASSERT_TRUE(error);
+    ASSERT_TRUE(error == OrbitalError::INTERRUPT);
+    ASSERT_STREQ(error.message().c_str(), "");
+    ASSERT_STREQ(error.traceback().c_str(), "  File \"" TEST_SCRIPTS_DIR "/baseline/error/interrupt.py\", line 4, in <module>\n    raise _Interrupt\n");
 
     delete core;
     delete iface;

@@ -6,10 +6,16 @@ from _orbital import (
     stop,
     msg,
     plot as _plot,
+    _Interrupt,
     _set_plot_property,
     _get_plot_property,
     _show_plot,
 )
+
+
+def breakpoint():
+    if stop():
+        raise _Interrupt
 
 
 class _PlotProperties:

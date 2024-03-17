@@ -220,6 +220,26 @@ error:
 }
 
 
+static bool
+isInterrupt(PyObject* object)
+{
+    // TODO: PyErr_GivenExceptionMatches(object, mState->obj_InterruptException)
+    if (strcmp(object->ob_type->tp_name, ORBITAL_INTERRUPT) != 0)
+        return false;
+
+    auto pyDict = PyType_GetDict(Py_TYPE(object));
+    auto pyModule = PyDict_GetItemString(pyDict, "__module__");
+    if (pyModule && PyUnicode_Check(pyModule)) {
+        auto module = PyUnicode_AsUTF8(pyModule);
+        if (module != NULL)
+            return strcmp(module, ORBITAL_MODULE) == 0;
+        if (PyErr_Occurred())
+            PyErr_Clear();
+    }
+    return false;
+}
+
+
 static std::map<std::string, PlotProperty::Type> propertyMap{
     {"title", PlotProperty::TITLE},
     {"x_axis", PlotProperty::XAXIS},
@@ -269,14 +289,17 @@ PlotProperty::PlotProperty(const std::string& property)
 
 
 OrbitalError
-OrbitalError::pyerror(OrbitalError::Type type)
+OrbitalError::pyerror(Type type)
 {
     OrbitalError error{type};
     PyObject* pyOwned_exception = NULL;
 
     pyOwned_exception = PyErr_GetRaisedException();
     if (pyOwned_exception == NULL)
-        return OrbitalError{OrbitalError::NONE};
+        return OrbitalError{NONE};
+
+    if (isInterrupt(pyOwned_exception))
+        error.m_type = INTERRUPT;
 
     if (!pyStrToStr(pyOwned_exception, error.m_message)) goto error;
     if (!pyTracebackToStr(pyOwned_exception, error.m_traceback)) goto error;
