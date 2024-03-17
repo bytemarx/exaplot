@@ -498,7 +498,7 @@ Interface::runScript(const std::vector<std::string>& args)
         params[i].value = args[i];
     this->stopRequested = false;
     auto status = this->module.get()->run(params);
-    if (status) {
+    if (status && status != orbital::OrbitalError::INTERRUPT) {
         auto message = status.message();
         if (!status.traceback().empty())
             message.append("\n").append(status.traceback());
