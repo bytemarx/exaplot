@@ -17,7 +17,7 @@ getModuleState(PyObject* module)
 static int
 PyRunParam_Check(PyObject* object)
 {
-    auto mState = getModuleStateFromObject(object);
+    auto mState = getModuleStateFromObjectType(Py_TYPE(object));
     if (mState == NULL)
         return 0;
 

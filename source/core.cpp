@@ -99,6 +99,21 @@ getModuleStateFromObject(PyObject* object)
 }
 
 
+orbital_state*
+getModuleStateFromObjectType(PyTypeObject* type)
+{
+    if (!PyType_HasFeature(type, Py_TPFLAGS_HEAPTYPE))
+        return NULL;
+
+    auto heapType = reinterpret_cast<PyHeapTypeObject*>(type);
+    auto module = heapType->ht_module;
+    if (module && PyModule_GetDef(module) == &moduleDef)
+        return static_cast<orbital_state*>(PyModule_GetState(module));
+
+    return NULL;
+}
+
+
 PyMODINIT_FUNC
 PyInit__orbital(void)
 {
