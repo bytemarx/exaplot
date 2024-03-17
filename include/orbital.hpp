@@ -127,8 +127,6 @@ private:
     static ssize_t coreCount;
     static PyThreadState* mainThreadState;
 
-    std::string traceback(PyObject* tb) const;
-
     const OrbitalInterface* const m_interface;
     PyThreadState* m_tState;
     std::vector<std::weak_ptr<ScriptModule>> m_scripts;

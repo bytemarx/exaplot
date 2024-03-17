@@ -131,17 +131,67 @@ preinit(void)
 }
 
 
-static PyObject*
-traceback(PyObject* pyBorrowed_traceback)
+/**
+ * @brief Obtains the string representation of a Python object. If the conversion was successful,
+ * returns `true` and sets the given `std::string` object to the result, otherwise returns `false`
+ * (Python's error indicator may be set on failure).
+ * 
+ * @param object 
+ * @param str 
+ * @return true 
+ * @return false 
+ */
+static bool
+pyStrToStr(PyObject* pyBorrowed_object, std::string& str)
 {
+    PyObject* pyOwned_msg = PyObject_Str(pyBorrowed_object);
+    if (pyOwned_msg == NULL)
+        return false;
+
+    Py_ssize_t size;
+    const char* msg = PyUnicode_AsUTF8AndSize(pyOwned_msg, &size);
+    if (msg == NULL) {
+        Py_DECREF(pyOwned_msg);
+        return false;
+    }
+
+    str = std::string{msg, static_cast<std::string::size_type>(size)};
+    Py_DECREF(pyOwned_msg);
+    return true;
+}
+
+
+/**
+ * @brief Obtains a formatted traceback string from an exception object. Returns `false` if an
+ * error occurred (Python's error indicator may be set on failure), otherwise returns `true` and
+ * sets the given `std::string` object to the result (if the exception doesn't have a traceback,
+ * then the result is set to an empty string).
+ * 
+ * @param exception 
+ * @param str 
+ * @return true 
+ * @return false 
+ */
+static bool
+pyTracebackToStr(PyObject* pyBorrowed_exception, std::string& str)
+{
+    PyObject* pyOwned_traceback = NULL;
     PyObject* pyOwned_module = NULL;
     PyObject* pyOwned_formatTb = NULL;
     PyObject* pyOwned_tracebackList = NULL;
     PyObject* pyOwned_emptyStr = NULL;
     PyObject* pyOwned_tracebackStr = NULL;
+    const char* tracebackStr = NULL;
+    Py_ssize_t size = 0;
 
-    if (pyBorrowed_traceback == NULL)
-        return NULL;
+    if (pyBorrowed_exception == NULL)
+        return false;
+
+    pyOwned_traceback = PyException_GetTraceback(pyBorrowed_exception);
+    if (pyOwned_traceback == NULL) {
+        str = std::string{};
+        return true;
+    }
 
     pyOwned_module = PyImport_ImportModule("traceback");
     if (pyOwned_module == NULL) goto error;
@@ -149,26 +199,36 @@ traceback(PyObject* pyBorrowed_traceback)
     pyOwned_formatTb = PyObject_GetAttrString(pyOwned_module, "format_tb");
     if (pyOwned_formatTb == NULL) goto error;
 
-    pyOwned_tracebackList = PyObject_CallFunctionObjArgs(pyOwned_formatTb, pyBorrowed_traceback, NULL);
+    pyOwned_tracebackList = PyObject_CallFunctionObjArgs(pyOwned_formatTb, pyOwned_traceback, NULL);
     if (pyOwned_tracebackList == NULL) goto error;
 
     pyOwned_emptyStr = PyUnicode_FromString("");
     if (pyOwned_emptyStr == NULL) goto error;
 
     pyOwned_tracebackStr = PyUnicode_Join(pyOwned_emptyStr, pyOwned_tracebackList);
+    if (pyOwned_tracebackStr == NULL) goto error;
 
+    tracebackStr = PyUnicode_AsUTF8AndSize(pyOwned_tracebackStr, &size);
+    if (tracebackStr == NULL) goto error;
+
+    str = std::string{tracebackStr, static_cast<std::string::size_type>(size)};
+
+    Py_DECREF(pyOwned_tracebackStr);
     Py_DECREF(pyOwned_emptyStr);
     Py_DECREF(pyOwned_tracebackList);
     Py_DECREF(pyOwned_formatTb);
     Py_DECREF(pyOwned_module);
-    return pyOwned_tracebackStr;
+    Py_DECREF(pyOwned_traceback);
+    return true;
 
 error:
+    Py_XDECREF(pyOwned_tracebackStr);
     Py_XDECREF(pyOwned_emptyStr);
     Py_XDECREF(pyOwned_tracebackList);
     Py_XDECREF(pyOwned_formatTb);
     Py_XDECREF(pyOwned_module);
-    return NULL;
+    Py_DECREF(pyOwned_traceback);
+    return false;
 }
 
 
@@ -223,62 +283,21 @@ PlotProperty::PlotProperty(const std::string& property)
 OrbitalError
 OrbitalError::pyerror(OrbitalError::Type type)
 {
-    PyObject* pyOwned_type = NULL;
-    PyObject* pyOwned_value = NULL;
-    PyObject* pyOwned_traceback = NULL;
     OrbitalError error{type};
+    PyObject* pyOwned_exception = NULL;
 
-    if (PyErr_Occurred() == NULL)
+    pyOwned_exception = PyErr_GetRaisedException();
+    if (pyOwned_exception == NULL)
         return OrbitalError{OrbitalError::NONE};
 
-    PyErr_Fetch(&pyOwned_type, &pyOwned_value, &pyOwned_traceback);
-    Py_DECREF(pyOwned_type);
-
-    // msg = str(e)
-    // * look what they need to mimic a fraction of our power *
-    if (pyOwned_value != NULL) {
-        PyObject* pyOwned_msg = PyObject_Str(pyOwned_value);
-        if (pyOwned_msg == NULL) {
-            Py_DECREF(pyOwned_value);
-            goto error;
-        }
-
-        Py_ssize_t size;
-        const char* msg = PyUnicode_AsUTF8AndSize(pyOwned_msg, &size);
-        if (msg == NULL) {
-            Py_DECREF(pyOwned_msg);
-            Py_DECREF(pyOwned_value);
-            goto error;
-        }
-
-        error.m_message = std::string{msg, static_cast<std::string::size_type>(size)};
-        Py_DECREF(pyOwned_msg);
-        Py_DECREF(pyOwned_value);
-    }
-
-    if (pyOwned_traceback != NULL) {
-        PyObject* pyOwned_tracebackStr = orbital::traceback(pyOwned_traceback);
-        if (pyOwned_tracebackStr == NULL) {
-            Py_DECREF(pyOwned_traceback);
-            goto error;
-        }
-
-        Py_ssize_t size;
-        const char* tracebackStr = PyUnicode_AsUTF8AndSize(pyOwned_tracebackStr, &size);
-        if (tracebackStr == NULL) {
-            Py_DECREF(pyOwned_tracebackStr);
-            Py_DECREF(pyOwned_traceback);
-            goto error;
-        }
-
-        error.m_traceback = std::string{tracebackStr, static_cast<std::string::size_type>(size)};
-        Py_DECREF(pyOwned_tracebackStr);
-        Py_DECREF(pyOwned_traceback);
-    }
+    if (!pyStrToStr(pyOwned_exception, error.m_message)) goto error;
+    if (!pyTracebackToStr(pyOwned_exception, error.m_traceback)) goto error;
+    Py_DECREF(pyOwned_exception);
 
     assert(!PyErr_Occurred());
     return error;
 error:
+    Py_DECREF(pyOwned_exception);
     if (PyErr_Occurred())
         PyErr_Print();
     throw std::runtime_error{"Fatal error parsing Python error"};
