@@ -796,8 +796,8 @@ moduleSlot_initExceptions(PyObject* module)
     auto mState = getModuleState(module);
 
     mState->obj_InterruptException = PyErr_NewException(
-        ORBITAL_MODULE "." ORBITAL_INTERRUPT, NULL, NULL)
-    ;
+        ORBITAL_MODULE "." ORBITAL_INTERRUPT, PyExc_BaseException, NULL
+    );
     if (mState->obj_InterruptException == NULL) return -1;
 
     if (PyModule_AddObjectRef(module, ORBITAL_INTERRUPT, mState->obj_InterruptException) < 0) return -1;
