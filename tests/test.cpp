@@ -240,6 +240,27 @@ TEST_F(BaselineTest, AccessGlobalVariableInRun)
 }
 
 
+TEST_F(BaselineTest, Error)
+{
+    Interface* iface = new Interface;
+    OrbitalCore* core = new OrbitalCore{iface};
+    std::shared_ptr<ScriptModule> mod;
+
+    auto error = core->load(TEST_SCRIPTS_DIR "/baseline/error/runtime-error.py", mod);
+    ASSERT_TRUE(error);
+    ASSERT_STREQ(error.message().c_str(), "");
+    ASSERT_STREQ(error.traceback().c_str(), "  File \"" TEST_SCRIPTS_DIR "/baseline/error/runtime-error.py\", line 1, in <module>\n    raise RuntimeError\n");
+
+    error = core->load(TEST_SCRIPTS_DIR "/baseline/error/runtime-error-msg.py", mod);
+    ASSERT_TRUE(error);
+    ASSERT_STREQ(error.message().c_str(), "test");
+    ASSERT_STREQ(error.traceback().c_str(), "  File \"" TEST_SCRIPTS_DIR "/baseline/error/runtime-error-msg.py\", line 1, in <module>\n    raise RuntimeError('test')\n");
+
+    delete core;
+    delete iface;
+}
+
+
 }
 }
 

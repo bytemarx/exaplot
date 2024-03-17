@@ -89,23 +89,11 @@ moduleDef =
 orbital_state*
 getModuleStateFromObject(PyObject* object)
 {
-    auto module = PyType_GetModuleByDef(Py_TYPE(object), &moduleDef);
-    if (module == NULL) {
-        PyErr_Clear();
-        return NULL;
-    }
-
-    return static_cast<orbital_state*>(PyModule_GetState(module));
-}
-
-
-orbital_state*
-getModuleStateFromObjectType(PyTypeObject* type)
-{
-    if (!PyType_HasFeature(type, Py_TPFLAGS_HEAPTYPE))
+    auto pyBorrowed_type = Py_TYPE(object);
+    if (!PyType_HasFeature(pyBorrowed_type, Py_TPFLAGS_HEAPTYPE))
         return NULL;
 
-    auto heapType = reinterpret_cast<PyHeapTypeObject*>(type);
+    auto heapType = reinterpret_cast<PyHeapTypeObject*>(pyBorrowed_type);
     auto module = heapType->ht_module;
     if (module && PyModule_GetDef(module) == &moduleDef)
         return static_cast<orbital_state*>(PyModule_GetState(module));
@@ -449,9 +437,11 @@ OrbitalCore::~OrbitalCore()
             //   manually decrement its reference and nullify its
             //   contents (use of a script with a destroyed core is
             //   a fatal error).
-            assert(h_script.get()->m_pyOwned_module->ob_refcnt > 0);
-            Py_DECREF(h_script.get()->m_pyOwned_module);
-            h_script.get()->m_pyOwned_module = NULL;
+            if (h_script.get()->m_pyOwned_module) {
+                assert(h_script.get()->m_pyOwned_module->ob_refcnt > 0);
+                Py_DECREF(h_script.get()->m_pyOwned_module);
+                h_script.get()->m_pyOwned_module = NULL;
+            }
             h_script.get()->m_tState = NULL;
         }
     }

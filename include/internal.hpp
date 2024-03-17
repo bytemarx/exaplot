@@ -45,7 +45,6 @@ typedef struct {
 namespace orbital {
 
 orbital_state* getModuleStateFromObject(PyObject*);
-orbital_state* getModuleStateFromObjectType(PyTypeObject*);
 
 }
 
