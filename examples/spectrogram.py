@@ -4,7 +4,7 @@ import time
 
 import librosa
 import numpy
-from orbital import RunParam, init, msg, plot, stop
+from orbital import RunParam, breakpoint, init, msg, plot
 from scipy.interpolate import CubicSpline
 
 init(
@@ -37,7 +37,7 @@ def run(frame_rate: int, file: str):
     if not _file.is_file():
         raise FileNotFoundError(f"Could not find {_file}")
 
-    msg("Loading MP3 file...")
+    msg("Loading MP3 file...", append=False)
     audio, sample_rate = librosa.load(_file, sr=None)
 
     frame_length = int(sample_rate / frame_rate)
@@ -56,8 +56,7 @@ def run(frame_rate: int, file: str):
     waveform_window = 0
     for i in range(0, len(audio), frame_length):
         frame_time_start = time.time_ns()
-        if stop():
-            return
+        breakpoint()
 
         # get a frame's worth of audio samples
         frame = audio[i : i + frame_length]

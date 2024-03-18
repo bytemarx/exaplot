@@ -1,3 +1,7 @@
+"""Based on QCustomPlot Color Map Demo:
+https://www.qcustomplot.com/index.php/demos/colormapdemo
+"""
+
 import math
 
 from orbital import RunParam, init, plot

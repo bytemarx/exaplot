@@ -1,7 +1,11 @@
+"""Based on QCustomPlot Color Map Demo:
+https://www.qcustomplot.com/index.php/demos/colormapdemo
+"""
+
 import math
 import time
 
-from orbital import RunParam, init, plot, stop
+from orbital import RunParam, init, plot, breakpoint
 
 init(ring_density=RunParam(5.0, "Ring Density"))
 plot = plot[1]
@@ -19,8 +23,7 @@ def run(ring_density: float):
         return 4 * x * (math.cos(r + 2 + phi) / (r - math.sin(r + 2 + phi) / r))
 
     for t in range(500):
-        if stop():
-            return
+        breakpoint()
         plot([
             [f(0.1 * col - 5.0, 0.1 * row - 5.0, -0.1 * t) for col in range(100)]
             for row in range(100)
