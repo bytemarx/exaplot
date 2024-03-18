@@ -135,8 +135,8 @@ AppMain::runComplete(const QString& message)
 
 void
 AppMain::module_init(
-    const std::vector<orbital::RunParam>& params,
-    const std::vector<orbital::GridPoint>& plots)
+    const std::vector<zeta::RunParam>& params,
+    const std::vector<zeta::GridPoint>& plots)
 {
     std::vector<std::pair<std::string, std::string>> paramDisplays;
     for (const auto& param : params) {
@@ -229,7 +229,7 @@ AppMain::module_clear(std::size_t plotIdx)
 void
 AppMain::module_setPlotProperty(
     std::size_t plotIdx,
-    const orbital::PlotProperty& property,
+    const zeta::PlotProperty& property,
     const QPlotTab::Cache& properties)
 {
     this->ui.setPlotProperty(plotIdx, property, properties);

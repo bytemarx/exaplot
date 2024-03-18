@@ -1,4 +1,4 @@
-from orbital import init, RunParam
+from zetaplot import init, RunParam
 
 
 e_param = RunParam("192.168.1.255", display="Gateway")

@@ -85,7 +85,7 @@ PlotEditor::setSelectedPlot(std::size_t plot, QPlot::Type selected)
 
 
 bool
-PlotEditor::setArrangement(const std::vector<orbital::GridPoint>& arrangement)
+PlotEditor::setArrangement(const std::vector<zeta::GridPoint>& arrangement)
 {
     if (!this->ui.buttonGrid->setArrangement(arrangement))
         return false;

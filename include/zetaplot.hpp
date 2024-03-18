@@ -12,23 +12,23 @@
 #include "plotproperty.hpp"
 
 
-#define ORBITAL_MODULE      "_orbital"
-#define ORBITAL_RUNPARAM    "RunParam"
-#define ORBITAL_INTERRUPT   "_Interrupt"
+#define ZETA_MODULE     "_zetaplot"
+#define ZETA_RUNPARAM   "RunParam"
+#define ZETA_INTERRUPT  "_Interrupt"
 
-#define ORBITAL_INIT        "init"                  // orbital.init(plots = 1, **params)
-#define ORBITAL_STOP        "stop"                  // orbital.stop()
-#define ORBITAL_MSG         "msg"                   // orbital.msg(message, append = False)
-#define ORBITAL_PLOT        "plot"                  // orbital.plot(data_set, *data)
-#define ORBITAL_SET_PLOT    "_set_plot_property"    // orbital._set_plot_property(plot_id, prop, value)
-#define ORBITAL_GET_PLOT    "_get_plot_property"    // orbital._get_plot_property(plot_id, prop)
-#define ORBITAL_SHOW_PLOT   "_show_plot"            // orbital._show_plot(plot_id, plot_type)
+#define ZETA_INIT       "init"                  // init(plots = 1, **params)
+#define ZETA_STOP       "stop"                  // stop()
+#define ZETA_MSG        "msg"                   // msg(message, append = False)
+#define ZETA_PLOT       "plot"                  // plot(data_set, *data)
+#define ZETA_SET_PLOT   "_set_plot_property"    // _set_plot_property(plot_id, prop, value)
+#define ZETA_GET_PLOT   "_get_plot_property"    // _get_plot_property(plot_id, prop)
+#define ZETA_SHOW_PLOT  "_show_plot"            // _show_plot(plot_id, plot_type)
 
-#define ORBITAL_SCRIPT_MODULE   "__orbital__"
-#define ORBITAL_SCRIPT_RUN      "run"           // run(**kwargs)
+#define ZETA_SCRIPT_MODULE  "__zeta__"
+#define ZETA_SCRIPT_RUN     "run"           // run(**kwargs)
 
 
-namespace orbital {
+namespace zeta {
 
 
 typedef std::size_t GridPoint_t;
@@ -53,7 +53,7 @@ typedef struct {
 } RunParam;
 
 
-struct OrbitalError
+struct Error
 {
     typedef const char* Type;
     constexpr static Type NONE = "NONE";
@@ -65,9 +65,9 @@ struct OrbitalError
     constexpr static Type INTERRUPT = "INTERRUPT";
     constexpr static Type UNDEFINED = "UNDEFINED";
 
-    static OrbitalError pyerror(Type);
+    static Error pyerror(Type);
 
-    OrbitalError(
+    Error(
         const Type type = UNDEFINED,
         const std::string& msg = "",
         const std::string& tb = "");
@@ -86,10 +86,10 @@ private:
 };
 
 
-class OrbitalInterface
+class Interface
 {
 public:
-    virtual ~OrbitalInterface();
+    virtual ~Interface();
     virtual PyObject* init(const std::vector<RunParam>& params, const std::vector<GridPoint>& plots) = 0;
     virtual PyObject* stop() = 0;
     virtual PyObject* msg(const std::string& message, bool append) = 0;
@@ -109,7 +109,7 @@ public:
 class ScriptModule;
 
 
-class OrbitalCore
+class Core
 {
 public:
     static PyStatus init(
@@ -117,17 +117,17 @@ public:
         const std::filesystem::path& prefix);
     static int deinit();
 
-    OrbitalCore(OrbitalInterface* interface);
-    ~OrbitalCore();
-    OrbitalCore(const OrbitalCore&) = delete;
+    Core(Interface* interface);
+    ~Core();
+    Core(const Core&) = delete;
 
-    OrbitalError load(const std::filesystem::path& file, std::shared_ptr<ScriptModule>& module);
+    Error load(const std::filesystem::path& file, std::shared_ptr<ScriptModule>& module);
 
 private:
     static ssize_t coreCount;
     static PyThreadState* mainThreadState;
 
-    const OrbitalInterface* const m_interface;
+    const Interface* const m_interface;
     PyThreadState* m_tState;
     std::vector<std::weak_ptr<ScriptModule>> m_scripts;
 };
@@ -135,17 +135,17 @@ private:
 
 class ScriptModule
 {
-    friend class OrbitalCore;
+    friend class Core;
 
 public:
     ~ScriptModule();
-    OrbitalError reload();
-    OrbitalError run(const std::vector<RunParam>& args);
+    Error reload();
+    Error run(const std::vector<RunParam>& args);
 
 private:
     ScriptModule(PyThreadState* tState, const std::filesystem::path& file);
     void ensureThreadState();
-    OrbitalError load();
+    Error load();
 
     PyThreadState* m_tState;
     std::filesystem::path m_file;

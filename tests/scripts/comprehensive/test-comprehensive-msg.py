@@ -1,4 +1,4 @@
-import orbital
+import zetaplot
 
 
-orbital.msg("test", append=True)
+zetaplot.msg("test", append=True)

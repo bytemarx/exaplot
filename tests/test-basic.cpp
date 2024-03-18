@@ -9,14 +9,13 @@
 #include <vector>
 
 
-namespace orbital {
-namespace testing {
+namespace zetatest {
 
 
 class BasicTest : public ModuleTest
 {
 public:
-    void init(const std::vector<orbital::RunParam>& params, const std::vector<orbital::GridPoint>& plots) override;
+    void init(const std::vector<zeta::RunParam>& params, const std::vector<zeta::GridPoint>& plots) override;
     void msg(const std::string& message, bool append) override;
     void plot2D(std::size_t plotID, double x, double y) override;
     void plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y) override;
@@ -25,7 +24,7 @@ protected:
     BasicTest() { this->scriptsDir = this->scriptsDir / "basic"; }
 };
 
-// orbital.init(a='', b='', c=1, d=10.0)
+// init(a='', b='', c=1, d=10.0)
 
 TEST_F(BasicTest, TestInit)
 {
@@ -34,32 +33,32 @@ TEST_F(BasicTest, TestInit)
 
 void
 BasicTest::init(
-    const std::vector<orbital::RunParam>& params,
-    const std::vector<orbital::GridPoint>& plots)
+    const std::vector<zeta::RunParam>& params,
+    const std::vector<zeta::GridPoint>& plots)
 {
     ASSERT_EQ(params.size(), 4);
-    std::vector<orbital::RunParam> expected{
+    std::vector<zeta::RunParam> expected{
         {
             .identifier = "a",
-            .type = orbital::RunParamType::STRING,
+            .type = zeta::RunParamType::STRING,
             .value = "",
             .display = "a"
         },
         {
             .identifier = "b",
-            .type = orbital::RunParamType::STRING,
+            .type = zeta::RunParamType::STRING,
             .value = "",
             .display = "b"
         },
         {
             .identifier = "c",
-            .type = orbital::RunParamType::INT,
+            .type = zeta::RunParamType::INT,
             .value = "1",
             .display = "c"
         },
         {
             .identifier = "d",
-            .type = orbital::RunParamType::FLOAT,
+            .type = zeta::RunParamType::FLOAT,
             .value = "10.0",
             .display = "d"
         },
@@ -74,7 +73,7 @@ BasicTest::init(
     }
 }
 
-// orbital.msg("test", append=False)
+// msg("test", append=False)
 
 TEST_F(BasicTest, TestMsg)
 {
@@ -88,7 +87,7 @@ BasicTest::msg(const std::string& message, bool append)
     ASSERT_FALSE(append);
 }
 
-// orbital.plot(1, 1, 2.2)
+// plot(1, 1, 2.2)
 
 TEST_F(BasicTest, TestPlot)
 {
@@ -103,7 +102,7 @@ BasicTest::plot2D(std::size_t plotID, double x, double y)
     ASSERT_EQ(y, 2.2);
 }
 
-// orbital.plotVec(2, [0, 1, 2, 3], [1, 2, 3.3, 4.4])
+// plotVec(2, [0, 1, 2, 3], [1, 2, 3.3, 4.4])
 
 TEST_F(BasicTest, TestPlotVec)
 {
@@ -120,7 +119,7 @@ BasicTest::plot2DVec(std::size_t plotID, const std::vector<double>& x, const std
     ASSERT_EQ(y, expected_y);
 }
 
-// orbital.plot(3)
+// plot(3)
 
 TEST_F(BasicTest, TestClear)
 {
@@ -134,5 +133,4 @@ BasicTest::clear(std::size_t plotID)
 }
 
 
-}
 }

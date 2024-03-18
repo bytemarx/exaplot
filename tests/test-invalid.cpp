@@ -9,14 +9,13 @@
 #include <vector>
 
 
-namespace orbital {
-namespace testing {
+namespace zetatest {
 
 
 class InvalidTest : public ModuleTest
 {
 public:
-    void init(const std::vector<orbital::RunParam>&, const std::vector<orbital::GridPoint>&) override;
+    void init(const std::vector<zeta::RunParam>&, const std::vector<zeta::GridPoint>&) override;
     void msg(const std::string&, bool) override;
     void plot2D(std::size_t, double, double) override;
     void plot2DVec(std::size_t, const std::vector<double>&, const std::vector<double>&) override;
@@ -33,8 +32,8 @@ TEST_F(InvalidTest, TestInit)
 
 void
 InvalidTest::init(
-    [[maybe_unused]] const std::vector<orbital::RunParam>& params,
-    [[maybe_unused]] const std::vector<orbital::GridPoint>& plots)
+    [[maybe_unused]] const std::vector<zeta::RunParam>& params,
+    [[maybe_unused]] const std::vector<zeta::GridPoint>& plots)
 {
     ASSERT_FALSE(true);
 }
@@ -84,5 +83,4 @@ InvalidTest::clear([[maybe_unused]] std::size_t plotID)
 }
 
 
-}
 }

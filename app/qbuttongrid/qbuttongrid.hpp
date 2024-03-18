@@ -3,7 +3,7 @@
 #include <QWidget>
 #include <QGridLayout>
 
-#include "orbital.hpp"
+#include "zetaplot.hpp"
 
 #include <vector>
 
@@ -17,7 +17,7 @@ class QButtonGrid : public QWidget
     Q_OBJECT
 
 public:
-    using GridPoint = orbital::GridPoint;
+    using GridPoint = zeta::GridPoint;
     explicit QButtonGrid(QWidget* parent = Q_NULLPTR);
     QButtonGrid(const QButtonGrid&) = delete;
     ~QButtonGrid();

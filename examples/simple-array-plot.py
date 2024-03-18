@@ -1,7 +1,7 @@
 import math
 import time
 
-from orbital import RunParam, breakpoint, init, msg, plot
+from zetaplot import RunParam, breakpoint, init, msg, plot
 
 
 init(ring_density=RunParam(5.0, "Ring Density"))

@@ -4,7 +4,7 @@
 #include "plotproperty.hpp"
 
 
-using PlotProperty = orbital::PlotProperty;
+using PlotProperty = zeta::PlotProperty;
 
 
 decltype(QPlotTab::toolTips) QPlotTab::toolTips = {

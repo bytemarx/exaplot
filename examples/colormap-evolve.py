@@ -5,7 +5,7 @@ https://www.qcustomplot.com/index.php/demos/colormapdemo
 import math
 import time
 
-from orbital import RunParam, init, plot, breakpoint
+from zetaplot import RunParam, init, plot, breakpoint
 
 init(ring_density=RunParam(5.0, "Ring Density"))
 plot = plot[1]

@@ -10,17 +10,16 @@
 #include <vector>
 
 
-namespace orbital {
-namespace testing {
+namespace zetatest {
 
 
 class ScriptTest : public ::testing::Test
 {
 protected:
-    class Interface : public OrbitalInterface
+    class Interface : public zeta::Interface
     {
     public:
-        PyObject* init(const std::vector<orbital::RunParam>&, const std::vector<orbital::GridPoint>&) override { Py_RETURN_NONE; }
+        PyObject* init(const std::vector<zeta::RunParam>&, const std::vector<zeta::GridPoint>&) override { Py_RETURN_NONE; }
         PyObject* stop() override { Py_RETURN_NONE; }
         PyObject* msg(const std::string&, bool) override { Py_RETURN_NONE; }
         PyObject* plot2D(std::size_t, double, double) override { Py_RETURN_NONE; }
@@ -29,8 +28,8 @@ protected:
         PyObject* plotCMVec(std::size_t, int, const std::vector<double>&) override { Py_RETURN_NONE; }
         PyObject* plotCMFrame(std::size_t, const std::vector<std::vector<double>>&) override { Py_RETURN_NONE; }
         PyObject* clear(std::size_t) override { Py_RETURN_NONE; }
-        PyObject* setPlotProperty(std::size_t, const PlotProperty&, const PlotProperty::Value& value) override { Py_RETURN_NONE; }
-        PyObject* getPlotProperty(std::size_t, const PlotProperty&) override { Py_RETURN_NONE; }
+        PyObject* setPlotProperty(std::size_t, const zeta::PlotProperty&, const zeta::PlotProperty::Value& value) override { Py_RETURN_NONE; }
+        PyObject* getPlotProperty(std::size_t, const zeta::PlotProperty&) override { Py_RETURN_NONE; }
         PyObject* showPlot(std::size_t, std::size_t) override { Py_RETURN_NONE; }
         Py_ssize_t currentPlotType(std::size_t) override { return 0; }
 
@@ -43,9 +42,9 @@ protected:
 
 TEST_F(ScriptTest, RunBasic)
 {
-    Interface* iface = new Interface;
-    OrbitalCore* core = new OrbitalCore{iface};
-    std::shared_ptr<ScriptModule> mod;
+    auto iface = new Interface;
+    auto core = new zeta::Core{iface};
+    std::shared_ptr<zeta::ScriptModule> mod;
     auto status = core->load(TEST_SCRIPTS_DIR "/run/basic.py", mod);
     ASSERT_FALSE(status) << status.message() << '\n' << status.traceback();
     status = mod->run({});
@@ -57,25 +56,25 @@ TEST_F(ScriptTest, RunBasic)
 
 TEST_F(ScriptTest, RunArgs)
 {
-    Interface* iface = new Interface;
-    OrbitalCore* core = new OrbitalCore{iface};
-    std::shared_ptr<ScriptModule> mod;
+    auto iface = new Interface;
+    auto core = new zeta::Core{iface};
+    std::shared_ptr<zeta::ScriptModule> mod;
     auto status = core->load(TEST_SCRIPTS_DIR "/run/args.py", mod);
     ASSERT_FALSE(status) << status.message() << '\n' << status.traceback();
     status = mod->run({
         {
             .identifier = "a",
-            .type = RunParamType::STRING,
+            .type = zeta::RunParamType::STRING,
             .value = "1"
         },
         {
             .identifier = "b",
-            .type = RunParamType::STRING,
+            .type = zeta::RunParamType::STRING,
             .value = "2"
         },
         {
             .identifier = "c",
-            .type = RunParamType::STRING,
+            .type = zeta::RunParamType::STRING,
             .value = "3"
         }
     });
@@ -85,5 +84,4 @@ TEST_F(ScriptTest, RunArgs)
 }
 
 
-}
 }

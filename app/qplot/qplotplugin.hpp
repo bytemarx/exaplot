@@ -7,7 +7,7 @@
 class QPlotPlugin : public QObject, public QDesignerCustomWidgetInterface
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "orbital.QPlotPlugin")
+    Q_PLUGIN_METADATA(IID "zetaplot.QPlotPlugin")
     Q_INTERFACES(QDesignerCustomWidgetInterface)
 
 public:

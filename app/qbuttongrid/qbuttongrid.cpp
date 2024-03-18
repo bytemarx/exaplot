@@ -5,8 +5,8 @@
 
 #include <limits>
 
-using orbital::GridPoint;
-using orbital::GridPoint_t;
+using zeta::GridPoint;
+using zeta::GridPoint_t;
 
 
 static constexpr auto QBUTTONGRID_MAX = std::numeric_limits<int>::max();

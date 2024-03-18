@@ -1,9 +1,9 @@
-#include "orbital.hpp"
+#include "internal.hpp"
 
 #include <fstream>
 
 
-namespace orbital {
+namespace zeta {
 
 
 ScriptModule::ScriptModule(PyThreadState* tState, const std::filesystem::path& file)
@@ -29,23 +29,23 @@ ScriptModule::ensureThreadState()
 }
 
 
-OrbitalError
+Error
 ScriptModule::load()
 {
     std::ifstream ifs{this->m_file, std::ios::binary | std::ios::ate};
     if (!ifs.is_open())
-        return OrbitalError{OrbitalError::IMPORT, "Failed to open file"};
+        return Error{Error::IMPORT, "Failed to open file"};
     auto end = ifs.tellg();
     ifs.seekg(0, std::ios::beg);
     auto size = static_cast<size_t>(end - ifs.tellg());
     if (size == 0) {
         ifs.close();
-        return OrbitalError{OrbitalError::IMPORT, "File is empty"};
+        return Error{Error::IMPORT, "File is empty"};
     }
     auto code = static_cast<char*>(malloc(size + 1));
     if (code == NULL) {
         ifs.close();
-        return OrbitalError{OrbitalError::SYSTEM, "Memory allocation failed"};
+        return Error{Error::SYSTEM, "Memory allocation failed"};
     }
     ifs.read(code, size);
     code[size] = 0;
@@ -55,46 +55,46 @@ ScriptModule::load()
     PyObject* codeObject = Py_CompileString(code, this->m_file.c_str(), Py_file_input);
     free(code);
     if (codeObject == NULL)
-        return OrbitalError::pyerror(OrbitalError::IMPORT);
+        return Error::pyerror(Error::IMPORT);
 
-    PyObject* pyOwned_module = PyImport_ExecCodeModule(ORBITAL_SCRIPT_MODULE, codeObject);
+    PyObject* pyOwned_module = PyImport_ExecCodeModule(ZETA_SCRIPT_MODULE, codeObject);
     Py_DECREF(codeObject);
     if (pyOwned_module == NULL)
-        return OrbitalError::pyerror(OrbitalError::IMPORT);
+        return Error::pyerror(Error::IMPORT);
     if (this->m_pyOwned_module != NULL)
         Py_DECREF(this->m_pyOwned_module);
     this->m_pyOwned_module = pyOwned_module;
 
-    return OrbitalError{OrbitalError::NONE};
+    return Error{Error::NONE};
 }
 
 
-OrbitalError
+Error
 ScriptModule::reload()
 {
     // this->ensureThreadState();
     // PyObject* pyOwned_newModule = PyImport_ReloadModule(this->m_pyOwned_module);
     // if (pyOwned_newModule == NULL)
-    //     return OrbitalError::pyerror(OrbitalError::RELOAD);
+    //     return Error::pyerror(Error::RELOAD);
     // Py_DECREF(this->m_pyOwned_module);
     // this->m_pyOwned_module = pyOwned_newModule;
-    // return OrbitalError{OrbitalError::NONE};
+    // return Error{Error::NONE};
     // TODO: `PyImport_ReloadModule` doesn't re-execute the module for some reason
     return this->load();
 }
 
 
-OrbitalError
+Error
 ScriptModule::run(const std::vector<RunParam>& args)
 {
     this->ensureThreadState();
-    OrbitalError status{OrbitalError::NONE};
+    Error status{Error::NONE};
     PyObject* pyOwned_runFn = NULL;
     PyObject* pyOwned_args = NULL;
     PyObject* pyOwned_kwargs = NULL;
     PyObject* pyOwned_result = NULL;
 
-    pyOwned_runFn = PyObject_GetAttrString(this->m_pyOwned_module, ORBITAL_SCRIPT_RUN);
+    pyOwned_runFn = PyObject_GetAttrString(this->m_pyOwned_module, ZETA_SCRIPT_RUN);
     if (pyOwned_runFn == NULL) goto error;
 
     pyOwned_args = PyTuple_New(0);
@@ -123,14 +123,14 @@ ScriptModule::run(const std::vector<RunParam>& args)
                     break;
                 }
             } catch (std::invalid_argument const& e) {
-                status = OrbitalError{
-                    OrbitalError::ARGUMENT,
+                status = Error{
+                    Error::ARGUMENT,
                     std::string{"Invalid argument for parameter '"}.append(arg.identifier).append("'")
                 };
                 goto done;
             } catch (std::out_of_range const& e) {
-                status = OrbitalError{
-                    OrbitalError::ARGUMENT,
+                status = Error{
+                    Error::ARGUMENT,
                     std::string{"Out of range for parameter '"}.append(arg.identifier).append("'")
                 };
                 goto done;
@@ -155,7 +155,7 @@ error:
     Py_XDECREF(pyOwned_kwargs);
     Py_XDECREF(pyOwned_args);
     Py_XDECREF(pyOwned_runFn);
-    return OrbitalError::pyerror(OrbitalError::RUNTIME);
+    return Error::pyerror(Error::RUNTIME);
 }
 
 

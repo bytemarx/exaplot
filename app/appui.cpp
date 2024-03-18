@@ -101,7 +101,7 @@ AppUI::setMessage(const QString& message, bool append)
 
 bool
 AppUI::init(
-    const std::vector<orbital::GridPoint>& arrangement,
+    const std::vector<zeta::GridPoint>& arrangement,
     const std::vector<std::pair<std::string, std::string>>& params)
 {
     if (!this->plotEditorDialog->setArrangement(arrangement))
@@ -152,11 +152,11 @@ AppUI::enableStop(bool enable)
 void
 AppUI::setPlotProperty(
     std::size_t plotIdx,
-    const orbital::PlotProperty& property,
+    const zeta::PlotProperty& property,
     const QPlotTab::Cache& properties)
 {
     auto plot = this->plot(plotIdx);
-    using PlotProperty = orbital::PlotProperty;
+    using PlotProperty = zeta::PlotProperty;
     switch (property) {
     case PlotProperty::TITLE:
         plot->setTitle(properties.title);

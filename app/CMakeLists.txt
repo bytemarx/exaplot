@@ -81,8 +81,8 @@ target_include_directories(
 )
 
 set_target_properties(app PROPERTIES
-	OUTPUT_NAME "orbital"
+	OUTPUT_NAME "zetaplot"
 	INSTALL_RPATH "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}"
 )
 
-target_link_libraries(app PRIVATE orbital ${ADDITIONAL_LIBRARY_DEPENDENCIES})
+target_link_libraries(app PRIVATE zetaplot ${ADDITIONAL_LIBRARY_DEPENDENCIES})

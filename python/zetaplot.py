@@ -1,6 +1,6 @@
 from numbers import Real
 
-from _orbital import (
+from _zetaplot import (
     RunParam,
     init,
     stop,

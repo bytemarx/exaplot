@@ -8,51 +8,51 @@
 #include <vector>
 #include <iostream>
 
-namespace orbital {
+namespace zeta {
 
 
 static PyMethodDef
 moduleMethods[] =
 {
     {
-        ORBITAL_INIT,
-        (PyCFunction)orbital_init,
+        ZETA_INIT,
+        (PyCFunction)zeta_init,
         METH_FASTCALL | METH_KEYWORDS,
         NULL
     },
     {
-        ORBITAL_STOP,
-        (PyCFunction)orbital_stop,
+        ZETA_STOP,
+        (PyCFunction)zeta_stop,
         METH_NOARGS,
         NULL
     },
     {
-        ORBITAL_MSG,
-        (PyCFunction)orbital_msg,
+        ZETA_MSG,
+        (PyCFunction)zeta_msg,
         METH_VARARGS | METH_KEYWORDS,
         NULL
     },
     {
-        ORBITAL_PLOT,
-        (PyCFunction)orbital_plot,
+        ZETA_PLOT,
+        (PyCFunction)zeta_plot,
         METH_FASTCALL,
         NULL
     },
     {
-        ORBITAL_SET_PLOT,
-        (PyCFunction)orbital__set_plot_property,
+        ZETA_SET_PLOT,
+        (PyCFunction)zeta__set_plot_property,
         METH_VARARGS,
         NULL
     },
     {
-        ORBITAL_GET_PLOT,
-        (PyCFunction)orbital__get_plot_property,
+        ZETA_GET_PLOT,
+        (PyCFunction)zeta__get_plot_property,
         METH_VARARGS,
         NULL
     },
     {
-        ORBITAL_SHOW_PLOT,
-        (PyCFunction)orbital__show_plot,
+        ZETA_SHOW_PLOT,
+        (PyCFunction)zeta__show_plot,
         METH_VARARGS,
         NULL
     },
@@ -75,9 +75,9 @@ static PyModuleDef
 moduleDef =
 {
     .m_base = PyModuleDef_HEAD_INIT,
-    .m_name = ORBITAL_MODULE,
+    .m_name = ZETA_MODULE,
     .m_doc = NULL,
-    .m_size = sizeof(orbital_state),
+    .m_size = sizeof(zeta_state),
     .m_methods = moduleMethods,
     .m_slots = moduleSlots,
     .m_traverse = module_traverse,
@@ -86,7 +86,7 @@ moduleDef =
 };
 
 
-orbital_state*
+zeta_state*
 getModuleStateFromObject(PyObject* object)
 {
     auto pyBorrowed_type = Py_TYPE(object);
@@ -96,14 +96,14 @@ getModuleStateFromObject(PyObject* object)
     auto heapType = reinterpret_cast<PyHeapTypeObject*>(pyBorrowed_type);
     auto module = heapType->ht_module;
     if (module && PyModule_GetDef(module) == &moduleDef)
-        return static_cast<orbital_state*>(PyModule_GetState(module));
+        return static_cast<zeta_state*>(PyModule_GetState(module));
 
     return NULL;
 }
 
 
 PyMODINIT_FUNC
-PyInit__orbital(void)
+PyInit__zetaplot(void)
 {
     return PyModuleDef_Init(&moduleDef);
 }
@@ -224,7 +224,7 @@ static bool
 isInterrupt(PyObject* object)
 {
     // TODO: PyErr_GivenExceptionMatches(object, mState->obj_InterruptException)
-    if (strcmp(object->ob_type->tp_name, ORBITAL_INTERRUPT) != 0)
+    if (strcmp(object->ob_type->tp_name, ZETA_INTERRUPT) != 0)
         return false;
 
     auto pyDict = PyType_GetDict(Py_TYPE(object));
@@ -232,7 +232,7 @@ isInterrupt(PyObject* object)
     if (pyModule && PyUnicode_Check(pyModule)) {
         auto module = PyUnicode_AsUTF8(pyModule);
         if (module != NULL)
-            return strcmp(module, ORBITAL_MODULE) == 0;
+            return strcmp(module, ZETA_MODULE) == 0;
         if (PyErr_Occurred())
             PyErr_Clear();
     }
@@ -288,15 +288,15 @@ PlotProperty::PlotProperty(const std::string& property)
 {}
 
 
-OrbitalError
-OrbitalError::pyerror(Type type)
+Error
+Error::pyerror(Type type)
 {
-    OrbitalError error{type};
+    Error error{type};
     PyObject* pyOwned_exception = NULL;
 
     pyOwned_exception = PyErr_GetRaisedException();
     if (pyOwned_exception == NULL)
-        return OrbitalError{NONE};
+        return Error{NONE};
 
     if (isInterrupt(pyOwned_exception))
         error.m_type = INTERRUPT;
@@ -315,7 +315,7 @@ error:
 }
 
 
-OrbitalError::OrbitalError(
+Error::Error(
     const Type type,
     const std::string& msg,
     const std::string& tb)
@@ -325,8 +325,8 @@ OrbitalError::OrbitalError(
 {}
 
 
-ssize_t OrbitalCore::coreCount = 0;
-PyThreadState* OrbitalCore::mainThreadState = NULL;
+ssize_t Core::coreCount = 0;
+PyThreadState* Core::mainThreadState = NULL;
 
 
 /**
@@ -339,15 +339,15 @@ PyThreadState* OrbitalCore::mainThreadState = NULL;
  * @return PyStatus 
  */
 PyStatus
-OrbitalCore::init(
+Core::init(
     const std::filesystem::path& executable,
     const std::filesystem::path& prefix)
 {
     PyStatus status;
     PyConfig config;
 
-    if (PyImport_AppendInittab(ORBITAL_MODULE, PyInit__orbital) == -1) {
-        return PyStatus_Error("Failed to append _orbital to the built-in modules.");
+    if (PyImport_AppendInittab(ZETA_MODULE, PyInit__zetaplot) == -1) {
+        return PyStatus_Error("Failed to append " ZETA_MODULE " to the built-in modules.");
     }
 
     status = preinit();
@@ -412,7 +412,7 @@ done:
 
 
 int
-OrbitalCore::deinit()
+Core::deinit()
 {
     if (mainThreadState != _PyThreadState_UncheckedGet())
         PyThreadState_Swap(mainThreadState);
@@ -420,10 +420,10 @@ OrbitalCore::deinit()
 }
 
 
-OrbitalInterface::~OrbitalInterface() = default;
+Interface::~Interface() = default;
 
 
-OrbitalCore::OrbitalCore(OrbitalInterface* interface)
+Core::Core(Interface* interface)
     : m_interface{interface}
     , m_tState{NULL}
 {
@@ -445,12 +445,12 @@ OrbitalCore::OrbitalCore(OrbitalInterface* interface)
             throw std::runtime_error{"Failed to initialize interpreter from config"};
         }
     }
-    this->m_tState->interp->orb_passthrough = static_cast<void*>(interface);
+    this->m_tState->interp->passthrough = static_cast<void*>(interface);
     this->coreCount++;
 }
 
 
-OrbitalCore::~OrbitalCore()
+Core::~Core()
 {
     if (this->m_tState != _PyThreadState_UncheckedGet())
         PyThreadState_Swap(this->m_tState);
@@ -474,8 +474,8 @@ OrbitalCore::~OrbitalCore()
 }
 
 
-OrbitalError
-OrbitalCore::load(const std::filesystem::path& file, std::shared_ptr<ScriptModule>& module)
+Error
+Core::load(const std::filesystem::path& file, std::shared_ptr<ScriptModule>& module)
 {
     module = std::shared_ptr<ScriptModule>(new ScriptModule{this->m_tState, file});
     this->m_scripts.push_back(module);

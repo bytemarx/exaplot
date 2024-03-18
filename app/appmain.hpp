@@ -31,7 +31,7 @@ public Q_SLOTS:
     void stop();
     void scriptError(const QString&, const QString&);
     void runComplete(const QString&);
-    void module_init(const std::vector<orbital::RunParam>&, const std::vector<orbital::GridPoint>&);
+    void module_init(const std::vector<zeta::RunParam>&, const std::vector<zeta::GridPoint>&);
     void module_msg(const std::string&, bool);
     void module_plot2D(std::size_t plotIdx, double, double);
     void module_plot2DVec(std::size_t plotIdx, const std::vector<double>&, const std::vector<double>&);
@@ -39,7 +39,7 @@ public Q_SLOTS:
     void module_plotCMVec(std::size_t plotIdx, int, const std::vector<double>&);
     void module_plotCMFrame(std::size_t plotIdx, const std::vector<std::vector<double>>&);
     void module_clear(std::size_t plotIdx);
-    void module_setPlotProperty(std::size_t plotIdx, const orbital::PlotProperty&, const QPlotTab::Cache&);
+    void module_setPlotProperty(std::size_t plotIdx, const zeta::PlotProperty&, const QPlotTab::Cache&);
     void module_showPlot(std::size_t plotIdx, QPlot::Type);
 
 private:

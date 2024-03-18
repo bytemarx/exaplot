@@ -1,6 +1,6 @@
 #include "appmain.hpp"
 
-#include "orbital.hpp"
+#include "zetaplot.hpp"
 
 #include <filesystem>
 #include <string>

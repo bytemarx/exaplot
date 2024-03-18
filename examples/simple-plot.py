@@ -1,7 +1,7 @@
 import math
 import time
 
-from orbital import RunParam, init, plot, stop
+from zetaplot import RunParam, init, plot, stop
 
 init(duration=RunParam(float, display="Duration (s)"))
 plot = plot[1]

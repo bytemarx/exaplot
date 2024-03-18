@@ -5,7 +5,7 @@
 #include <variant>
 
 
-namespace orbital {
+namespace zeta {
 
 
 class PlotProperty

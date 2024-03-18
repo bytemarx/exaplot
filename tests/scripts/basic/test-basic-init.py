@@ -1,4 +1,4 @@
-import orbital
+import zetaplot
 
 
-orbital.init(a='', b='', c=1, d=10.0)
+zetaplot.init(a='', b='', c=1, d=10.0)

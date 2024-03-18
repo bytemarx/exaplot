@@ -4,7 +4,7 @@ import time
 
 import librosa
 import numpy
-from orbital import RunParam, breakpoint, init, msg, plot
+from zetaplot import RunParam, breakpoint, init, msg, plot
 from scipy.interpolate import CubicSpline
 
 init(

@@ -14,8 +14,8 @@ Interface::Interface(QObject* parent)
 
 PyObject*
 Interface::init(
-    const std::vector<orbital::RunParam>& params,
-    const std::vector<orbital::GridPoint>& plots)
+    const std::vector<zeta::RunParam>& params,
+    const std::vector<zeta::GridPoint>& plots)
 {
     this->params = params;
     emit this->module_init(params, plots);
@@ -76,11 +76,11 @@ Interface::plotCM(std::size_t plotID, int col, int row, double value)
 {
     auto plot = this->plots.at(plotID - 1);
     if (col >= plot.attributes.colorMap.dataSize.x) {
-        PyErr_SetString(PyExc_ValueError, ORBITAL_PLOT "() 'col' argument out of bounds");
+        PyErr_SetString(PyExc_ValueError, ZETA_PLOT "() 'col' argument out of bounds");
         return NULL;
     }
     if (row >= plot.attributes.colorMap.dataSize.y) {
-        PyErr_SetString(PyExc_ValueError, ORBITAL_PLOT "() 'row' argument out of bounds");
+        PyErr_SetString(PyExc_ValueError, ZETA_PLOT "() 'row' argument out of bounds");
         return NULL;
     }
     emit this->module_plotCM(plotID - 1, col, row, value);
@@ -93,11 +93,11 @@ Interface::plotCMVec(std::size_t plotID, int row, const std::vector<double>& val
 {
     auto plot = this->plots.at(plotID - 1);
     if (row >= plot.attributes.colorMap.dataSize.y) {
-        PyErr_SetString(PyExc_ValueError, ORBITAL_PLOT "() 'row' argument out of bounds");
+        PyErr_SetString(PyExc_ValueError, ZETA_PLOT "() 'row' argument out of bounds");
         return NULL;
     }
     if (values.size() > static_cast<std::size_t>(plot.attributes.colorMap.dataSize.x)) {
-        PyErr_SetString(PyExc_ValueError, ORBITAL_PLOT "() 'values' argument contains too many values");
+        PyErr_SetString(PyExc_ValueError, ZETA_PLOT "() 'values' argument contains too many values");
         return NULL;
     }
     emit this->module_plotCMVec(plotID - 1, row, values);
@@ -110,13 +110,13 @@ Interface::plotCMFrame(std::size_t plotID, const std::vector<std::vector<double>
 {
     auto plot = this->plots.at(plotID - 1);
     if (frame.size() > static_cast<std::size_t>(plot.attributes.colorMap.dataSize.y)) {
-        PyErr_SetString(PyExc_ValueError, ORBITAL_PLOT "() 'frame' argument contains too many rows");
+        PyErr_SetString(PyExc_ValueError, ZETA_PLOT "() 'frame' argument contains too many rows");
         return NULL;
     }
     std::size_t i = 0;
     for (const auto& row : frame) {
         if (row.size() > static_cast<std::size_t>(plot.attributes.colorMap.dataSize.x)) {
-            PyErr_Format(PyExc_ValueError, ORBITAL_PLOT "() frame[%zd] contains too many values", i);
+            PyErr_Format(PyExc_ValueError, ZETA_PLOT "() frame[%zd] contains too many values", i);
             return NULL;
         }
         i += 1;
@@ -142,8 +142,8 @@ Interface::clear(std::size_t plotID)
 PyObject*
 Interface::setPlotProperty(
     std::size_t plotID,
-    const orbital::PlotProperty& property,
-    const orbital::PlotProperty::Value& value)
+    const zeta::PlotProperty& property,
+    const zeta::PlotProperty::Value& value)
 {
     if (plotID == 0) {
         PyErr_SetString(PyExc_IndexError, "invalid plot ID");
@@ -156,7 +156,7 @@ Interface::setPlotProperty(
     }
 
     auto& properties = this->plots.at(plotIdx).attributes;
-    using PlotProperty = orbital::PlotProperty;
+    using PlotProperty = zeta::PlotProperty;
     switch (property) {
     case PlotProperty::TITLE: properties.title = QString::fromStdString(std::get<std::string>(value)); break;
     case PlotProperty::XAXIS: properties.xAxis = QString::fromStdString(std::get<std::string>(value)); break;
@@ -301,7 +301,7 @@ Interface::setPlotProperty(
 
 
 PyObject*
-Interface::getPlotProperty(std::size_t plotID, const orbital::PlotProperty& property)
+Interface::getPlotProperty(std::size_t plotID, const zeta::PlotProperty& property)
 {
     if (plotID == 0) {
         PyErr_SetString(PyExc_IndexError, "invalid plot ID");
@@ -316,7 +316,7 @@ Interface::getPlotProperty(std::size_t plotID, const orbital::PlotProperty& prop
     const auto& attributes = this->plots.at(plotIdx).attributes;
     PyObject* pyOwned_value = NULL;
 
-    using PlotProperty = orbital::PlotProperty;
+    using PlotProperty = zeta::PlotProperty;
     switch (property) {
     case PlotProperty::TITLE: pyOwned_value = PyUnicode_FromString(attributes.title.toStdString().c_str()); break;
     case PlotProperty::XAXIS: pyOwned_value = PyUnicode_FromString(attributes.xAxis.toStdString().c_str()); break;
@@ -439,13 +439,13 @@ Interface::currentPlotType(std::size_t plotID)
 void
 Interface::pythonInit()
 {
-    std::filesystem::path prefix{ORBITAL_LIBRARY_PATH "/python"};
+    std::filesystem::path prefix{ZETAPLOT_LIBRARY_PATH "/python"};
 
     // TODO: For uninstalled applications, find a better way to locate library
     if (!std::filesystem::exists(prefix))
         prefix = std::filesystem::canonical("/proc/self/exe").parent_path() / "python";
 
-    PyStatus status = orbital::OrbitalCore::init(
+    PyStatus status = zeta::Core::init(
         std::filesystem::canonical("/proc/self/exe"),
         prefix
     );
@@ -456,7 +456,7 @@ Interface::pythonInit()
         return;
     }
 
-    this->core = new orbital::OrbitalCore{this};
+    this->core = new zeta::Core{this};
 }
 
 
@@ -464,7 +464,7 @@ void
 Interface::pythonDeInit()
 {
     delete this->core;
-    orbital::OrbitalCore::deinit();
+    zeta::Core::deinit();
 }
 
 
@@ -498,7 +498,7 @@ Interface::runScript(const std::vector<std::string>& args)
         params[i].value = args[i];
     this->stopRequested = false;
     auto status = this->module.get()->run(params);
-    if (status && status != orbital::OrbitalError::INTERRUPT) {
+    if (status && status != zeta::Error::INTERRUPT) {
         auto message = status.message();
         if (!status.traceback().empty())
             message.append("\n").append(status.traceback());

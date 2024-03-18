@@ -1,4 +1,4 @@
-import orbital
+import zetaplot
 
 
-orbital.plot[3]()
+zetaplot.plot[3]()

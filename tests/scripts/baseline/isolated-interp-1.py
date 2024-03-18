@@ -1,1 +1,1 @@
-assert('__orbital_test__' not in globals())
+assert('__test__' not in globals())

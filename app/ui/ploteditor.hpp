@@ -14,7 +14,7 @@ class PlotEditor : public QDialog
 public:
     typedef struct
     {
-        orbital::GridPoint position;
+        zeta::GridPoint position;
         QPlotTab::Cache attributes;
         QPlot::Type selected;
     } PlotInfo;
@@ -25,7 +25,7 @@ public:
     std::vector<PlotInfo> plots() const;
     void setPlot(std::size_t plot, const QPlotTab::Cache& attributes);
     void setSelectedPlot(std::size_t plot, QPlot::Type selected);
-    bool setArrangement(const std::vector<orbital::GridPoint>& arrangement);
+    bool setArrangement(const std::vector<zeta::GridPoint>& arrangement);
 
 public Q_SLOTS:
     void open() override;
@@ -37,7 +37,7 @@ private:
     struct
     {
         std::vector<QPlotTab::Cache> plotTabs;
-        std::vector<orbital::GridPoint> arrangement;
+        std::vector<zeta::GridPoint> arrangement;
         QPixmap buttonGridStatus;
     } cache;
 

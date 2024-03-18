@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 
 project(
-    Orbital
+    ZetaPlot
     VERSION 0.0.0
     LANGUAGES CXX
 )
@@ -11,7 +11,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(OUTPUT_LIB_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/lib")
-set(LIB_INSTALL_DIR lib/orbital)
+set(LIB_INSTALL_DIR lib/zetaplot)
 
 include(ExternalProject)
 
@@ -148,7 +148,7 @@ add_custom_command(
         "${PYTHON_INSTALL_DIR}/${PYTHON_SITE_PACKAGES_DIR}"
     COMMENT "Copying the interpreter's library modules to ${PYTHON_INSTALL_DIR}"
     COMMAND ${CMAKE_COMMAND} -E copy
-        "${PYTHON_PROJECT_DIR}/orbital.py"
+        "${PYTHON_PROJECT_DIR}/zetaplot.py"
         "${PYTHON_INSTALL_DIR}/${PYTHON_LIB_DIR}"
     BYPRODUCTS ${PYTHON_INSTALL_DIR}
 )
@@ -169,7 +169,7 @@ set(PYTHON_INCLUDES
 
 add_compile_definitions(QT_NO_SIGNALS_SLOTS_KEYWORDS)
 
-set(ORBITAL_LIBRARY_PATH "${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}")
+set(ZETAPLOT_LIBRARY_PATH "${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}")
 configure_file(config.h.in config.h)
 
 set(SOURCES
@@ -202,20 +202,20 @@ set(LIBRARIES
     m
 )
 
-add_library(orbital SHARED ${SOURCES})
+add_library(zetaplot SHARED ${SOURCES})
 
-add_dependencies(orbital ${PYTHON_TARGET})
+add_dependencies(zetaplot ${PYTHON_TARGET})
 
-target_include_directories(orbital PUBLIC
+target_include_directories(zetaplot PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include/orbital>
+    $<INSTALL_INTERFACE:include/zetaplot>
     "${CMAKE_BINARY_DIR}"
     "${PYTHON_INCLUDES}"
 )
 
-target_compile_options(orbital PUBLIC ${CFLAGS})
-target_link_libraries(orbital PUBLIC ${LIBRARIES})
-set_target_properties(orbital PROPERTIES INSTALL_RPATH "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}")
+target_compile_options(zetaplot PUBLIC ${CFLAGS})
+target_link_libraries(zetaplot PUBLIC ${LIBRARIES})
+set_target_properties(zetaplot PROPERTIES INSTALL_RPATH "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}")
 
 add_subdirectory("tests")
 

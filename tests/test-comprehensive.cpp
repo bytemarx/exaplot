@@ -9,14 +9,13 @@
 #include <vector>
 
 
-namespace orbital {
-namespace testing {
+namespace zetatest {
 
 
 class ComprehensiveTest : public ModuleTest
 {
 public:
-    void init(const std::vector<orbital::RunParam>& params, const std::vector<orbital::GridPoint>& plots) override;
+    void init(const std::vector<zeta::RunParam>& params, const std::vector<zeta::GridPoint>& plots) override;
     void msg(const std::string& message, bool append) override;
     void plot2D(std::size_t plotID, double x, double y) override {};
     void plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y) override {};
@@ -32,103 +31,103 @@ TEST_F(ComprehensiveTest, TestInit)
 
 void
 ComprehensiveTest::init(
-    const std::vector<orbital::RunParam>& params,
-    const std::vector<orbital::GridPoint>& plots)
+    const std::vector<zeta::RunParam>& params,
+    const std::vector<zeta::GridPoint>& plots)
 {
-    std::vector<orbital::RunParam> expected{
+    std::vector<zeta::RunParam> expected{
         {
             .identifier = "a",
-            .type = orbital::RunParamType::STRING,
+            .type = zeta::RunParamType::STRING,
             .value = "",
             .display = "a"
         },
         {
             .identifier = "b",
-            .type = orbital::RunParamType::STRING,
+            .type = zeta::RunParamType::STRING,
             .value = "127.0.0.1",
             .display = "b"
         },
         {
             .identifier = "c",
-            .type = orbital::RunParamType::INT,
+            .type = zeta::RunParamType::INT,
             .value = "-100",
             .display = "c"
         },
         {
             .identifier = "d",
-            .type = orbital::RunParamType::FLOAT,
+            .type = zeta::RunParamType::FLOAT,
             .value = "1.602e-19",
             .display = "d"
         },
         {
             .identifier = "e",
-            .type = orbital::RunParamType::STRING,
+            .type = zeta::RunParamType::STRING,
             .value = "192.168.1.255",
             .display = "Gateway"
         },
         {
             .identifier = "f",
-            .type = orbital::RunParamType::STRING,
+            .type = zeta::RunParamType::STRING,
             .value = "",
             .display = "Server"
         },
         {
             .identifier = "g",
-            .type = orbital::RunParamType::INT,
+            .type = zeta::RunParamType::INT,
             .value = "4",
             .display = "Rings"
         },
         {
             .identifier = "h",
-            .type = orbital::RunParamType::INT,
+            .type = zeta::RunParamType::INT,
             .value = "",
             .display = "Level"
         },
         {
             .identifier = "i",
-            .type = orbital::RunParamType::FLOAT,
+            .type = zeta::RunParamType::FLOAT,
             .value = "5.0",
             .display = "Threshold (V)"
         },
         {
             .identifier = "j",
-            .type = orbital::RunParamType::FLOAT,
+            .type = zeta::RunParamType::FLOAT,
             .value = "",
             .display = "Noise (dB)"
         },
         {
             .identifier = "k",
-            .type = orbital::RunParamType::STRING,
+            .type = zeta::RunParamType::STRING,
             .value = "192.168.1.255",
             .display = "k"
         },
         {
             .identifier = "l",
-            .type = orbital::RunParamType::STRING,
+            .type = zeta::RunParamType::STRING,
             .value = "",
             .display = "l"
         },
         {
             .identifier = "m",
-            .type = orbital::RunParamType::INT,
+            .type = zeta::RunParamType::INT,
             .value = "4",
             .display = "m"
         },
         {
             .identifier = "n",
-            .type = orbital::RunParamType::INT,
+            .type = zeta::RunParamType::INT,
             .value = "",
             .display = "n"
         },
         {
             .identifier = "o",
-            .type = orbital::RunParamType::FLOAT,
+            .type = zeta::RunParamType::FLOAT,
             .value = "5.0",
             .display = "o"
         },
         {
             .identifier = "p",
-            .type = orbital::RunParamType::FLOAT,
+            .type = zeta::RunParamType::FLOAT,
             .value = "",
             .display = "p"
         }
@@ -157,5 +156,4 @@ ComprehensiveTest::msg(const std::string& message, bool append)
 }
 
 
-}
 }

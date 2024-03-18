@@ -4,13 +4,13 @@
 #include <limits>
 
 
-namespace orbital {
+namespace zeta {
 
 
-static orbital_state*
+static zeta_state*
 getModuleState(PyObject* module)
 {
-    return static_cast<orbital_state*>(PyModule_GetState(module));
+    return static_cast<zeta_state*>(PyModule_GetState(module));
 }
 
 
@@ -35,12 +35,12 @@ moduleSlot_initInterface(PyObject* module)
     auto tState = PyThreadState_Get();
     auto interp = tState->interp;
 
-    assert(interp->orb_passthrough);
-    if (interp->orb_passthrough == NULL) {
+    assert(interp->passthrough);
+    if (interp->passthrough == NULL) {
         goto error;
     }
 
-    mState->iface = static_cast<OrbitalInterface*>(interp->orb_passthrough);
+    mState->iface = static_cast<Interface*>(interp->passthrough);
 
     return 0;
 error:
@@ -78,13 +78,13 @@ module_clear(PyObject* module)
  * @return PyObject* 
  */
 PyObject*
-orbital_init(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
+zeta_init(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
 {
     std::vector<RunParam> params;
     std::vector<GridPoint> plots{{.x=0, .dx=0, .y=0, .dy=0}};
 
     if (nargs > 1) {
-        PyErr_Format(PyExc_TypeError, ORBITAL_INIT "() takes from 0 to 1 positional arguments but %zd were given", nargs);
+        PyErr_Format(PyExc_TypeError, ZETA_INIT "() takes from 0 to 1 positional arguments but %zd were given", nargs);
         return NULL;
     }
 
@@ -96,7 +96,7 @@ orbital_init(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject
             if (n_plots <= 0) {
                 if (!PyErr_Occurred())
                     PyErr_Format(PyExc_ValueError,
-                        ORBITAL_INIT "() 'plots' argument must be an integer greater than zero");
+                        ZETA_INIT "() 'plots' argument must be an integer greater than zero");
                 return NULL;
             }
             for (decltype(n_plots) i_plot = 0; i_plot < n_plots; ++i_plot) {
@@ -110,18 +110,18 @@ orbital_init(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject
         } else if (PyList_Check(pyBorrowed_plots)) {
             auto n_plots = PyList_GET_SIZE(pyBorrowed_plots);
             if (n_plots == 0) {
-                PyErr_SetString(PyExc_ValueError, ORBITAL_INIT "() plots list is missing entries");
+                PyErr_SetString(PyExc_ValueError, ZETA_INIT "() plots list is missing entries");
                 return NULL;
             }
             if (n_plots > 64) {
-                PyErr_SetString(PyExc_ValueError, ORBITAL_INIT "() that's too many plots "
+                PyErr_SetString(PyExc_ValueError, ZETA_INIT "() that's too many plots "
                                 "why do you need this many plots, what are you doing with all these plots??");
                 return NULL;
             }
             for (decltype(n_plots) i_plot = 0; i_plot < n_plots; ++i_plot) {
                 auto pyBorrowed_plot = PyList_GET_ITEM(pyBorrowed_plots, i_plot);
                 if (!PyTuple_Check(pyBorrowed_plot) || PyTuple_GET_SIZE(pyBorrowed_plot) != 4) {
-                    PyErr_Format(PyExc_TypeError, ORBITAL_INIT "() 'plots[%zd]' value must be type 'tuple[int, int, int, int]'", i_plot);
+                    PyErr_Format(PyExc_TypeError, ZETA_INIT "() 'plots[%zd]' value must be type 'tuple[int, int, int, int]'", i_plot);
                     return NULL;
                 }
                 long p[4];
@@ -129,7 +129,7 @@ orbital_init(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject
                     auto pyBorrowed_plotPoint = PyTuple_GET_ITEM(pyBorrowed_plot, i_plotPoint);
                     if (!PyLong_Check(pyBorrowed_plotPoint)) {
                         PyErr_Format(PyExc_TypeError,
-                            ORBITAL_INIT "() 'plots[%zd][%zd]' value must be type 'int'",
+                            ZETA_INIT "() 'plots[%zd][%zd]' value must be type 'int'",
                             i_plot, i_plotPoint);
                         return NULL;
                     }
@@ -137,7 +137,7 @@ orbital_init(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject
                     if (plotPoint < 0) {
                         if (!PyErr_Occurred())
                             PyErr_Format(PyExc_ValueError,
-                                ORBITAL_INIT "() 'plots[%zd][%zd]' value is invalid: %ld",
+                                ZETA_INIT "() 'plots[%zd][%zd]' value is invalid: %ld",
                                 i_plot, i_plotPoint, plotPoint);
                         return NULL;
                     }
@@ -151,7 +151,7 @@ orbital_init(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject
                 });
             }
         } else {
-            PyErr_SetString(PyExc_TypeError, ORBITAL_INIT "() 'plots' argument must be either an 'int' or 'list' type");
+            PyErr_SetString(PyExc_TypeError, ZETA_INIT "() 'plots' argument must be either an 'int' or 'list' type");
             return NULL;
         }
     }
@@ -194,7 +194,7 @@ orbital_init(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject
             } else if (PyFloat_CheckExact(pyBorrowed_paramInfo)) {
                 type = RunParamType::FLOAT;
             } else {
-                PyErr_Format(PyExc_ValueError, ORBITAL_INIT "() invalid value for parameter '%U'", pyBorrowed_paramName);
+                PyErr_Format(PyExc_ValueError, ZETA_INIT "() invalid value for parameter '%U'", pyBorrowed_paramName);
                 return NULL;
             }
 
@@ -224,7 +224,7 @@ done:
 
 
 PyObject*
-orbital_stop(PyObject* module, PyObject* Py_UNUSED(args))
+zeta_stop(PyObject* module, PyObject* Py_UNUSED(args))
 {
     auto state = getModuleState(module);
     return state->iface->stop();
@@ -247,11 +247,11 @@ msg_keywords[] = {
  * @return PyObject* 
  */
 PyObject*
-orbital_msg(PyObject* module, PyObject* args, PyObject* kwargs)
+zeta_msg(PyObject* module, PyObject* args, PyObject* kwargs)
 {
     const char* c_message = NULL;
     int c_append = 0;
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s|p:" ORBITAL_MSG, msg_keywords, &c_message, &c_append))
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s|p:" ZETA_MSG, msg_keywords, &c_message, &c_append))
         return NULL;
 
     std::string message{c_message};
@@ -263,10 +263,10 @@ orbital_msg(PyObject* module, PyObject* args, PyObject* kwargs)
 
 
 static PyObject*
-plot2D(orbital_state* state, std::size_t plotID, PyObject* const* args, Py_ssize_t nargs)
+plot2D(zeta_state* state, std::size_t plotID, PyObject* const* args, Py_ssize_t nargs)
 {
     if (nargs != 2) {
-        PyErr_Format(PyExc_TypeError, ORBITAL_PLOT "() takes 2 positional arguments but %zd were given", nargs);
+        PyErr_Format(PyExc_TypeError, ZETA_PLOT "() takes 2 positional arguments but %zd were given", nargs);
         return NULL;
     }
     auto x = PyFloat_AsDouble(args[0]);
@@ -278,17 +278,17 @@ plot2D(orbital_state* state, std::size_t plotID, PyObject* const* args, Py_ssize
 
 
 static PyObject*
-plot2DVec(orbital_state* state, std::size_t plotID, PyObject* const* args, Py_ssize_t nargs)
+plot2DVec(zeta_state* state, std::size_t plotID, PyObject* const* args, Py_ssize_t nargs)
 {
     if (nargs != 2) {
-        PyErr_Format(PyExc_TypeError, ORBITAL_PLOT "() takes 2 positional arguments but %zd were given", nargs);
+        PyErr_Format(PyExc_TypeError, ZETA_PLOT "() takes 2 positional arguments but %zd were given", nargs);
         return NULL;
     }
 
-    auto pyBorrowed_xData = PySequence_Fast(args[0], ORBITAL_PLOT "() 'x' argument must be type 'Sequence'");
+    auto pyBorrowed_xData = PySequence_Fast(args[0], ZETA_PLOT "() 'x' argument must be type 'Sequence'");
     if (pyBorrowed_xData == NULL)
         return NULL;
-    auto pyBorrowed_yData = PySequence_Fast(args[1], ORBITAL_PLOT "() 'y' argument must be type 'Sequence'");
+    auto pyBorrowed_yData = PySequence_Fast(args[1], ZETA_PLOT "() 'y' argument must be type 'Sequence'");
     if (pyBorrowed_yData == NULL)
         return NULL;
 
@@ -313,10 +313,10 @@ plot2DVec(orbital_state* state, std::size_t plotID, PyObject* const* args, Py_ss
 
 
 static PyObject*
-plotCM(orbital_state* state, std::size_t plotID, PyObject* const* args, Py_ssize_t nargs)
+plotCM(zeta_state* state, std::size_t plotID, PyObject* const* args, Py_ssize_t nargs)
 {
     if (nargs != 3) {
-        PyErr_Format(PyExc_TypeError, ORBITAL_PLOT "() takes 3 positional arguments but %zd were given", nargs);
+        PyErr_Format(PyExc_TypeError, ZETA_PLOT "() takes 3 positional arguments but %zd were given", nargs);
         return NULL;
     }
     auto x = PyLong_AsLong(args[0]);
@@ -330,17 +330,17 @@ plotCM(orbital_state* state, std::size_t plotID, PyObject* const* args, Py_ssize
 
 
 static PyObject*
-plotCMVec(orbital_state* state, std::size_t plotID, PyObject* const* args, Py_ssize_t nargs)
+plotCMVec(zeta_state* state, std::size_t plotID, PyObject* const* args, Py_ssize_t nargs)
 {
     if (nargs != 2) {
-        PyErr_Format(PyExc_TypeError, ORBITAL_PLOT "() takes 2 positional arguments but %zd were given", nargs);
+        PyErr_Format(PyExc_TypeError, ZETA_PLOT "() takes 2 positional arguments but %zd were given", nargs);
         return NULL;
     }
 
     auto y = PyLong_AsLong(args[0]);
     if (PyErr_Occurred()) return NULL;
 
-    auto pyBorrowed_values = PySequence_Fast(args[1], ORBITAL_PLOT "() 'values' argument must be type 'Sequence'");
+    auto pyBorrowed_values = PySequence_Fast(args[1], ZETA_PLOT "() 'values' argument must be type 'Sequence'");
     if (pyBorrowed_values == NULL)
         return NULL;
     auto n_values = PySequence_Fast_GET_SIZE(pyBorrowed_values);
@@ -356,9 +356,9 @@ plotCMVec(orbital_state* state, std::size_t plotID, PyObject* const* args, Py_ss
 
 
 static PyObject*
-plotCMFrame(orbital_state* state, std::size_t plotID, PyObject* const* args, Py_ssize_t nargs)
+plotCMFrame(zeta_state* state, std::size_t plotID, PyObject* const* args, Py_ssize_t nargs)
 {
-    auto pyBorrowed_frame = PySequence_Fast(args[0], ORBITAL_PLOT "() 'frame' argument must be type 'Sequence[Sequence[Real]]'");
+    auto pyBorrowed_frame = PySequence_Fast(args[0], ZETA_PLOT "() 'frame' argument must be type 'Sequence[Sequence[Real]]'");
     if (pyBorrowed_frame == NULL)
         return NULL;
 
@@ -367,19 +367,19 @@ plotCMFrame(orbital_state* state, std::size_t plotID, PyObject* const* args, Py_
         Py_RETURN_NONE;
     }
     if (!PySequence_Check(PySequence_Fast_GET_ITEM(pyBorrowed_frame, 0))) {
-        PyErr_SetString(PyExc_TypeError, ORBITAL_PLOT "() 'frame' argument must be type 'Sequence[Sequence[Real]]'");
+        PyErr_SetString(PyExc_TypeError, ZETA_PLOT "() 'frame' argument must be type 'Sequence[Sequence[Real]]'");
         return NULL;
     }
     auto n_cols = PySequence_Size(PySequence_Fast_GET_ITEM(pyBorrowed_frame, 0));
     std::vector<std::vector<double>> frame(n_rows, std::vector<double>(n_cols));
 
     for (decltype(n_rows) i = 0; i < n_rows; ++i) {
-        auto pyBorrowed_row = PySequence_Fast(PySequence_Fast_GET_ITEM(pyBorrowed_frame, i), ORBITAL_PLOT "() 'frame' argument contains non-Sequence type object (frame[%zd])");
+        auto pyBorrowed_row = PySequence_Fast(PySequence_Fast_GET_ITEM(pyBorrowed_frame, i), ZETA_PLOT "() 'frame' argument contains non-Sequence type object (frame[%zd])");
         if (pyBorrowed_row == NULL)
             return NULL;
         if (PySequence_Fast_GET_SIZE(pyBorrowed_row) != n_cols) {
             // TODO: consider using std::move to allow vectors of differing lengths without sacrificing performance
-            PyErr_SetString(PyExc_ValueError, ORBITAL_PLOT "() 'frame' argument must contain sequences of equal size (frame[%zd])");
+            PyErr_SetString(PyExc_ValueError, ZETA_PLOT "() 'frame' argument must contain sequences of equal size (frame[%zd])");
             return NULL;
         }
         for (decltype(n_cols) j = 0; j < n_cols; ++j) {
@@ -402,19 +402,19 @@ plotCMFrame(orbital_state* state, std::size_t plotID, PyObject* const* args, Py_
  * @return PyObject* 
  */
 PyObject*
-orbital_plot(PyObject* module, PyObject* const* args, Py_ssize_t nargs)
+zeta_plot(PyObject* module, PyObject* const* args, Py_ssize_t nargs)
 {
     assert(nargs >= 0);
     auto state = getModuleState(module);
 
     if (nargs == 0) {
-        PyErr_SetString(PyExc_TypeError, ORBITAL_PLOT "() missing 1 required positional argument: 'plot_id'");
+        PyErr_SetString(PyExc_TypeError, ZETA_PLOT "() missing 1 required positional argument: 'plot_id'");
         return NULL;
     }
 
     auto pyBorrowed_plotID = args[0];
     if (!PyLong_Check(pyBorrowed_plotID)) {
-        PyErr_SetString(PyExc_TypeError, ORBITAL_PLOT "() 'plot_id' argument must be type 'int'");
+        PyErr_SetString(PyExc_TypeError, ZETA_PLOT "() 'plot_id' argument must be type 'int'");
         return NULL;
     }
     auto plotID = PyLong_AsSize_t(pyBorrowed_plotID);
@@ -432,7 +432,7 @@ orbital_plot(PyObject* module, PyObject* const* args, Py_ssize_t nargs)
         Py_RETURN_NONE;
     }
 
-    std::function<PyObject*(orbital_state*, long, PyObject* const*, Py_ssize_t)> plotFn;
+    std::function<PyObject*(zeta_state*, long, PyObject* const*, Py_ssize_t)> plotFn;
     switch (state->iface->currentPlotType(plotID)) {
     case 0: // 2D
         plotFn = PySequence_Check(args[1]) ? plot2DVec : plot2D;
@@ -457,9 +457,9 @@ orbital_plot(PyObject* module, PyObject* const* args, Py_ssize_t nargs)
  * @return PyObject* 
  */
 PyObject*
-orbital__set_plot_property(PyObject* module, PyObject* args)
+zeta__set_plot_property(PyObject* module, PyObject* args)
 {
-    orbital_state* state = getModuleState(module);
+    zeta_state* state = getModuleState(module);
 
     long plotID = 0;
     const char* c_prop = NULL;
@@ -588,9 +588,9 @@ orbital__set_plot_property(PyObject* module, PyObject* args)
  * @return PyObject* 
  */
 PyObject*
-orbital__get_plot_property(PyObject* module, PyObject* args)
+zeta__get_plot_property(PyObject* module, PyObject* args)
 {
-    orbital_state* state = getModuleState(module);
+    zeta_state* state = getModuleState(module);
 
     long plotID = 0;
     const char* c_prop = NULL;
@@ -621,9 +621,9 @@ orbital__get_plot_property(PyObject* module, PyObject* args)
  * @return PyObject* 
  */
 PyObject*
-orbital__show_plot(PyObject* module, PyObject* args)
+zeta__show_plot(PyObject* module, PyObject* args)
 {
-    orbital_state* state = getModuleState(module);
+    zeta_state* state = getModuleState(module);
 
     long plotID = 0;
     Py_ssize_t plotType = 0;
@@ -682,7 +682,7 @@ PyRunParam_CheckTypeArg(PyObject* object)
  * @return int 
  */
 static int
-orbital_RunParam___init__(PyRunParam* self, PyObject* args, PyObject* kwargs)
+zetaplot_RunParam___init__(PyRunParam* self, PyObject* args, PyObject* kwargs)
 {
     PyObject* pyBorrowed_defaultOrType = NULL;
     const char* pyBorrowed_display = NULL;
@@ -756,7 +756,7 @@ PyRunParam_traverse(PyRunParam* self, visitproc visit, void* arg)
 static PyType_Slot
 PyRunParam_slots[] =
 {
-    {Py_tp_init, (void*)orbital_RunParam___init__},
+    {Py_tp_init, (void*)zetaplot_RunParam___init__},
     {Py_tp_dealloc, (void*)PyRunParam_dealloc},
     {Py_tp_traverse, (void*)PyRunParam_traverse},
     {Py_tp_clear, (void*)PyRunParam_clear},
@@ -767,7 +767,7 @@ PyRunParam_slots[] =
 static PyType_Spec
 PyRunParam_spec =
 {
-    .name = ORBITAL_MODULE "." ORBITAL_RUNPARAM,
+    .name = ZETA_MODULE "." ZETA_RUNPARAM,
     .basicsize = sizeof(PyRunParam),
     .flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_GC | Py_TPFLAGS_IMMUTABLETYPE,
     .slots = PyRunParam_slots,
@@ -796,11 +796,11 @@ moduleSlot_initExceptions(PyObject* module)
     auto mState = getModuleState(module);
 
     mState->obj_InterruptException = PyErr_NewException(
-        ORBITAL_MODULE "." ORBITAL_INTERRUPT, PyExc_BaseException, NULL
+        ZETA_MODULE "." ZETA_INTERRUPT, PyExc_BaseException, NULL
     );
     if (mState->obj_InterruptException == NULL) return -1;
 
-    if (PyModule_AddObjectRef(module, ORBITAL_INTERRUPT, mState->obj_InterruptException) < 0) return -1;
+    if (PyModule_AddObjectRef(module, ZETA_INTERRUPT, mState->obj_InterruptException) < 0) return -1;
 
     return 0;
 }
