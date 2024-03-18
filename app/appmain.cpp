@@ -218,9 +218,11 @@ void
 AppMain::module_clear(std::size_t plotIdx)
 {
     auto plot = this->ui.plot(plotIdx);
-    plot->plot2D()->clear();
-    plot->plotColorMap()->clear();
-    plot->queue();
+    switch (plot->type()) {
+    default:
+    case QPlot::Type::TWODIMEN: return plot->plot2D()->clear();
+    case QPlot::Type::COLORMAP: return plot->plotColorMap()->clear();
+    }
 }
 
 
