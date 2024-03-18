@@ -169,6 +169,9 @@ class _PlotProperties:
         def autorescale_data(self, value: bool) -> None:...
 class _Plot:
     @overload
+    def __call__(self) -> None:
+        """Clears the plot."""
+    @overload
     def __call__(self, x: Real, y: Real) -> None:
         """Plots a data point to the 2D plot.
 
