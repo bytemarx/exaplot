@@ -1,7 +1,8 @@
 <RCC>
-    <qresource prefix="/">
-        <file>res/checkmark.svg</file>
-        <file>res/exclamation.svg</file>
-        <file>res/attributions.txt</file>
-    </qresource>
+  <qresource prefix="/">
+    <file>res/checkmark.svg</file>
+    <file>res/icon-128.bmp</file>
+    <file>res/exclamation.svg</file>
+    <file>res/attributions.txt</file>
+  </qresource>
 </RCC>
