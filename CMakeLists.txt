@@ -169,7 +169,7 @@ set(PYTHON_INCLUDES
 
 add_compile_definitions(QT_NO_SIGNALS_SLOTS_KEYWORDS)
 
-set(ZETAPLOT_LIBRARY_PATH "${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}")
+set(ZPLOT_LIBRARY_PATH "${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}")
 configure_file(config.h.in config.h)
 
 set(SOURCES
@@ -202,20 +202,20 @@ set(LIBRARIES
     m
 )
 
-add_library(zetaplot SHARED ${SOURCES})
+add_library(zplot SHARED ${SOURCES})
 
-add_dependencies(zetaplot ${PYTHON_TARGET})
+add_dependencies(zplot ${PYTHON_TARGET})
 
-target_include_directories(zetaplot PUBLIC
+target_include_directories(zplot PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include/zetaplot>
+    $<INSTALL_INTERFACE:include/zplot>
     "${CMAKE_BINARY_DIR}"
     "${PYTHON_INCLUDES}"
 )
 
-target_compile_options(zetaplot PUBLIC ${CFLAGS})
-target_link_libraries(zetaplot PUBLIC ${LIBRARIES})
-set_target_properties(zetaplot PROPERTIES INSTALL_RPATH "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}")
+target_compile_options(zplot PUBLIC ${CFLAGS})
+target_link_libraries(zplot PUBLIC ${LIBRARIES})
+set_target_properties(zplot PROPERTIES INSTALL_RPATH "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}")
 
 add_subdirectory("tests")
 

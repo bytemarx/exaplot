@@ -5,7 +5,7 @@
 
 #include "config.h"
 
-#define APP_VERSION "v" ZETAPLOT_PROJECT_VERSION
+#define APP_VERSION "v" ZPLOT_PROJECT_VERSION
 
 
 static QString

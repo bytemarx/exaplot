@@ -34,7 +34,7 @@ target_include_directories(
     "${CMAKE_BINARY_DIR}/tests"
 )
 
-target_link_libraries(tests PRIVATE zetaplot ${TEST_LIBRARIES})
+target_link_libraries(tests PRIVATE zplot ${TEST_LIBRARIES})
 
 include(GoogleTest)
 gtest_discover_tests(tests)

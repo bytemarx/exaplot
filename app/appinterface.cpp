@@ -439,7 +439,7 @@ Interface::currentPlotType(std::size_t plotID)
 void
 Interface::pythonInit()
 {
-    std::filesystem::path prefix{ZETAPLOT_LIBRARY_PATH "/python"};
+    std::filesystem::path prefix{ZPLOT_LIBRARY_PATH "/python"};
 
     // TODO: For uninstalled applications, find a better way to locate library
     if (!std::filesystem::exists(prefix))

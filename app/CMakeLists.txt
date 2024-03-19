@@ -77,6 +77,7 @@ target_include_directories(
 	"${CMAKE_CURRENT_SOURCE_DIR}/qcustomplot"
 	"${CMAKE_CURRENT_SOURCE_DIR}/qplot"
 	"${CMAKE_CURRENT_SOURCE_DIR}/../include"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../build"
     "${PYTHON_INCLUDES}"
 )
 
@@ -85,4 +86,4 @@ set_target_properties(app PROPERTIES
 	INSTALL_RPATH "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}"
 )
 
-target_link_libraries(app PRIVATE zetaplot ${ADDITIONAL_LIBRARY_DEPENDENCIES})
+target_link_libraries(app PRIVATE zplot ${ADDITIONAL_LIBRARY_DEPENDENCIES})
