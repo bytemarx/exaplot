@@ -383,14 +383,13 @@ Core::init(
     if (PyStatus_Exception(status)) goto done;
 
     // third-party modules
-    status = PyWideStringList_Append(
-        &config.module_search_paths,
-        (std::getenv("PYTHONPATH")
-            ? std::filesystem::path{std::getenv("PYTHONPATH")}
-            : prefix / "site-packages"
-        ).wstring().c_str()
-    );
-    if (PyStatus_Exception(status)) goto done;
+    if (std::getenv("PYTHONPATH")) {
+        status = PyWideStringList_Append(
+            &config.module_search_paths,
+            std::filesystem::path{std::getenv("PYTHONPATH")}.wstring().c_str()
+        );
+        if (PyStatus_Exception(status)) goto done;
+    }
 
     // Python home
     status = PyConfig_SetBytesString(
