@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>ZetaPlot</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../res/icon-128.png</normaloff>../res/icon-128.png</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
