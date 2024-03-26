@@ -67,22 +67,14 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         --with-pydebug
     )
     set(CPYTHON_LIBRARY_PREFIX "libpython${PYTHON_VER_MAJ_MIN}d")
-    set(CPYTHON_LIBS
-        "${CPYTHON_SRC_DIR}/${CPYTHON_LIBRARY_PREFIX}.so"
-        "${CPYTHON_SRC_DIR}/${CPYTHON_LIBRARY_PREFIX}.so.1.0"
-    )
 else()
     set(CPYTHON_CONFIGURE_FLAGS
         --enable-shared
         --disable-test-modules
     )
     set(CPYTHON_LIBRARY_PREFIX "libpython${PYTHON_VER_MAJ_MIN}")
-    set(CPYTHON_LIBS
-        "${CPYTHON_SRC_DIR}/libpython3.so"
-        "${CPYTHON_SRC_DIR}/${CPYTHON_LIBRARY_PREFIX}.so"
-        "${CPYTHON_SRC_DIR}/${CPYTHON_LIBRARY_PREFIX}.so.1.0"
-    )
 endif()
+set(CPYTHON_LIB "${CPYTHON_LIBRARY_PREFIX}.so.1.0")
 
 message("Targeted Python version: ${PYTHON_VERSION}")
 
@@ -121,13 +113,13 @@ add_custom_command(
     BYPRODUCTS ${CMAKE_BINARY_DIR}/${PYTHON_NATIVE_LIB_DIR}
 )
 
-# Copy the main CPython libraries from build location to the output directory
+# Copy CPython libraries from build location to the output directory
 add_custom_command(
     TARGET ${PYTHON_TARGET}
     POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E rm -rf -- "${OUTPUT_LIB_DIRECTORY}"
     COMMAND ${CMAKE_COMMAND} -E make_directory "${OUTPUT_LIB_DIRECTORY}"
-    COMMAND ${CMAKE_COMMAND} -E copy ${CPYTHON_LIBS} "${OUTPUT_LIB_DIRECTORY}"
+    COMMAND ${CMAKE_COMMAND} -E copy "${CPYTHON_SRC_DIR}/${CPYTHON_LIB}" "${OUTPUT_LIB_DIRECTORY}"
     COMMENT "Copying the interpreter's shared libraries to ${OUTPUT_LIB_DIRECTORY}"
     BYPRODUCTS ${OUTPUT_LIB_DIRECTORY}
 )
@@ -154,9 +146,7 @@ add_custom_command(
 )
 
 add_library(pythonlib SHARED IMPORTED)
-set_target_properties(pythonlib PROPERTIES IMPORTED_LOCATION "${OUTPUT_LIB_DIRECTORY}/${CPYTHON_LIBRARY_PREFIX}.so")
-add_library(pythonlib10 SHARED IMPORTED)
-set_target_properties(pythonlib10 PROPERTIES IMPORTED_LOCATION "${OUTPUT_LIB_DIRECTORY}/${CPYTHON_LIBRARY_PREFIX}.so.1.0")
+set_target_properties(pythonlib PROPERTIES IMPORTED_LOCATION "${OUTPUT_LIB_DIRECTORY}/${CPYTHON_LIB}")
 
 set(PYTHON_INCLUDES
     "${CPYTHON_SRC_DIR}"
@@ -197,7 +187,6 @@ endif()
 
 set(LIBRARIES
     pythonlib
-    pythonlib10
     dl
     m
 )
