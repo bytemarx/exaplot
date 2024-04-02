@@ -344,6 +344,7 @@ plotCMVec(zeta_state* state, std::size_t plotID, PyObject* const* args, Py_ssize
     if (pyBorrowed_values == NULL)
         return NULL;
     auto n_values = PySequence_Fast_GET_SIZE(pyBorrowed_values);
+    // TODO: limit n_values
     std::vector<double> values(n_values);
     for (decltype(n_values) i = 0; i < n_values; ++i) {
         auto value = PyFloat_AsDouble(PySequence_Fast_GET_ITEM(pyBorrowed_values, i));
@@ -363,6 +364,7 @@ plotCMFrame(zeta_state* state, std::size_t plotID, PyObject* const* args, Py_ssi
         return NULL;
 
     auto n_rows = PySequence_Fast_GET_SIZE(pyBorrowed_frame);
+    // TODO: limit n_rows
     if (n_rows == 0) {
         Py_RETURN_NONE;
     }
@@ -371,6 +373,7 @@ plotCMFrame(zeta_state* state, std::size_t plotID, PyObject* const* args, Py_ssi
         return NULL;
     }
     auto n_cols = PySequence_Size(PySequence_Fast_GET_ITEM(pyBorrowed_frame, 0));
+    // TODO: limit n_cols
     std::vector<std::vector<double>> frame(n_rows, std::vector<double>(n_cols));
 
     for (decltype(n_rows) i = 0; i < n_rows; ++i) {

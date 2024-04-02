@@ -189,10 +189,10 @@ void
 AppMain::module_plotCMVec(std::size_t plotIdx, int y, const std::vector<double>& values)
 {
     auto plot = this->ui.plot(plotIdx);
-    auto x_end = static_cast<std::size_t>(plot->plotColorMap()->getDataSizeX()) < values.size()
-        ? static_cast<std::size_t>(plot->plotColorMap()->getDataSizeX())
-        : values.size();
-    for (decltype(x_end) x = 0; x < x_end; ++x)
+    auto x_end = plot->plotColorMap()->getDataSizeX() < static_cast<int>(values.size())
+        ? plot->plotColorMap()->getDataSizeX()
+        : static_cast<int>(values.size());
+    for (int x = 0; x < x_end; ++x)
         plot->plotColorMap()->setCell(x, y, values[x]);
     plot->queue();
 }
@@ -204,10 +204,10 @@ AppMain::module_plotCMFrame(std::size_t plotIdx, const std::vector<std::vector<d
     auto plot = this->ui.plot(plotIdx);
     int y = 0;
     for (const auto& row : frame) {
-        auto x_end = static_cast<std::size_t>(plot->plotColorMap()->getDataSizeX()) < row.size()
-            ? static_cast<std::size_t>(plot->plotColorMap()->getDataSizeX())
-            : row.size();
-        for (decltype(x_end) x = 0; x < x_end; ++x)
+        auto x_end = plot->plotColorMap()->getDataSizeX() < static_cast<int>(row.size())
+            ? plot->plotColorMap()->getDataSizeX()
+            : static_cast<int>(row.size());
+        for (int x = 0; x < x_end; ++x)
             plot->plotColorMap()->setCell(x, y, row[x]);
         y += 1;
     }
