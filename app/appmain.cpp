@@ -15,7 +15,6 @@ AppMain::AppMain(int& argc, char* argv[])
     QObject::connect(&this->ifaceThread, &QThread::started, &this->iface, &Interface::pythonInit);
     QObject::connect(&this->ifaceThread, &QThread::finished, &this->iface, &Interface::pythonDeInit);
     this->iface.moveToThread(&this->ifaceThread);
-    this->ifaceThread.start();
 
     QObject::connect(&this->a, &QApplication::aboutToQuit, [this] { this->shutdown(0); });
     QObject::connect(&this->ui, &AppUI::closed, [this] { this->shutdown(0); });
@@ -39,6 +38,8 @@ AppMain::AppMain(int& argc, char* argv[])
     QObject::connect(&this->iface, &Interface::module_clear, this, &AppMain::module_clear, Qt::QueuedConnection);
     QObject::connect(&this->iface, &Interface::module_setPlotProperty, this, &AppMain::module_setPlotProperty, Qt::QueuedConnection);
     QObject::connect(&this->iface, &Interface::module_showPlot, this, &AppMain::module_showPlot, Qt::QueuedConnection);
+
+    this->ifaceThread.start();
 }
 
 
