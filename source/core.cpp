@@ -325,7 +325,7 @@ Error::Error(
 {}
 
 
-ssize_t Core::coreCount = 0;
+std::size_t Core::coreCount = 0;
 PyThreadState* Core::mainThreadState = NULL;
 
 

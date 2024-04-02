@@ -124,7 +124,7 @@ public:
     Error load(const std::filesystem::path& file, std::shared_ptr<ScriptModule>& module);
 
 private:
-    static ssize_t coreCount;
+    static std::size_t coreCount;
     static PyThreadState* mainThreadState;
 
     const Interface* const m_interface;
