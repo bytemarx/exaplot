@@ -92,10 +92,16 @@ exa_init(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kw
     std::vector<GridPoint> plots{{.x=0, .dx=0, .y=0, .dy=0}};
 
     if (nargs > 1) {
-        PyErr_Format(PyExc_TypeError, EXA_INIT "() takes from 0 to 1 positional arguments but %zd were given", nargs);
+        PyErr_Format(PyExc_TypeError,
+                     EXA_INIT "() takes from 0 to 1 positional arguments but %zd were given", nargs);
         return NULL;
     }
 
+    // positional argument 'plots' given
+    // - clear current plots
+    // - determine overload (num of plots or plot arrangement)
+    // - parse
+    // - convert to std::vector<GridPoint>
     if (nargs == 1) {
         plots.clear();
         auto pyBorrowed_plots = args[0];
@@ -103,15 +109,15 @@ exa_init(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kw
             auto n_plots = PyLong_AS_LONG(pyBorrowed_plots);
             if (n_plots <= 0) {
                 if (!PyErr_Occurred())
-                    PyErr_Format(PyExc_ValueError,
-                        EXA_INIT "() 'plots' argument must be an integer greater than zero");
+                    PyErr_SetString(PyExc_ValueError,
+                                    EXA_INIT "() 'plots' argument must be an integer greater than zero");
                 return NULL;
             }
             for (decltype(n_plots) i_plot = 0; i_plot < n_plots; ++i_plot) {
                 plots.push_back({
-                    .x = static_cast<GridPoint_t>(i_plot),
+                    .x = 0,
                     .dx = 0,
-                    .y = 0,
+                    .y = static_cast<GridPoint_t>(i_plot),
                     .dy = 0,
                 });
             }
@@ -121,15 +127,12 @@ exa_init(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kw
                 PyErr_SetString(PyExc_ValueError, EXA_INIT "() plots list is missing entries");
                 return NULL;
             }
-            if (n_plots > 64) {
-                PyErr_SetString(PyExc_ValueError, EXA_INIT "() that's too many plots "
-                                "why do you need this many plots, what are you doing with all these plots??");
-                return NULL;
-            }
             for (decltype(n_plots) i_plot = 0; i_plot < n_plots; ++i_plot) {
                 auto pyBorrowed_plot = PyList_GET_ITEM(pyBorrowed_plots, i_plot);
                 if (!PyTuple_Check(pyBorrowed_plot) || PyTuple_GET_SIZE(pyBorrowed_plot) != 4) {
-                    PyErr_Format(PyExc_TypeError, EXA_INIT "() 'plots[%zd]' value must be type 'tuple[int, int, int, int]'", i_plot);
+                    PyErr_Format(PyExc_TypeError,
+                                 EXA_INIT "() 'plots[%zd]' value must be type 'tuple[int, int, int, int]'",
+                                 i_plot);
                     return NULL;
                 }
                 long p[4];
@@ -137,16 +140,16 @@ exa_init(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kw
                     auto pyBorrowed_plotPoint = PyTuple_GET_ITEM(pyBorrowed_plot, i_plotPoint);
                     if (!PyLong_Check(pyBorrowed_plotPoint)) {
                         PyErr_Format(PyExc_TypeError,
-                            EXA_INIT "() 'plots[%zd][%zd]' value must be type 'int'",
-                            i_plot, i_plotPoint);
+                                     EXA_INIT "() 'plots[%zd][%zd]' value must be type 'int'",
+                                     i_plot, i_plotPoint);
                         return NULL;
                     }
                     auto plotPoint = PyLong_AsLong(pyBorrowed_plotPoint);
                     if (plotPoint < 0) {
                         if (!PyErr_Occurred())
                             PyErr_Format(PyExc_ValueError,
-                                EXA_INIT "() 'plots[%zd][%zd]' value is invalid: %ld",
-                                i_plot, i_plotPoint, plotPoint);
+                                         EXA_INIT "() 'plots[%zd][%zd]' value is invalid: %ld",
+                                         i_plot, i_plotPoint, plotPoint);
                         return NULL;
                     }
                     p[i_plotPoint] = plotPoint;
@@ -159,7 +162,8 @@ exa_init(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kw
                 });
             }
         } else {
-            PyErr_SetString(PyExc_TypeError, EXA_INIT "() 'plots' argument must be either an 'int' or 'list' type");
+            PyErr_SetString(PyExc_TypeError,
+                            EXA_INIT "() 'plots' argument must be either an 'int' or 'list' type");
             return NULL;
         }
     }
@@ -167,6 +171,11 @@ exa_init(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kw
     if (kwnames == NULL)
         goto done;
 
+    // parse script parameters
+    // - iterate over keywords
+    // - determine type
+    // - parse
+    // - convert to std::vector<RunParam>
     for (decltype(PyTuple_GET_SIZE(kwnames)) i = 0; i < PyTuple_GET_SIZE(kwnames); ++i) {
         auto pyBorrowed_paramName = PyTuple_GET_ITEM(kwnames, i);
         auto pyBorrowed_paramInfo = args[nargs + i];
@@ -202,7 +211,8 @@ exa_init(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kw
             } else if (PyFloat_CheckExact(pyBorrowed_paramInfo)) {
                 type = RunParamType::FLOAT;
             } else {
-                PyErr_Format(PyExc_ValueError, EXA_INIT "() invalid value for parameter '%U'", pyBorrowed_paramName);
+                PyErr_Format(PyExc_ValueError,
+                             EXA_INIT "() invalid value for parameter '%U'", pyBorrowed_paramName);
                 return NULL;
             }
 
@@ -367,7 +377,8 @@ plotCMVec(exa_state* state, std::size_t plotID, PyObject* const* args, Py_ssize_
 static PyObject*
 plotCMFrame(exa_state* state, std::size_t plotID, PyObject* const* args, Py_ssize_t nargs)
 {
-    auto pyBorrowed_frame = PySequence_Fast(args[0], EXA_PLOT "() 'frame' argument must be type 'Sequence[Sequence[Real]]'");
+    auto pyBorrowed_frame = PySequence_Fast(args[0],
+                                            EXA_PLOT "() 'frame' argument must be type 'Sequence[Sequence[Real]]'");
     if (pyBorrowed_frame == NULL)
         return NULL;
 
@@ -385,12 +396,16 @@ plotCMFrame(exa_state* state, std::size_t plotID, PyObject* const* args, Py_ssiz
     std::vector<std::vector<double>> frame(n_rows, std::vector<double>(n_cols));
 
     for (decltype(n_rows) i = 0; i < n_rows; ++i) {
-        auto pyBorrowed_row = PySequence_Fast(PySequence_Fast_GET_ITEM(pyBorrowed_frame, i), EXA_PLOT "() 'frame' argument contains non-Sequence type object (frame[%zd])");
+        auto pyBorrowed_row = PySequence_Fast(
+            PySequence_Fast_GET_ITEM(pyBorrowed_frame, i),
+            EXA_PLOT "() 'frame' argument contains non-Sequence type object (frame[%zd])"
+        );
         if (pyBorrowed_row == NULL)
             return NULL;
         if (PySequence_Fast_GET_SIZE(pyBorrowed_row) != n_cols) {
             // TODO: consider using std::move to allow vectors of differing lengths without sacrificing performance
-            PyErr_SetString(PyExc_ValueError, EXA_PLOT "() 'frame' argument must contain sequences of equal size (frame[%zd])");
+            PyErr_SetString(PyExc_ValueError,
+                            EXA_PLOT "() 'frame' argument must contain sequences of equal size (frame[%zd])");
             return NULL;
         }
         for (decltype(n_cols) j = 0; j < n_cols; ++j) {
@@ -531,7 +546,8 @@ exa__set_plot_property(PyObject* module, PyObject* args)
                     return NULL;
                 }
                 if (long_value > std::numeric_limits<int>::max()) {
-                    PyErr_Format(PyExc_OverflowError, "Value must not exceed %d", std::numeric_limits<int>::max());
+                    PyErr_Format(PyExc_OverflowError,
+                                 "Value must not exceed %d", std::numeric_limits<int>::max());
                     return NULL;
                 }
                 value = static_cast<int>(long_value);
@@ -654,6 +670,11 @@ exa__show_plot(PyObject* module, PyObject* args)
 }
 
 
+/**
+ * RunParam implementation
+ */
+
+
 static char*
 RunParam_keywords[] =
 {
@@ -724,7 +745,8 @@ exaplot_RunParam___init__(PyRunParam* self, PyObject* args, PyObject* kwargs)
     default:
         type = PyRunParam_CheckTypeArg(pyBorrowed_defaultOrType);
         if (type < 0) {
-            PyErr_SetString(PyExc_TypeError, "RunParam.__init__() first argument must be type 'RunParamType' or 'type[RunParamType]'");
+            PyErr_SetString(PyExc_TypeError,
+                            "RunParam.__init__() first argument must be type 'RunParamType' or 'type[RunParamType]'");
             return -1;
         }
     }
@@ -783,6 +805,11 @@ PyRunParam_spec =
     .flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_GC | Py_TPFLAGS_IMMUTABLETYPE,
     .slots = PyRunParam_slots,
 };
+
+
+/**
+ * RunParam implementation end
+ */
 
 
 int

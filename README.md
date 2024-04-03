@@ -20,5 +20,5 @@ make -C build/
 ```powershell
 $Env:QT_DIR = "C:\Qt\6.4.0\msvc2019_64"
 $Env:MSBUILD = "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe"
-.\build.ps1
+.\winbuild.ps1
 ```

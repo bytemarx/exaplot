@@ -13,7 +13,7 @@
 
 #include "config.h"
 
-#define APP_VERSION "v" ZPLOT_PROJECT_VERSION
+#define APP_VERSION "v" EXAPLOT_PROJECT_VERSION
 
 
 static QString

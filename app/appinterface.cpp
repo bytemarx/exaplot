@@ -447,7 +447,7 @@ Interface::currentPlotType(std::size_t plotID)
 void
 Interface::pythonInit()
 {
-    std::filesystem::path prefix{ZPLOT_LIBRARY_PATH "/python"};
+    std::filesystem::path prefix{EXAPLOT_LIBRARY_PATH "/python"};
 
 #if defined(_WIN32)
     WCHAR wpath[MAX_PATH];

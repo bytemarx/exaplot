@@ -137,7 +137,7 @@ add_dependencies(pythonlib ${CPYTHON_TARGET})
 
 add_compile_definitions(QT_NO_SIGNALS_SLOTS_KEYWORDS)
 
-set(ZPLOT_LIBRARY_PATH "${CMAKE_INSTALL_PREFIX}/lib/exaplot")
+set(EXAPLOT_LIBRARY_PATH "${CMAKE_INSTALL_PREFIX}/lib/exaplot")
 configure_file(config.h.in config.h)
 
 set(SOURCES
