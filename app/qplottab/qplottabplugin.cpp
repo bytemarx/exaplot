@@ -1,3 +1,11 @@
+/*
+ * ZetaPlot
+ * QPlotTab widget plugin
+ * 
+ * SPDX-License-Identifier: GPL-3.0
+ * Copyright (C) 2024 bytemarx
+ */
+
 #include "qplottabplugin.hpp"
 #include "qplottabprivate.hpp"
 

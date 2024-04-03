@@ -1,3 +1,11 @@
+/*
+ * ZetaPlot
+ * app ui component
+ * 
+ * SPDX-License-Identifier: GPL-3.0
+ * Copyright (C) 2024 bytemarx
+ */
+
 #pragma once
 
 #include <QObject>

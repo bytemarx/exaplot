@@ -1,3 +1,11 @@
+/*
+ * ZetaPlot
+ * app-module interface
+ * 
+ * SPDX-License-Identifier: GPL-3.0
+ * Copyright (C) 2024 bytemarx
+ */
+
 #include "appinterface.hpp"
 #include "config.h"
 

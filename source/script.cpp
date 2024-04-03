@@ -1,3 +1,11 @@
+/*
+ * ZetaPlot
+ * script handling/management
+ * 
+ * SPDX-License-Identifier: GPL-3.0
+ * Copyright (C) 2024 bytemarx
+ */
+
 #include "internal.hpp"
 
 #include <fstream>

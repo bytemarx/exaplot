@@ -1,3 +1,11 @@
+/*
+ * ZetaPlot
+ * module implementation
+ * 
+ * SPDX-License-Identifier: GPL-3.0
+ * Copyright (C) 2024 bytemarx
+ */
+
 #include "internal.hpp"
 
 #include <functional>

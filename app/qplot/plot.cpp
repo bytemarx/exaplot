@@ -1,3 +1,11 @@
+/*
+ * ZetaPlot
+ * base plot object
+ * 
+ * SPDX-License-Identifier: GPL-3.0
+ * Copyright (C) 2024 bytemarx
+ */
+
 #include "plot.hpp"
 
 

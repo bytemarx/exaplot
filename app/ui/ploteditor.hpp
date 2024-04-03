@@ -1,3 +1,11 @@
+/*
+ * ZetaPlot
+ * plot editor dialog
+ * 
+ * SPDX-License-Identifier: GPL-3.0
+ * Copyright (C) 2024 bytemarx
+ */
+
 #pragma once
 
 #include "ui_ploteditor.h"

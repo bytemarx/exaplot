@@ -1,3 +1,11 @@
+/*
+ * ZetaPlot
+ * library api
+ * 
+ * SPDX-License-Identifier: GPL-3.0
+ * Copyright (C) 2024 bytemarx
+ */
+
 #pragma once
 
 #define PY_SSIZE_T_CLEAN

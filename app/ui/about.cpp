@@ -1,3 +1,11 @@
+/*
+ * ZetaPlot
+ * about dialog
+ * 
+ * SPDX-License-Identifier: GPL-3.0
+ * Copyright (C) 2024 bytemarx
+ */
+
 #include <QFile>
 #include <QMessageBox>
 

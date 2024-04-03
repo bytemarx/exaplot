@@ -1,3 +1,11 @@
+/*
+ * ZetaPlot
+ * app main component
+ * 
+ * SPDX-License-Identifier: GPL-3.0
+ * Copyright (C) 2024 bytemarx
+ */
+
 #include <QMessageBox>
 
 #include "appmain.hpp"

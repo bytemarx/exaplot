@@ -1,5 +1,10 @@
-#pragma once
-
+/*
+ * ZetaPlot
+ * QPlot widget
+ * 
+ * SPDX-License-Identifier: GPL-3.0
+ * Copyright (C) 2024 bytemarx
+ */
 
 /*
 
@@ -29,6 +34,7 @@ plot. It contains each type of plot:
 
 */
 
+#pragma once
 
 #include <QWidget>
 

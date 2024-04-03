@@ -1,3 +1,11 @@
+/*
+ * ZetaPlot
+ * 2-dimensional plot
+ * 
+ * SPDX-License-Identifier: GPL-3.0
+ * Copyright (C) 2024 bytemarx
+ */
+
 #include "plot2d.hpp"
 
 
