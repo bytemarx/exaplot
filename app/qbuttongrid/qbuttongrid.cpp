@@ -1,5 +1,5 @@
 /*
- * ZetaPlot
+ * ExaPlot
  * QButtonGrid widget 
  * 
  * SPDX-License-Identifier: GPL-3.0
@@ -13,8 +13,8 @@
 
 #include <limits>
 
-using zeta::GridPoint;
-using zeta::GridPoint_t;
+using exa::GridPoint;
+using exa::GridPoint_t;
 
 
 static constexpr auto QBUTTONGRID_MAX = std::numeric_limits<int>::max();

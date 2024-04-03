@@ -9,13 +9,13 @@
 #include <vector>
 
 
-namespace zetatest {
+namespace exatest {
 
 
 class InvalidTest : public ModuleTest
 {
 public:
-    void init(const std::vector<zeta::RunParam>&, const std::vector<zeta::GridPoint>&) override;
+    void init(const std::vector<exa::RunParam>&, const std::vector<exa::GridPoint>&) override;
     void msg(const std::string&, bool) override;
     void plot2D(std::size_t, double, double) override;
     void plot2DVec(std::size_t, const std::vector<double>&, const std::vector<double>&) override;
@@ -32,8 +32,8 @@ TEST_F(InvalidTest, TestInit)
 
 void
 InvalidTest::init(
-    [[maybe_unused]] const std::vector<zeta::RunParam>& params,
-    [[maybe_unused]] const std::vector<zeta::GridPoint>& plots)
+    [[maybe_unused]] const std::vector<exa::RunParam>& params,
+    [[maybe_unused]] const std::vector<exa::GridPoint>& plots)
 {
     ASSERT_FALSE(true);
 }

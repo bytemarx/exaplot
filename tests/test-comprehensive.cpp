@@ -9,13 +9,13 @@
 #include <vector>
 
 
-namespace zetatest {
+namespace exatest {
 
 
 class ComprehensiveTest : public ModuleTest
 {
 public:
-    void init(const std::vector<zeta::RunParam>& params, const std::vector<zeta::GridPoint>& plots) override;
+    void init(const std::vector<exa::RunParam>& params, const std::vector<exa::GridPoint>& plots) override;
     void msg(const std::string& message, bool append) override;
     void plot2D(std::size_t plotID, double x, double y) override {};
     void plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y) override {};
@@ -31,103 +31,103 @@ TEST_F(ComprehensiveTest, TestInit)
 
 void
 ComprehensiveTest::init(
-    const std::vector<zeta::RunParam>& params,
-    const std::vector<zeta::GridPoint>& plots)
+    const std::vector<exa::RunParam>& params,
+    const std::vector<exa::GridPoint>& plots)
 {
-    std::vector<zeta::RunParam> expected{
+    std::vector<exa::RunParam> expected{
         {
             .identifier = "a",
-            .type = zeta::RunParamType::STRING,
+            .type = exa::RunParamType::STRING,
             .value = "",
             .display = "a"
         },
         {
             .identifier = "b",
-            .type = zeta::RunParamType::STRING,
+            .type = exa::RunParamType::STRING,
             .value = "127.0.0.1",
             .display = "b"
         },
         {
             .identifier = "c",
-            .type = zeta::RunParamType::INT,
+            .type = exa::RunParamType::INT,
             .value = "-100",
             .display = "c"
         },
         {
             .identifier = "d",
-            .type = zeta::RunParamType::FLOAT,
+            .type = exa::RunParamType::FLOAT,
             .value = "1.602e-19",
             .display = "d"
         },
         {
             .identifier = "e",
-            .type = zeta::RunParamType::STRING,
+            .type = exa::RunParamType::STRING,
             .value = "192.168.1.255",
             .display = "Gateway"
         },
         {
             .identifier = "f",
-            .type = zeta::RunParamType::STRING,
+            .type = exa::RunParamType::STRING,
             .value = "",
             .display = "Server"
         },
         {
             .identifier = "g",
-            .type = zeta::RunParamType::INT,
+            .type = exa::RunParamType::INT,
             .value = "4",
             .display = "Rings"
         },
         {
             .identifier = "h",
-            .type = zeta::RunParamType::INT,
+            .type = exa::RunParamType::INT,
             .value = "",
             .display = "Level"
         },
         {
             .identifier = "i",
-            .type = zeta::RunParamType::FLOAT,
+            .type = exa::RunParamType::FLOAT,
             .value = "5.0",
             .display = "Threshold (V)"
         },
         {
             .identifier = "j",
-            .type = zeta::RunParamType::FLOAT,
+            .type = exa::RunParamType::FLOAT,
             .value = "",
             .display = "Noise (dB)"
         },
         {
             .identifier = "k",
-            .type = zeta::RunParamType::STRING,
+            .type = exa::RunParamType::STRING,
             .value = "192.168.1.255",
             .display = "k"
         },
         {
             .identifier = "l",
-            .type = zeta::RunParamType::STRING,
+            .type = exa::RunParamType::STRING,
             .value = "",
             .display = "l"
         },
         {
             .identifier = "m",
-            .type = zeta::RunParamType::INT,
+            .type = exa::RunParamType::INT,
             .value = "4",
             .display = "m"
         },
         {
             .identifier = "n",
-            .type = zeta::RunParamType::INT,
+            .type = exa::RunParamType::INT,
             .value = "",
             .display = "n"
         },
         {
             .identifier = "o",
-            .type = zeta::RunParamType::FLOAT,
+            .type = exa::RunParamType::FLOAT,
             .value = "5.0",
             .display = "o"
         },
         {
             .identifier = "p",
-            .type = zeta::RunParamType::FLOAT,
+            .type = exa::RunParamType::FLOAT,
             .value = "",
             .display = "p"
         }

@@ -1,5 +1,5 @@
 /*
- * ZetaPlot
+ * ExaPlot
  * app-module interface
  * 
  * SPDX-License-Identifier: GPL-3.0
@@ -22,8 +22,8 @@ Interface::Interface(QObject* parent)
 
 PyObject*
 Interface::init(
-    const std::vector<zeta::RunParam>& params,
-    const std::vector<zeta::GridPoint>& plots)
+    const std::vector<exa::RunParam>& params,
+    const std::vector<exa::GridPoint>& plots)
 {
     this->params = params;
     emit this->module_init(params, plots);
@@ -84,11 +84,11 @@ Interface::plotCM(std::size_t plotID, int col, int row, double value)
 {
     auto plot = this->plots.at(plotID - 1);
     if (col >= plot.attributes.colorMap.dataSize.x) {
-        PyErr_SetString(PyExc_ValueError, ZETA_PLOT "() 'col' argument out of bounds");
+        PyErr_SetString(PyExc_ValueError, EXA_PLOT "() 'col' argument out of bounds");
         return NULL;
     }
     if (row >= plot.attributes.colorMap.dataSize.y) {
-        PyErr_SetString(PyExc_ValueError, ZETA_PLOT "() 'row' argument out of bounds");
+        PyErr_SetString(PyExc_ValueError, EXA_PLOT "() 'row' argument out of bounds");
         return NULL;
     }
     emit this->module_plotCM(plotID - 1, col, row, value);
@@ -101,11 +101,11 @@ Interface::plotCMVec(std::size_t plotID, int row, const std::vector<double>& val
 {
     auto plot = this->plots.at(plotID - 1);
     if (row >= plot.attributes.colorMap.dataSize.y) {
-        PyErr_SetString(PyExc_ValueError, ZETA_PLOT "() 'row' argument out of bounds");
+        PyErr_SetString(PyExc_ValueError, EXA_PLOT "() 'row' argument out of bounds");
         return NULL;
     }
     if (values.size() > static_cast<std::size_t>(plot.attributes.colorMap.dataSize.x)) {
-        PyErr_SetString(PyExc_ValueError, ZETA_PLOT "() 'values' argument contains too many values");
+        PyErr_SetString(PyExc_ValueError, EXA_PLOT "() 'values' argument contains too many values");
         return NULL;
     }
     emit this->module_plotCMVec(plotID - 1, row, values);
@@ -118,13 +118,13 @@ Interface::plotCMFrame(std::size_t plotID, const std::vector<std::vector<double>
 {
     auto plot = this->plots.at(plotID - 1);
     if (frame.size() > static_cast<std::size_t>(plot.attributes.colorMap.dataSize.y)) {
-        PyErr_SetString(PyExc_ValueError, ZETA_PLOT "() 'frame' argument contains too many rows");
+        PyErr_SetString(PyExc_ValueError, EXA_PLOT "() 'frame' argument contains too many rows");
         return NULL;
     }
     std::size_t i = 0;
     for (const auto& row : frame) {
         if (row.size() > static_cast<std::size_t>(plot.attributes.colorMap.dataSize.x)) {
-            PyErr_Format(PyExc_ValueError, ZETA_PLOT "() frame[%zd] contains too many values", i);
+            PyErr_Format(PyExc_ValueError, EXA_PLOT "() frame[%zd] contains too many values", i);
             return NULL;
         }
         i += 1;
@@ -150,8 +150,8 @@ Interface::clear(std::size_t plotID)
 PyObject*
 Interface::setPlotProperty(
     std::size_t plotID,
-    const zeta::PlotProperty& property,
-    const zeta::PlotProperty::Value& value)
+    const exa::PlotProperty& property,
+    const exa::PlotProperty::Value& value)
 {
     if (plotID == 0) {
         PyErr_SetString(PyExc_IndexError, "invalid plot ID");
@@ -164,7 +164,7 @@ Interface::setPlotProperty(
     }
 
     auto& properties = this->plots.at(plotIdx).attributes;
-    using PlotProperty = zeta::PlotProperty;
+    using PlotProperty = exa::PlotProperty;
     switch (property) {
     case PlotProperty::TITLE: properties.title = QString::fromStdString(std::get<std::string>(value)); break;
     case PlotProperty::XAXIS: properties.xAxis = QString::fromStdString(std::get<std::string>(value)); break;
@@ -309,7 +309,7 @@ Interface::setPlotProperty(
 
 
 PyObject*
-Interface::getPlotProperty(std::size_t plotID, const zeta::PlotProperty& property)
+Interface::getPlotProperty(std::size_t plotID, const exa::PlotProperty& property)
 {
     if (plotID == 0) {
         PyErr_SetString(PyExc_IndexError, "invalid plot ID");
@@ -324,7 +324,7 @@ Interface::getPlotProperty(std::size_t plotID, const zeta::PlotProperty& propert
     const auto& attributes = this->plots.at(plotIdx).attributes;
     PyObject* pyOwned_value = NULL;
 
-    using PlotProperty = zeta::PlotProperty;
+    using PlotProperty = exa::PlotProperty;
     switch (property) {
     case PlotProperty::TITLE: pyOwned_value = PyUnicode_FromString(attributes.title.toStdString().c_str()); break;
     case PlotProperty::XAXIS: pyOwned_value = PyUnicode_FromString(attributes.xAxis.toStdString().c_str()); break;
@@ -460,7 +460,7 @@ Interface::pythonInit()
     if (!std::filesystem::exists(prefix))
         prefix = exe.parent_path() / "python";
 
-    PyStatus status = zeta::Core::init(exe, prefix);
+    PyStatus status = exa::Core::init(exe, prefix);
     if (PyStatus_Exception(status)) {
         if (PyStatus_IsError(status))
             std::cerr << "FATAL PYTHON INITIALIZATION ERROR:\n" << status.func << ": " << status.err_msg << '\n';
@@ -468,7 +468,7 @@ Interface::pythonInit()
         return;
     }
 
-    this->core = new zeta::Core{this};
+    this->core = new exa::Core{this};
 }
 
 
@@ -476,7 +476,7 @@ void
 Interface::pythonDeInit()
 {
     delete this->core;
-    zeta::Core::deinit();
+    exa::Core::deinit();
 }
 
 
@@ -510,7 +510,7 @@ Interface::runScript(const std::vector<std::string>& args)
         params[i].value = args[i];
     this->stopRequested = false;
     auto status = this->module.get()->run(params);
-    if (status && status != zeta::Error::INTERRUPT) {
+    if (status && status != exa::Error::INTERRUPT) {
         auto message = status.message();
         if (!status.traceback().empty())
             message.append("\n").append(status.traceback());

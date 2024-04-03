@@ -10,7 +10,7 @@
 #include <vector>
 
 
-namespace zetatest {
+namespace exatest {
 
 
 Environment::~Environment()
@@ -25,7 +25,7 @@ Environment::SetUp()
     std::filesystem::path prefix = executable.parent_path() / "python";
     std::cout << "Prefix path: " << prefix << '\n';
 
-    PyStatus status = zeta::Core::init(executable, prefix);
+    PyStatus status = exa::Core::init(executable, prefix);
     ASSERT_FALSE(PyStatus_Exception(status));
 }
 
@@ -33,7 +33,7 @@ Environment::SetUp()
 void
 Environment::TearDown()
 {
-    ASSERT_EQ(zeta::Core::deinit(), 0);
+    ASSERT_EQ(exa::Core::deinit(), 0);
 }
 
 
@@ -54,7 +54,7 @@ ModuleTest::~ModuleTest()
 void
 ModuleTest::run(const char* file)
 {
-    std::shared_ptr<zeta::ScriptModule> mod;
+    std::shared_ptr<exa::ScriptModule> mod;
     auto error = this->core.load(this->scriptsDir / file, mod);
     ASSERT_FALSE(error) << error.message() << '\n' << error.traceback();
 }
@@ -68,8 +68,8 @@ ModuleTest::Interface::Interface(ModuleTest* tester)
 
 PyObject*
 ModuleTest::Interface::init(
-    const std::vector<zeta::RunParam>& params,
-    const std::vector<zeta::GridPoint>& plots)
+    const std::vector<exa::RunParam>& params,
+    const std::vector<exa::GridPoint>& plots)
 {
     this->m_tester->init(params, plots);
     Py_RETURN_NONE;
@@ -111,10 +111,10 @@ ModuleTest::Interface::clear(std::size_t plotID)
 class BaselineTest : public ::testing::Test
 {
 protected:
-    class Interface : public zeta::Interface
+    class Interface : public exa::Interface
     {
     public:
-        PyObject* init(const std::vector<zeta::RunParam>&, const std::vector<zeta::GridPoint>&) override { Py_RETURN_NONE; }
+        PyObject* init(const std::vector<exa::RunParam>&, const std::vector<exa::GridPoint>&) override { Py_RETURN_NONE; }
         PyObject* stop() override { Py_RETURN_NONE; }
         PyObject* msg(const std::string&, bool) override { Py_RETURN_NONE; }
         PyObject* plot2D(std::size_t, double, double) override { Py_RETURN_NONE; }
@@ -123,8 +123,8 @@ protected:
         PyObject* plotCMVec(std::size_t, int, const std::vector<double>&) override { Py_RETURN_NONE; }
         PyObject* plotCMFrame(std::size_t, const std::vector<std::vector<double>>&) override { Py_RETURN_NONE; }
         PyObject* clear(std::size_t) override { Py_RETURN_NONE; }
-        PyObject* setPlotProperty(std::size_t, const zeta::PlotProperty&, const zeta::PlotProperty::Value&) override { Py_RETURN_NONE; }
-        PyObject* getPlotProperty(std::size_t, const zeta::PlotProperty&) override { Py_RETURN_NONE; }
+        PyObject* setPlotProperty(std::size_t, const exa::PlotProperty&, const exa::PlotProperty::Value&) override { Py_RETURN_NONE; }
+        PyObject* getPlotProperty(std::size_t, const exa::PlotProperty&) override { Py_RETURN_NONE; }
         PyObject* showPlot(std::size_t, std::size_t) override { Py_RETURN_NONE; }
         Py_ssize_t currentPlotType(std::size_t) override { return 0; }
 
@@ -144,7 +144,7 @@ TEST_F(BaselineTest, Init)
 TEST_F(BaselineTest, Instantiate)
 {
     auto iface = new Interface;
-    auto core = new zeta::Core{iface};
+    auto core = new exa::Core{iface};
     delete core;
     delete iface;
 }
@@ -153,8 +153,8 @@ TEST_F(BaselineTest, Instantiate)
 TEST_F(BaselineTest, DoubleInstantiate)
 {
     auto iface = new Interface;
-    auto core0 = new zeta::Core{iface};
-    auto core1 = new zeta::Core{iface};
+    auto core0 = new exa::Core{iface};
+    auto core1 = new exa::Core{iface};
     delete core0;
     delete core1;
     delete iface;
@@ -164,11 +164,11 @@ TEST_F(BaselineTest, DoubleInstantiate)
 TEST_F(BaselineTest, InterleaveLoads)
 {
     auto iface = new Interface;
-    auto core0 = new zeta::Core{iface};
-    auto core1 = new zeta::Core{iface};
+    auto core0 = new exa::Core{iface};
+    auto core1 = new exa::Core{iface};
     for (int i = 0; i < 2; ++i) {
-        std::shared_ptr<zeta::ScriptModule> mod0;
-        std::shared_ptr<zeta::ScriptModule> mod1;
+        std::shared_ptr<exa::ScriptModule> mod0;
+        std::shared_ptr<exa::ScriptModule> mod1;
         {
             auto error = core0->load(TEST_SCRIPTS_DIR "/baseline/isolated-interp-0.py", mod0);
             ASSERT_FALSE(error) << error.message() << '\n' << error.traceback();
@@ -187,8 +187,8 @@ TEST_F(BaselineTest, InterleaveLoads)
 TEST_F(BaselineTest, Reload)
 {
     auto iface = new Interface;
-    auto core = new zeta::Core{iface};
-    std::shared_ptr<zeta::ScriptModule> mod;
+    auto core = new exa::Core{iface};
+    std::shared_ptr<exa::ScriptModule> mod;
     {
         std::ofstream file(TEST_SCRIPTS_DIR "/baseline/reload.py");
         file << "assert(True)\n";
@@ -213,9 +213,9 @@ TEST_F(BaselineTest, Reload)
 TEST_F(BaselineTest, NotIsolatedWithinCore)
 {
     auto iface = new Interface;
-    auto core = new zeta::Core{iface};
-    std::shared_ptr<zeta::ScriptModule> mod0;
-    std::shared_ptr<zeta::ScriptModule> mod1;
+    auto core = new exa::Core{iface};
+    std::shared_ptr<exa::ScriptModule> mod0;
+    std::shared_ptr<exa::ScriptModule> mod1;
     auto error = core->load(TEST_SCRIPTS_DIR "/baseline/reload2-0.py", mod0);
     ASSERT_FALSE(error) << error.message() << '\n' << error.traceback();
     error = core->load(TEST_SCRIPTS_DIR "/baseline/reload2-1.py", mod1);
@@ -228,8 +228,8 @@ TEST_F(BaselineTest, NotIsolatedWithinCore)
 TEST_F(BaselineTest, AccessGlobalVariableInRun)
 {
     auto iface = new Interface;
-    auto core = new zeta::Core{iface};
-    std::shared_ptr<zeta::ScriptModule> mod;
+    auto core = new exa::Core{iface};
+    std::shared_ptr<exa::ScriptModule> mod;
     auto error = core->load(TEST_SCRIPTS_DIR "/baseline/global-variable.py", mod);
     ASSERT_FALSE(error) << error.message() << '\n' << error.traceback();
     error = mod->run({});
@@ -242,25 +242,25 @@ TEST_F(BaselineTest, AccessGlobalVariableInRun)
 TEST_F(BaselineTest, Error)
 {
     auto iface = new Interface;
-    auto core = new zeta::Core{iface};
-    std::shared_ptr<zeta::ScriptModule> mod;
+    auto core = new exa::Core{iface};
+    std::shared_ptr<exa::ScriptModule> mod;
     std::filesystem::path scriptDir{TEST_SCRIPTS_DIR "/baseline/error"};
 
     auto error = core->load(scriptDir / "load-error.py", mod);
     ASSERT_TRUE(error);
-    ASSERT_TRUE(error == zeta::Error::IMPORT);
+    ASSERT_TRUE(error == exa::Error::IMPORT);
     ASSERT_STREQ(error.message().c_str(), "");
     ASSERT_STREQ(error.traceback().c_str(), "  File \"" TEST_SCRIPTS_DIR "/baseline/error/load-error.py\", line 1, in <module>\n    raise RuntimeError\n");
 
     error = core->load(scriptDir / "load-error-msg.py", mod);
     ASSERT_TRUE(error);
-    ASSERT_TRUE(error == zeta::Error::IMPORT);
+    ASSERT_TRUE(error == exa::Error::IMPORT);
     ASSERT_STREQ(error.message().c_str(), "test");
     ASSERT_STREQ(error.traceback().c_str(), "  File \"" TEST_SCRIPTS_DIR "/baseline/error/load-error-msg.py\", line 1, in <module>\n    raise RuntimeError('test')\n");
 
     error = core->load(scriptDir / "interrupt.py", mod);
     ASSERT_TRUE(error);
-    ASSERT_TRUE(error == zeta::Error::INTERRUPT);
+    ASSERT_TRUE(error == exa::Error::INTERRUPT);
     ASSERT_STREQ(error.message().c_str(), "");
     ASSERT_STREQ(error.traceback().c_str(), "  File \"" TEST_SCRIPTS_DIR "/baseline/error/interrupt.py\", line 4, in <module>\n    raise _Interrupt\n");
 
@@ -274,6 +274,6 @@ TEST_F(BaselineTest, Error)
 
 int main(int argc, char** argv) {
     ::testing::InitGoogleTest(&argc, argv);
-    ::testing::AddGlobalTestEnvironment(new zetatest::Environment);
+    ::testing::AddGlobalTestEnvironment(new exatest::Environment);
     return RUN_ALL_TESTS();
 }

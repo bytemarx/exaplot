@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 
 project(
-    ZetaPlot-Tests
+    ExaPlot-Tests
 )
 
 include(FetchContent)
@@ -34,7 +34,7 @@ target_include_directories(
     "${CMAKE_BINARY_DIR}/tests"
 )
 
-target_link_libraries(tests PRIVATE zetaplot ${TEST_LIBRARIES})
+target_link_libraries(tests PRIVATE exaplot ${TEST_LIBRARIES})
 
 include(GoogleTest)
 gtest_discover_tests(tests)

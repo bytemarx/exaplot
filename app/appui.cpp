@@ -1,5 +1,5 @@
 /*
- * ZetaPlot
+ * ExaPlot
  * app ui component
  * 
  * SPDX-License-Identifier: GPL-3.0
@@ -109,7 +109,7 @@ AppUI::setMessage(const QString& message, bool append)
 
 bool
 AppUI::init(
-    const std::vector<zeta::GridPoint>& arrangement,
+    const std::vector<exa::GridPoint>& arrangement,
     const std::vector<std::pair<std::string, std::string>>& params)
 {
     if (!this->plotEditorDialog->setArrangement(arrangement))
@@ -160,11 +160,11 @@ AppUI::enableStop(bool enable)
 void
 AppUI::setPlotProperty(
     std::size_t plotIdx,
-    const zeta::PlotProperty& property,
+    const exa::PlotProperty& property,
     const QPlotTab::Cache& properties)
 {
     auto plot = this->plot(plotIdx);
-    using PlotProperty = zeta::PlotProperty;
+    using PlotProperty = exa::PlotProperty;
     switch (property) {
     case PlotProperty::TITLE:
         plot->setTitle(properties.title);

@@ -1,4 +1,4 @@
-from zetaplot import init
+from exaplot import init
 
 
 try:

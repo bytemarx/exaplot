@@ -1,5 +1,5 @@
 /*
- * ZetaPlot
+ * ExaPlot
  * QPlotTab widget plugin
  * 
  * SPDX-License-Identifier: GPL-3.0
@@ -14,7 +14,7 @@
 class QPlotPlugin : public QObject, public QDesignerCustomWidgetInterface
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "zetaplot.QPlotTab")
+    Q_PLUGIN_METADATA(IID "exaplot.QPlotTab")
     Q_INTERFACES(QDesignerCustomWidgetInterface)
 
 public:

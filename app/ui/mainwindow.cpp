@@ -1,5 +1,5 @@
 /*
- * ZetaPlot
+ * ExaPlot
  * app main window
  * 
  * SPDX-License-Identifier: GPL-3.0

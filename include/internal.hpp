@@ -1,5 +1,5 @@
 /*
- * ZetaPlot
+ * ExaPlot
  * private declarations
  * 
  * SPDX-License-Identifier: GPL-3.0
@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "zetaplot.hpp"
+#include "exaplot.hpp"
 
 #include <optional>
 
@@ -37,21 +37,21 @@ typedef struct _is {
 typedef struct {
     PyTypeObject* type_RunParam;
     PyObject* obj_InterruptException;
-    zeta::Interface* iface;
-} zeta_state;
+    exa::Interface* iface;
+} exa_state;
 
 
 typedef struct {
     PyObject_HEAD
-    zeta::RunParamType type;
+    exa::RunParamType type;
     PyObject* value;
     PyObject* display;
 } PyRunParam;
 
 
-namespace zeta {
+namespace exa {
 
-zeta_state* getModuleStateFromObject(PyObject*);
+exa_state* getModuleStateFromObject(PyObject*);
 
 }
 
@@ -63,12 +63,12 @@ int moduleSlot_initExceptions(PyObject*);
 int moduleSlot_initInterface(PyObject*);
 int module_traverse(PyObject*, visitproc, void*);
 int module_clear(PyObject*);
-PyObject* zeta_init(PyObject*, PyObject* const*, Py_ssize_t, PyObject*);
-PyObject* zeta_stop(PyObject*, PyObject*);
-PyObject* zeta_msg(PyObject*, PyObject*, PyObject*);
-PyObject* zeta_plot(PyObject*, PyObject* const*, Py_ssize_t);
-PyObject* zeta__set_plot_property(PyObject*, PyObject*);
-PyObject* zeta__get_plot_property(PyObject*, PyObject*);
-PyObject* zeta__show_plot(PyObject*, PyObject*);
+PyObject* exa_init(PyObject*, PyObject* const*, Py_ssize_t, PyObject*);
+PyObject* exa_stop(PyObject*, PyObject*);
+PyObject* exa_msg(PyObject*, PyObject*, PyObject*);
+PyObject* exa_plot(PyObject*, PyObject* const*, Py_ssize_t);
+PyObject* exa__set_plot_property(PyObject*, PyObject*);
+PyObject* exa__get_plot_property(PyObject*, PyObject*);
+PyObject* exa__show_plot(PyObject*, PyObject*);
 
 }

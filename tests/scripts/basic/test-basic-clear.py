@@ -1,4 +1,4 @@
-import zetaplot
+import exaplot
 
 
-zetaplot.plot[3]()
+exaplot.plot[3]()

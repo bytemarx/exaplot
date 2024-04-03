@@ -1,5 +1,5 @@
 /*
- * ZetaPlot
+ * ExaPlot
  * colormap plot
  * 
  * SPDX-License-Identifier: GPL-3.0

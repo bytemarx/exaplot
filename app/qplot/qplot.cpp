@@ -1,5 +1,5 @@
 /*
- * ZetaPlot
+ * ExaPlot
  * QPlot widget
  * 
  * SPDX-License-Identifier: GPL-3.0

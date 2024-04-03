@@ -1,5 +1,5 @@
 /*
- * ZetaPlot
+ * ExaPlot
  * base plot object
  * 
  * SPDX-License-Identifier: GPL-3.0

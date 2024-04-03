@@ -1,4 +1,4 @@
-from zetaplot import init, RunParam
+from exaplot import init, RunParam
 
 
 e_param = RunParam("192.168.1.255", display="Gateway")

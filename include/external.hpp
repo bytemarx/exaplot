@@ -1,5 +1,5 @@
 /*
- * ZetaPlot
+ * ExaPlot
  * api macros
  * 
  * SPDX-License-Identifier: GPL-3.0
@@ -10,11 +10,11 @@
 
 
 #if defined(_WIN32)
-    #if defined(BUILD_ZETAPLOT)
-        #define ZETA_API __declspec(dllexport)
+    #if defined(BUILD_EXAPLOT)
+        #define EXA_API __declspec(dllexport)
     #else
-        #define ZETA_API __declspec(dllimport)
+        #define EXA_API __declspec(dllimport)
     #endif
 #else
-    #define ZETA_API __attribute__((visibility("default")))
+    #define EXA_API __attribute__((visibility("default")))
 #endif

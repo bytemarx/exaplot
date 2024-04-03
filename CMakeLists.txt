@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 
 project(
-    ZetaPlot
+    ExaPlot
     VERSION 0.0.0
     LANGUAGES CXX
 )
@@ -73,7 +73,7 @@ if(WIN32)
         COMMAND ${CMAKE_COMMAND} -E copy_directory "${CPYTHON_SRC_DIR}/Lib" "${PYTHON_STDLIB_DIR}"
 
         # copy project package
-        COMMAND ${CMAKE_COMMAND} -E copy -t "${PYTHON_STDLIB_DIR}" "${PYTHON_PROJECT_DIR}/zetaplot.py"
+        COMMAND ${CMAKE_COMMAND} -E copy -t "${PYTHON_STDLIB_DIR}" "${PYTHON_PROJECT_DIR}/exaplot.py"
     )
 else()
     set(PYTHON_INCLUDES
@@ -110,7 +110,7 @@ else()
         COMMAND ${CMAKE_COMMAND} -E copy_directory "${CPYTHON_SRC_DIR}/Lib" "${PYTHON_STDLIB_DIR}"
 
         # copy project package
-        COMMAND ${CMAKE_COMMAND} -E copy "${PYTHON_PROJECT_DIR}/zetaplot.py" "${PYTHON_STDLIB_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${PYTHON_PROJECT_DIR}/exaplot.py" "${PYTHON_STDLIB_DIR}"
     )
 endif()
 
@@ -137,7 +137,7 @@ add_dependencies(pythonlib ${CPYTHON_TARGET})
 
 add_compile_definitions(QT_NO_SIGNALS_SLOTS_KEYWORDS)
 
-set(ZPLOT_LIBRARY_PATH "${CMAKE_INSTALL_PREFIX}/lib/zetaplot")
+set(ZPLOT_LIBRARY_PATH "${CMAKE_INSTALL_PREFIX}/lib/exaplot")
 configure_file(config.h.in config.h)
 
 set(SOURCES
@@ -146,8 +146,8 @@ set(SOURCES
     source/script.cpp
 )
 
-add_library(zetaplot SHARED ${SOURCES})
-add_dependencies(zetaplot pythonlib)
+add_library(exaplot SHARED ${SOURCES})
+add_dependencies(exaplot pythonlib)
 
 if(WIN32)
     set(LIBRARIES
@@ -180,17 +180,17 @@ else()
     endif()
 endif()
 
-target_include_directories(zetaplot PUBLIC
+target_include_directories(exaplot PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include/zetaplot>
+    $<INSTALL_INTERFACE:include/exaplot>
     "${CMAKE_BINARY_DIR}"
     "${PYTHON_INCLUDES}"
 )
 
-target_compile_options(zetaplot PUBLIC ${COMPILE_FLAGS})
-target_compile_definitions(zetaplot PRIVATE BUILD_ZETAPLOT=1)
-target_link_libraries(zetaplot PUBLIC ${LIBRARIES})
-set_target_properties(zetaplot PROPERTIES INSTALL_RPATH "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/zetaplot")
+target_compile_options(exaplot PUBLIC ${COMPILE_FLAGS})
+target_compile_definitions(exaplot PRIVATE BUILD_EXAPLOT=1)
+target_link_libraries(exaplot PUBLIC ${LIBRARIES})
+set_target_properties(exaplot PROPERTIES INSTALL_RPATH "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/exaplot")
 
 if((CMAKE_BUILD_TYPE STREQUAL "Debug") OR WITH_TESTS)
     add_subdirectory("tests")

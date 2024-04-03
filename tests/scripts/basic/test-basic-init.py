@@ -1,4 +1,4 @@
-import zetaplot
+import exaplot
 
 
-zetaplot.init(a='', b='', c=1, d=10.0)
+exaplot.init(a='', b='', c=1, d=10.0)

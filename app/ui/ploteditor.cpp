@@ -1,5 +1,5 @@
 /*
- * ZetaPlot
+ * ExaPlot
  * plot editor dialog
  * 
  * SPDX-License-Identifier: GPL-3.0
@@ -93,7 +93,7 @@ PlotEditor::setSelectedPlot(std::size_t plot, QPlot::Type selected)
 
 
 bool
-PlotEditor::setArrangement(const std::vector<zeta::GridPoint>& arrangement)
+PlotEditor::setArrangement(const std::vector<exa::GridPoint>& arrangement)
 {
     if (!this->ui.buttonGrid->setArrangement(arrangement))
         return false;

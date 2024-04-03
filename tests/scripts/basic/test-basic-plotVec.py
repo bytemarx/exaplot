@@ -1,4 +1,4 @@
-import zetaplot
+import exaplot
 
 
-zetaplot.plot[2]([0, 1, 2, 3], [1, 2, 3.3, 4.4])
+exaplot.plot[2]([0, 1, 2, 3], [1, 2, 3.3, 4.4])

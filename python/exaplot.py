@@ -1,6 +1,6 @@
 from numbers import Real
 
-from _zetaplot import (
+from _exaplot import (
     RunParam,
     init,
     stop,

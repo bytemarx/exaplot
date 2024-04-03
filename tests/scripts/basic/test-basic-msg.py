@@ -1,4 +1,4 @@
-import zetaplot
+import exaplot
 
 
-zetaplot.msg("test")
+exaplot.msg("test")

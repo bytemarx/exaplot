@@ -1,4 +1,4 @@
-from zetaplot import msg
+from exaplot import msg
 
 
 try:

@@ -1,5 +1,5 @@
 /*
- * ZetaPlot
+ * ExaPlot
  * script handling/management
  * 
  * SPDX-License-Identifier: GPL-3.0
@@ -11,7 +11,7 @@
 #include <fstream>
 
 
-namespace zeta {
+namespace exa {
 
 
 ScriptModule::ScriptModule(PyThreadState* tState, const std::filesystem::path& file)
@@ -65,7 +65,7 @@ ScriptModule::load()
     if (codeObject == NULL)
         return Error::pyerror(Error::IMPORT);
 
-    PyObject* pyOwned_module = PyImport_ExecCodeModule(ZETA_SCRIPT_MODULE, codeObject);
+    PyObject* pyOwned_module = PyImport_ExecCodeModule(EXA_SCRIPT_MODULE, codeObject);
     Py_DECREF(codeObject);
     if (pyOwned_module == NULL)
         return Error::pyerror(Error::IMPORT);
@@ -102,7 +102,7 @@ ScriptModule::run(const std::vector<RunParam>& args)
     PyObject* pyOwned_kwargs = NULL;
     PyObject* pyOwned_result = NULL;
 
-    pyOwned_runFn = PyObject_GetAttrString(this->m_pyOwned_module, ZETA_SCRIPT_RUN);
+    pyOwned_runFn = PyObject_GetAttrString(this->m_pyOwned_module, EXA_SCRIPT_RUN);
     if (pyOwned_runFn == NULL) goto error;
 
     pyOwned_args = PyTuple_New(0);

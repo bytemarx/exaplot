@@ -1,5 +1,5 @@
 /*
- * ZetaPlot
+ * ExaPlot
  * library api
  * 
  * SPDX-License-Identifier: GPL-3.0
@@ -20,23 +20,23 @@
 #include "plotproperty.hpp"
 
 
-#define ZETA_MODULE     "_zetaplot"
-#define ZETA_RUNPARAM   "RunParam"
-#define ZETA_INTERRUPT  "_Interrupt"
+#define EXA_MODULE     "_exaplot"
+#define EXA_RUNPARAM   "RunParam"
+#define EXA_INTERRUPT  "_Interrupt"
 
-#define ZETA_INIT       "init"                  // init(plots = 1, **params)
-#define ZETA_STOP       "stop"                  // stop()
-#define ZETA_MSG        "msg"                   // msg(message, append = False)
-#define ZETA_PLOT       "plot"                  // plot(data_set, *data)
-#define ZETA_SET_PLOT   "_set_plot_property"    // _set_plot_property(plot_id, prop, value)
-#define ZETA_GET_PLOT   "_get_plot_property"    // _get_plot_property(plot_id, prop)
-#define ZETA_SHOW_PLOT  "_show_plot"            // _show_plot(plot_id, plot_type)
+#define EXA_INIT       "init"                  // init(plots = 1, **params)
+#define EXA_STOP       "stop"                  // stop()
+#define EXA_MSG        "msg"                   // msg(message, append = False)
+#define EXA_PLOT       "plot"                  // plot(data_set, *data)
+#define EXA_SET_PLOT   "_set_plot_property"    // _set_plot_property(plot_id, prop, value)
+#define EXA_GET_PLOT   "_get_plot_property"    // _get_plot_property(plot_id, prop)
+#define EXA_SHOW_PLOT  "_show_plot"            // _show_plot(plot_id, plot_type)
 
-#define ZETA_SCRIPT_MODULE  "__zeta__"
-#define ZETA_SCRIPT_RUN     "run"           // run(**kwargs)
+#define EXA_SCRIPT_MODULE  "__exa__"
+#define EXA_SCRIPT_RUN     "run"           // run(**kwargs)
 
 
-namespace zeta {
+namespace exa {
 
 
 typedef std::size_t GridPoint_t;
@@ -61,7 +61,7 @@ typedef struct {
 } RunParam;
 
 
-struct ZETA_API Error
+struct EXA_API Error
 {
     typedef const char* Type;
     constexpr static Type NONE = "NONE";
@@ -94,7 +94,7 @@ private:
 };
 
 
-class ZETA_API Interface
+class EXA_API Interface
 {
 public:
     virtual ~Interface();
@@ -117,7 +117,7 @@ public:
 class ScriptModule;
 
 
-class ZETA_API Core
+class EXA_API Core
 {
 public:
     static PyStatus init(
@@ -141,7 +141,7 @@ private:
 };
 
 
-class ZETA_API ScriptModule
+class EXA_API ScriptModule
 {
     friend class Core;
 

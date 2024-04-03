@@ -1,5 +1,5 @@
 /*
- * ZetaPlot
+ * ExaPlot
  * plot editor dialog
  * 
  * SPDX-License-Identifier: GPL-3.0
@@ -22,7 +22,7 @@ class PlotEditor : public QDialog
 public:
     typedef struct
     {
-        zeta::GridPoint position;
+        exa::GridPoint position;
         QPlotTab::Cache attributes;
         QPlot::Type selected;
     } PlotInfo;
@@ -33,7 +33,7 @@ public:
     std::vector<PlotInfo> plots() const;
     void setPlot(std::size_t plot, const QPlotTab::Cache& attributes);
     void setSelectedPlot(std::size_t plot, QPlot::Type selected);
-    bool setArrangement(const std::vector<zeta::GridPoint>& arrangement);
+    bool setArrangement(const std::vector<exa::GridPoint>& arrangement);
 
 public Q_SLOTS:
     void open() override;
@@ -45,7 +45,7 @@ private:
     struct
     {
         std::vector<QPlotTab::Cache> plotTabs;
-        std::vector<zeta::GridPoint> arrangement;
+        std::vector<exa::GridPoint> arrangement;
         QPixmap buttonGridStatus;
     } cache;
 

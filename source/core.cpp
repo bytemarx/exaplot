@@ -1,5 +1,5 @@
 /*
- * ZetaPlot
+ * ExaPlot
  * core library component
  * 
  * SPDX-License-Identifier: GPL-3.0
@@ -16,51 +16,51 @@
 #include <vector>
 #include <iostream>
 
-namespace zeta {
+namespace exa {
 
 
 static PyMethodDef
 moduleMethods[] =
 {
     {
-        ZETA_INIT,
-        (PyCFunction)zeta_init,
+        EXA_INIT,
+        (PyCFunction)exa_init,
         METH_FASTCALL | METH_KEYWORDS,
         NULL
     },
     {
-        ZETA_STOP,
-        (PyCFunction)zeta_stop,
+        EXA_STOP,
+        (PyCFunction)exa_stop,
         METH_NOARGS,
         NULL
     },
     {
-        ZETA_MSG,
-        (PyCFunction)zeta_msg,
+        EXA_MSG,
+        (PyCFunction)exa_msg,
         METH_VARARGS | METH_KEYWORDS,
         NULL
     },
     {
-        ZETA_PLOT,
-        (PyCFunction)zeta_plot,
+        EXA_PLOT,
+        (PyCFunction)exa_plot,
         METH_FASTCALL,
         NULL
     },
     {
-        ZETA_SET_PLOT,
-        (PyCFunction)zeta__set_plot_property,
+        EXA_SET_PLOT,
+        (PyCFunction)exa__set_plot_property,
         METH_VARARGS,
         NULL
     },
     {
-        ZETA_GET_PLOT,
-        (PyCFunction)zeta__get_plot_property,
+        EXA_GET_PLOT,
+        (PyCFunction)exa__get_plot_property,
         METH_VARARGS,
         NULL
     },
     {
-        ZETA_SHOW_PLOT,
-        (PyCFunction)zeta__show_plot,
+        EXA_SHOW_PLOT,
+        (PyCFunction)exa__show_plot,
         METH_VARARGS,
         NULL
     },
@@ -83,9 +83,9 @@ static PyModuleDef
 moduleDef =
 {
     .m_base = PyModuleDef_HEAD_INIT,
-    .m_name = ZETA_MODULE,
+    .m_name = EXA_MODULE,
     .m_doc = NULL,
-    .m_size = sizeof(zeta_state),
+    .m_size = sizeof(exa_state),
     .m_methods = moduleMethods,
     .m_slots = moduleSlots,
     .m_traverse = module_traverse,
@@ -94,7 +94,7 @@ moduleDef =
 };
 
 
-zeta_state*
+exa_state*
 getModuleStateFromObject(PyObject* object)
 {
     auto pyBorrowed_type = Py_TYPE(object);
@@ -104,14 +104,14 @@ getModuleStateFromObject(PyObject* object)
     auto heapType = reinterpret_cast<PyHeapTypeObject*>(pyBorrowed_type);
     auto module = heapType->ht_module;
     if (module && PyModule_GetDef(module) == &moduleDef)
-        return static_cast<zeta_state*>(PyModule_GetState(module));
+        return static_cast<exa_state*>(PyModule_GetState(module));
 
     return NULL;
 }
 
 
 PyMODINIT_FUNC
-PyInit__zetaplot(void)
+PyInit__exaplot(void)
 {
     return PyModuleDef_Init(&moduleDef);
 }
@@ -232,7 +232,7 @@ static bool
 isInterrupt(PyObject* object)
 {
     // TODO: PyErr_GivenExceptionMatches(object, mState->obj_InterruptException)
-    if (strcmp(object->ob_type->tp_name, ZETA_INTERRUPT) != 0)
+    if (strcmp(object->ob_type->tp_name, EXA_INTERRUPT) != 0)
         return false;
 
     auto pyDict = PyType_GetDict(Py_TYPE(object));
@@ -240,7 +240,7 @@ isInterrupt(PyObject* object)
     if (pyModule && PyUnicode_Check(pyModule)) {
         auto module = PyUnicode_AsUTF8(pyModule);
         if (module != NULL)
-            return strcmp(module, ZETA_MODULE) == 0;
+            return strcmp(module, EXA_MODULE) == 0;
         if (PyErr_Occurred())
             PyErr_Clear();
     }
@@ -354,8 +354,8 @@ Core::init(
     PyStatus status;
     PyConfig config;
 
-    if (PyImport_AppendInittab(ZETA_MODULE, PyInit__zetaplot) == -1) {
-        return PyStatus_Error("Failed to append " ZETA_MODULE " to the built-in modules.");
+    if (PyImport_AppendInittab(EXA_MODULE, PyInit__exaplot) == -1) {
+        return PyStatus_Error("Failed to append " EXA_MODULE " to the built-in modules.");
     }
 
     status = preinit();

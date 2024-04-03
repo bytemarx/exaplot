@@ -9,13 +9,13 @@
 #include <vector>
 
 
-namespace zetatest {
+namespace exatest {
 
 
 class BasicTest : public ModuleTest
 {
 public:
-    void init(const std::vector<zeta::RunParam>& params, const std::vector<zeta::GridPoint>& plots) override;
+    void init(const std::vector<exa::RunParam>& params, const std::vector<exa::GridPoint>& plots) override;
     void msg(const std::string& message, bool append) override;
     void plot2D(std::size_t plotID, double x, double y) override;
     void plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y) override;
@@ -33,32 +33,32 @@ TEST_F(BasicTest, TestInit)
 
 void
 BasicTest::init(
-    const std::vector<zeta::RunParam>& params,
-    const std::vector<zeta::GridPoint>& plots)
+    const std::vector<exa::RunParam>& params,
+    const std::vector<exa::GridPoint>& plots)
 {
     ASSERT_EQ(params.size(), 4);
-    std::vector<zeta::RunParam> expected{
+    std::vector<exa::RunParam> expected{
         {
             .identifier = "a",
-            .type = zeta::RunParamType::STRING,
+            .type = exa::RunParamType::STRING,
             .value = "",
             .display = "a"
         },
         {
             .identifier = "b",
-            .type = zeta::RunParamType::STRING,
+            .type = exa::RunParamType::STRING,
             .value = "",
             .display = "b"
         },
         {
             .identifier = "c",
-            .type = zeta::RunParamType::INT,
+            .type = exa::RunParamType::INT,
             .value = "1",
             .display = "c"
         },
         {
             .identifier = "d",
-            .type = zeta::RunParamType::FLOAT,
+            .type = exa::RunParamType::FLOAT,
             .value = "10.0",
             .display = "d"
         },

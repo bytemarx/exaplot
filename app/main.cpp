@@ -1,5 +1,5 @@
 /*
- * ZetaPlot
+ * ExaPlot
  * app entry point
  * 
  * SPDX-License-Identifier: GPL-3.0
@@ -8,7 +8,7 @@
 
 #include "appmain.hpp"
 
-#include "zetaplot.hpp"
+#include "exaplot.hpp"
 
 #include <filesystem>
 #include <string>

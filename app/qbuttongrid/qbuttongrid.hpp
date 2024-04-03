@@ -1,5 +1,5 @@
 /*
- * ZetaPlot
+ * ExaPlot
  * QButtonGrid widget
  * 
  * SPDX-License-Identifier: GPL-3.0
@@ -11,7 +11,7 @@
 #include <QWidget>
 #include <QGridLayout>
 
-#include "zetaplot.hpp"
+#include "exaplot.hpp"
 
 #include <vector>
 
@@ -25,7 +25,7 @@ class QButtonGrid : public QWidget
     Q_OBJECT
 
 public:
-    using GridPoint = zeta::GridPoint;
+    using GridPoint = exa::GridPoint;
     explicit QButtonGrid(QWidget* parent = Q_NULLPTR);
     QButtonGrid(const QButtonGrid&) = delete;
     ~QButtonGrid();

@@ -1,5 +1,5 @@
 /*
- * ZetaPlot
+ * ExaPlot
  * plot property object
  * 
  * SPDX-License-Identifier: GPL-3.0
@@ -15,10 +15,10 @@
 #include "external.hpp"
 
 
-namespace zeta {
+namespace exa {
 
 
-class ZETA_API PlotProperty
+class EXA_API PlotProperty
 {
 public:
     typedef std::variant<int, double, std::string, bool> Value;

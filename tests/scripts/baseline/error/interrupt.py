@@ -1,4 +1,4 @@
-from _zetaplot import _Interrupt
+from _exaplot import _Interrupt
 
 try:
     raise _Interrupt

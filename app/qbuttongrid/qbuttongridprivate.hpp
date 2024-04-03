@@ -1,5 +1,5 @@
 /*
- * ZetaPlot
+ * ExaPlot
  * QButtonGrid widget private parts (get out of here you pervert)
  * 
  * SPDX-License-Identifier: GPL-3.0

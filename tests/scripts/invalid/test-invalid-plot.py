@@ -1,4 +1,4 @@
-from zetaplot import _plot, plot
+from exaplot import _plot, plot
 
 
 try:
@@ -14,7 +14,7 @@ except TypeError as e:
 try:
     _plot(1, foo=None)
 except TypeError as e:
-    assert(str(e) == "_zetaplot.plot() takes no keyword arguments")
+    assert(str(e) == "_exaplot.plot() takes no keyword arguments")
 
 try:
     _plot(1, "")

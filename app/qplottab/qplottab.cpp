@@ -1,5 +1,5 @@
 /*
- * ZetaPlot
+ * ExaPlot
  * QPlotTab widget
  * 
  * SPDX-License-Identifier: GPL-3.0
@@ -12,7 +12,7 @@
 #include "plotproperty.hpp"
 
 
-using PlotProperty = zeta::PlotProperty;
+using PlotProperty = exa::PlotProperty;
 
 
 QPlotTab::ToolTips QPlotTab::toolTips = {

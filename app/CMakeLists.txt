@@ -83,8 +83,8 @@ target_include_directories(
 )
 
 set_target_properties(app PROPERTIES
-	OUTPUT_NAME "zetaplot"
+	OUTPUT_NAME "exaplot"
 	INSTALL_RPATH "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}"
 )
 
-target_link_libraries(app PRIVATE zetaplot ${ADDITIONAL_LIBRARY_DEPENDENCIES})
+target_link_libraries(app PRIVATE exaplot ${ADDITIONAL_LIBRARY_DEPENDENCIES})

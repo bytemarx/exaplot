@@ -1,5 +1,5 @@
 /*
- * ZetaPlot
+ * ExaPlot
  * app ui component
  * 
  * SPDX-License-Identifier: GPL-3.0
@@ -33,13 +33,13 @@ public:
     void clear();
     std::vector<std::string> scriptArgs() const;
     void setMessage(const QString&, bool);
-    bool init(const std::vector<zeta::GridPoint>&, const std::vector<std::pair<std::string, std::string>>&);
+    bool init(const std::vector<exa::GridPoint>&, const std::vector<std::pair<std::string, std::string>>&);
     void setScriptStatus(const QString& = "");
     QPlot* plot(std::size_t);
     std::size_t plotCount() const;
     void enableRun(bool);
     void enableStop(bool);
-    void setPlotProperty(std::size_t, const zeta::PlotProperty&, const QPlotTab::Cache&);
+    void setPlotProperty(std::size_t, const exa::PlotProperty&, const QPlotTab::Cache&);
     void showPlot(std::size_t, QPlot::Type);
 
 public Q_SLOTS:
