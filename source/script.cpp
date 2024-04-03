@@ -52,7 +52,7 @@ ScriptModule::load()
     ifs.close();
 
     this->ensureThreadState();
-    PyObject* codeObject = Py_CompileString(code, this->m_file.c_str(), Py_file_input);
+    PyObject* codeObject = Py_CompileString(code, this->m_file.string().c_str(), Py_file_input);
     free(code);
     if (codeObject == NULL)
         return Error::pyerror(Error::IMPORT);

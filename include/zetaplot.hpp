@@ -53,7 +53,7 @@ typedef struct {
 } RunParam;
 
 
-struct Error
+struct ZETA_API Error
 {
     typedef const char* Type;
     constexpr static Type NONE = "NONE";
@@ -86,7 +86,7 @@ private:
 };
 
 
-class Interface
+class ZETA_API Interface
 {
 public:
     virtual ~Interface();
@@ -109,7 +109,7 @@ public:
 class ScriptModule;
 
 
-class Core
+class ZETA_API Core
 {
 public:
     static PyStatus init(
@@ -133,7 +133,7 @@ private:
 };
 
 
-class ScriptModule
+class ZETA_API ScriptModule
 {
     friend class Core;
 

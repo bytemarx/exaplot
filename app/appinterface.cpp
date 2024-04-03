@@ -441,14 +441,18 @@ Interface::pythonInit()
 {
     std::filesystem::path prefix{ZPLOT_LIBRARY_PATH "/python"};
 
-    // TODO: For uninstalled applications, find a better way to locate library
-    if (!std::filesystem::exists(prefix))
-        prefix = std::filesystem::canonical("/proc/self/exe").parent_path() / "python";
+#if defined(_WIN32)
+    WCHAR wpath[MAX_PATH];
+    GetModuleFileNameW(NULL, wpath, MAX_PATH);
+    auto exe = std::filesystem::path{wpath};
+#else
+    auto exe = std::filesystem::canonical("/proc/self/exe");
+#endif
 
-    PyStatus status = zeta::Core::init(
-        std::filesystem::canonical("/proc/self/exe"),
-        prefix
-    );
+    if (!std::filesystem::exists(prefix))
+        prefix = exe.parent_path() / "python";
+
+    PyStatus status = zeta::Core::init(exe, prefix);
     if (PyStatus_Exception(status)) {
         if (PyStatus_IsError(status))
             std::cerr << "FATAL PYTHON INITIALIZATION ERROR:\n" << status.func << ": " << status.err_msg << '\n';

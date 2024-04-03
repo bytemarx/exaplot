@@ -4,11 +4,13 @@
 #include <string>
 #include <variant>
 
+#include "external.hpp"
+
 
 namespace zeta {
 
 
-class PlotProperty
+class ZETA_API PlotProperty
 {
 public:
     typedef std::variant<int, double, std::string, bool> Value;

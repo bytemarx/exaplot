@@ -9,9 +9,8 @@ project(
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
-set(OUTPUT_LIB_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/lib")
-set(LIB_INSTALL_DIR lib/zetaplot)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/$<CONFIG>")
+set(LIB_OUTPUT_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/lib")
 
 include(ExternalProject)
 
@@ -21,137 +20,116 @@ set(PYTHON_VERSION "3.12.0")
 ######### Python setup #########
 ################################
 
-# build/
-#   - top-level build directory (CMAKE_BINARY_DIR)
-#   bin/
-#     - build output directory (CMAKE_RUNTIME_OUTPUT_DIRECTORY)
-#     lib/
-#       - CPython shared libraries (OUTPUT_LIB_DIRECTORY)
-#     python/
-#       - interpreter's library (PYTHON_INSTALL_DIR)
-#       lib/
-#         - stdlib modules
-#       lib-dynload/
-#         - stdlib extended modules
-#       site-packages/
-#         - third-party modules
-#   python-${PYTHON_VERSION}/
-#     - CPython external project root directory
-#     src/python/
-#       - CPython interpreter source directory; build location of CPython shared libraries (CPYTHON_SRC_DIR)
-#   python-env/
-#     - embedded Python environment workspace (PYTHON_ENV_DIR)
-# python/
-#   - custom built-in Python module project source (PYTHON_PROJECT_DIR)
-
-set(PYTHON_TARGET "python")
+set(CPYTHON_TARGET "python")
 string(REGEX MATCH "^[0-9]+\.[0-9]+" PYTHON_VER_MAJ_MIN ${PYTHON_VERSION})
 if("${PYTHON_VER_MAJ_MIN}" STREQUAL "")
     message(FATAL_ERROR "Failed to parse Python version")
 endif()
-set(PYTHON_SOURCE "${CMAKE_SOURCE_DIR}/cpython")
 
-set(PYTHON_INSTALL_DIR "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PYTHON_TARGET}")
-set(PYTHON_LIB_DIR "lib")
-set(PYTHON_NATIVE_LIB_DIR "lib-dynload")
-set(PYTHON_SITE_PACKAGES_DIR "site-packages")
-set(CPYTHON_PROJ "${PYTHON_TARGET}-${PYTHON_VERSION}")
-set(CPYTHON_SRC_DIR "${PYTHON_SOURCE}")
-set(PYTHON_ENV_DIR "${CMAKE_BINARY_DIR}/${PYTHON_TARGET}-env")
-
+set(CPYTHON_SRC_DIR "${CMAKE_SOURCE_DIR}/cpython")
 set(PYTHON_PROJECT_DIR "${CMAKE_SOURCE_DIR}/python")
+set(PYTHON_INSTALL_DIR "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/python")
+set(PYTHON_STDLIB_DIR "${PYTHON_INSTALL_DIR}/lib")
+set(PYTHON_STDLIBEXT_DIR "${PYTHON_INSTALL_DIR}/lib-dynload")
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(CPYTHON_CONFIGURE_FLAGS
-        --enable-shared
-        --with-pydebug
+# CPython
+if(WIN32)
+    set(PYTHON_INCLUDES
+        "${CPYTHON_SRC_DIR}/PC"
+        "${CPYTHON_SRC_DIR}/Include"
     )
-    set(CPYTHON_LIBRARY_PREFIX "libpython${PYTHON_VER_MAJ_MIN}d")
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(CPYTHON_BUILD_COMMAND PCbuild/build.bat -c Debug)
+        set(CPYTHON_LIB "python312_d.dll")
+        set(CPYTHON_IMPLIB "python312_d.lib")
+    else()
+        set(CPYTHON_BUILD_COMMAND PCbuild/build.bat -c Release)
+        set(CPYTHON_LIB "python312.dll")
+        set(CPYTHON_IMPLIB "python312.lib")
+    endif()
+    ExternalProject_Add(
+        ${CPYTHON_TARGET}
+        PREFIX python-${PYTHON_VERSION}
+        SOURCE_DIR ${CPYTHON_SRC_DIR}
+        GIT_SUBMODULES cpython
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ${CPYTHON_BUILD_COMMAND}
+        BUILD_IN_SOURCE TRUE
+        INSTALL_COMMAND
+                ${CMAKE_COMMAND} -E rm -rf -- "${PYTHON_INSTALL_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${PYTHON_STDLIBEXT_DIR}"
+
+        # copy all *.dll files to PYTHON_STDLIBEXT_DIR
+        COMMAND PowerShell -Command "Get-ChildItem -Path '${CPYTHON_SRC_DIR}/PCbuild/amd64' -Include '*.dll', '*.pyd' -Recurse | ForEach-Object { Copy-Item -Path $_.FullName -Destination '${PYTHON_STDLIBEXT_DIR}' -Force }"
+
+        # move interpreter library (separate interpreter from stdlib extensions)
+        COMMAND ${CMAKE_COMMAND} -E copy -t "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" "${PYTHON_STDLIBEXT_DIR}/${CPYTHON_LIB}"
+        COMMAND ${CMAKE_COMMAND} -E rm -- "${PYTHON_STDLIBEXT_DIR}/${CPYTHON_LIB}"
+
+        # copy interpreter import library
+        COMMAND ${CMAKE_COMMAND} -E copy -t "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" "${CPYTHON_SRC_DIR}/PCbuild/amd64/${CPYTHON_IMPLIB}"
+
+        # copy stdlib
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CPYTHON_SRC_DIR}/Lib" "${PYTHON_STDLIB_DIR}"
+
+        # copy project package
+        COMMAND ${CMAKE_COMMAND} -E copy -t "${PYTHON_STDLIB_DIR}" "${PYTHON_PROJECT_DIR}/zetaplot.py"
+    )
 else()
-    set(CPYTHON_CONFIGURE_FLAGS
-        --enable-shared
-        --disable-test-modules
+    set(PYTHON_INCLUDES
+        "${CPYTHON_SRC_DIR}"
+        "${CPYTHON_SRC_DIR}/Include"
     )
-    set(CPYTHON_LIBRARY_PREFIX "libpython${PYTHON_VER_MAJ_MIN}")
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(CPYTHON_CONFIGURE_COMMAND ./configure --enable-shared --with-pydebug)
+        set(CPYTHON_LIB "libpython${PYTHON_VER_MAJ_MIN}d.so.1.0")
+    else()
+        set(CPYTHON_CONFIGURE_COMMAND ./configure --enable-shared --disable-test-modules)
+        set(CPYTHON_LIB "libpython${PYTHON_VER_MAJ_MIN}.so.1.0")
+    endif()
+    set(CPYTHON_BUILD_COMMAND CFLAGS=-w make -j)
+    ExternalProject_Add(
+        ${CPYTHON_TARGET}
+        PREFIX python-${PYTHON_VERSION}
+        SOURCE_DIR ${CPYTHON_SRC_DIR}
+        GIT_SUBMODULES cpython
+        CONFIGURE_COMMAND ${CPYTHON_CONFIGURE_COMMAND}
+        BUILD_COMMAND ${CPYTHON_BUILD_COMMAND}
+        BUILD_IN_SOURCE TRUE
+        INSTALL_COMMAND
+                ${CMAKE_COMMAND} -E rm -rf -- "${PYTHON_INSTALL_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${PYTHON_STDLIBEXT_DIR}"
+
+        # copy interpreter library
+        COMMAND ${CMAKE_COMMAND} -E copy "${CPYTHON_SRC_DIR}/${CPYTHON_LIB}" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+
+        # copy stdlib extensions
+        COMMAND bash -c "cp -rLv $(cat pybuilddir.txt)/* ${PYTHON_STDLIBEXT_DIR}"
+
+        # copy stdlib
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CPYTHON_SRC_DIR}/Lib" "${PYTHON_STDLIB_DIR}"
+
+        # copy project package
+        COMMAND ${CMAKE_COMMAND} -E copy "${PYTHON_PROJECT_DIR}/zetaplot.py" "${PYTHON_STDLIB_DIR}"
+    )
 endif()
-set(CPYTHON_LIB "${CPYTHON_LIBRARY_PREFIX}.so.1.0")
-
-message("Targeted Python version: ${PYTHON_VERSION}")
-
-message("CMake output directory: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
-message("Library build output directory: ${OUTPUT_LIB_DIRECTORY}")
-message("Interpreter library directory: ${PYTHON_INSTALL_DIR}")
-message("CPython interpreter source directory: ${CPYTHON_SRC_DIR}")
-message("Python environment workspace: ${PYTHON_ENV_DIR}")
-
-message("Python project directory: ${PYTHON_PROJECT_DIR}")
-
-# Download CPython & set up isolated environment workspace
-ExternalProject_Add(
-    ${PYTHON_TARGET}
-    PREFIX ${CPYTHON_PROJ}
-    SOURCE_DIR ${PYTHON_SOURCE}
-    GIT_SUBMODULES cpython
-    CONFIGURE_COMMAND
-        ./configure ${CPYTHON_CONFIGURE_FLAGS}
-    BUILD_COMMAND
-        CFLAGS=-w make -s -j $(nproc)
-    BUILD_IN_SOURCE TRUE
-    BUILD_ALWAYS FALSE
-    INSTALL_COMMAND
-        ${CMAKE_COMMAND} -E env LD_LIBRARY_PATH=${CPYTHON_SRC_DIR} ./python -m venv ${PYTHON_ENV_DIR}
-)
-
-# Copy CPython native libraries to known build directory
-add_custom_command(
-    TARGET ${PYTHON_TARGET}
-    POST_BUILD
-    COMMAND bash -c "cp -rL $(cat pybuilddir.txt) ${CMAKE_BINARY_DIR}/${PYTHON_NATIVE_LIB_DIR}"
-    COMMENT "Copying the interpreter's native libraries to ${CMAKE_BINARY_DIR}/${PYTHON_NATIVE_LIB_DIR}"
-    WORKING_DIRECTORY ${CPYTHON_SRC_DIR}
-    VERBATIM
-    BYPRODUCTS ${CMAKE_BINARY_DIR}/${PYTHON_NATIVE_LIB_DIR}
-)
-
-# Copy CPython libraries from build location to the output directory
-add_custom_command(
-    TARGET ${PYTHON_TARGET}
-    POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E rm -rf -- "${OUTPUT_LIB_DIRECTORY}"
-    COMMAND ${CMAKE_COMMAND} -E make_directory "${OUTPUT_LIB_DIRECTORY}"
-    COMMAND ${CMAKE_COMMAND} -E copy "${CPYTHON_SRC_DIR}/${CPYTHON_LIB}" "${OUTPUT_LIB_DIRECTORY}"
-    COMMENT "Copying the interpreter's shared libraries to ${OUTPUT_LIB_DIRECTORY}"
-    BYPRODUCTS ${OUTPUT_LIB_DIRECTORY}
-)
-
-# Copy interpreter's library modules to the output directory
-add_custom_command(
-    TARGET ${PYTHON_TARGET}
-    POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E rm -rf -- "${PYTHON_INSTALL_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${CPYTHON_SRC_DIR}/Lib"
-        "${PYTHON_INSTALL_DIR}/${PYTHON_LIB_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${CMAKE_BINARY_DIR}/${PYTHON_NATIVE_LIB_DIR}"
-        "${PYTHON_INSTALL_DIR}/${PYTHON_NATIVE_LIB_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${PYTHON_ENV_DIR}/lib/python${PYTHON_VER_MAJ_MIN}/site-packages"
-        "${PYTHON_INSTALL_DIR}/${PYTHON_SITE_PACKAGES_DIR}"
-    COMMENT "Copying the interpreter's library modules to ${PYTHON_INSTALL_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy
-        "${PYTHON_PROJECT_DIR}/zetaplot.py"
-        "${PYTHON_INSTALL_DIR}/${PYTHON_LIB_DIR}"
-    BYPRODUCTS ${PYTHON_INSTALL_DIR}
-)
 
 add_library(pythonlib SHARED IMPORTED)
-set_target_properties(pythonlib PROPERTIES IMPORTED_LOCATION "${OUTPUT_LIB_DIRECTORY}/${CPYTHON_LIB}")
-
-set(PYTHON_INCLUDES
-    "${CPYTHON_SRC_DIR}"
-    "${CPYTHON_SRC_DIR}/Include"
+set_target_properties(pythonlib PROPERTIES
+    IMPORTED_LOCATION
+        "${CMAKE_BINARY_DIR}/bin/${CPYTHON_LIB}"
+    IMPORTED_LOCATION_DEBUG
+        "${CMAKE_BINARY_DIR}/bin/Debug/${CPYTHON_LIB}"
+    IMPORTED_LOCATION_RELEASE
+        "${CMAKE_BINARY_DIR}/bin/Release/${CPYTHON_LIB}"
+    IMPORTED_IMPLIB
+        "${CMAKE_BINARY_DIR}/bin/${CPYTHON_IMPLIB}"
+    IMPORTED_IMPLIB_DEBUG
+        "${CMAKE_BINARY_DIR}/bin/Debug/${CPYTHON_IMPLIB}"
+    IMPORTED_IMPLIB_RELEASE
+        "${CMAKE_BINARY_DIR}/bin/Release/${CPYTHON_IMPLIB}"
 )
+add_dependencies(pythonlib ${CPYTHON_TARGET})
 
 ################################
 ####### Python setup end #######
@@ -159,7 +137,7 @@ set(PYTHON_INCLUDES
 
 add_compile_definitions(QT_NO_SIGNALS_SLOTS_KEYWORDS)
 
-set(ZPLOT_LIBRARY_PATH "${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}")
+set(ZPLOT_LIBRARY_PATH "${CMAKE_INSTALL_PREFIX}/lib/zetaplot")
 configure_file(config.h.in config.h)
 
 set(SOURCES
@@ -168,44 +146,54 @@ set(SOURCES
     source/script.cpp
 )
 
-set(CFLAGS
-    -Wsign-compare
-    -fwrapv
-    -Wall
-)
+add_library(zetaplot SHARED ${SOURCES})
+add_dependencies(zetaplot pythonlib)
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    list(APPEND CFLAGS
-        -O0
-        -g
+if(WIN32)
+    set(LIBRARIES
+        pythonlib
+    )
+    set(COMPILE_FLAGS
+        /W4
+        /std:c++20
     )
 else()
-    list(APPEND CFLAGS
-        -O3
+    set(LIBRARIES
+        pythonlib
+        dl
+        m
     )
+    set(COMPILE_FLAGS
+        -Wsign-compare
+        -fwrapv
+        -Wall
+    )
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        list(APPEND COMPILE_FLAGS
+            -O0
+            -g
+        )
+    else()
+        list(APPEND COMPILE_FLAGS
+            -O3
+        )
+    endif()
 endif()
 
-set(LIBRARIES
-    pythonlib
-    dl
-    m
-)
-
-add_library(zplot SHARED ${SOURCES})
-
-add_dependencies(zplot ${PYTHON_TARGET})
-
-target_include_directories(zplot PUBLIC
+target_include_directories(zetaplot PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include/zplot>
+    $<INSTALL_INTERFACE:include/zetaplot>
     "${CMAKE_BINARY_DIR}"
     "${PYTHON_INCLUDES}"
 )
 
-target_compile_options(zplot PUBLIC ${CFLAGS})
-target_link_libraries(zplot PUBLIC ${LIBRARIES})
-set_target_properties(zplot PROPERTIES INSTALL_RPATH "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}")
+target_compile_options(zetaplot PUBLIC ${COMPILE_FLAGS})
+target_compile_definitions(zetaplot PRIVATE BUILD_ZETAPLOT=1)
+target_link_libraries(zetaplot PUBLIC ${LIBRARIES})
+set_target_properties(zetaplot PROPERTIES INSTALL_RPATH "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/zetaplot")
 
-add_subdirectory("tests")
+if((CMAKE_BUILD_TYPE STREQUAL "Debug") OR WITH_TESTS)
+    add_subdirectory("tests")
+endif()
 
 add_subdirectory("app")

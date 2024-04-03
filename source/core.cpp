@@ -364,7 +364,7 @@ Core::init(
     status = PyConfig_SetBytesString(
         &config,
         &config.program_name,
-        executable.c_str()
+        executable.string().c_str()
     );
     if (PyStatus_Exception(status)) goto done;
 
@@ -395,7 +395,7 @@ Core::init(
     status = PyConfig_SetBytesString(
         &config,
         &config.home,
-        prefix.c_str()
+        prefix.string().c_str()
     );
     if (PyStatus_Exception(status)) goto done;
 

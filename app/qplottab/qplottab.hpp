@@ -239,7 +239,7 @@ public:
         SubTabColorMap::Cache colorMap;
     } Cache;
 
-    static struct
+    static struct ToolTips
     {
         QString title;
         QString xAxis;

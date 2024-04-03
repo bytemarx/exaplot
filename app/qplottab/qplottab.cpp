@@ -7,7 +7,7 @@
 using PlotProperty = zeta::PlotProperty;
 
 
-decltype(QPlotTab::toolTips) QPlotTab::toolTips = {
+QPlotTab::ToolTips QPlotTab::toolTips = {
     .title = PlotProperty::toStr(PlotProperty::TITLE),
     .xAxis = PlotProperty::toStr(PlotProperty::XAXIS),
     .yAxis = PlotProperty::toStr(PlotProperty::YAXIS),
