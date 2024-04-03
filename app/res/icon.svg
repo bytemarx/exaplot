@@ -24,8 +24,8 @@
      inkscape:document-units="mm"
      showgrid="true"
      inkscape:zoom="1.4142136"
-     inkscape:cx="440.52752"
-     inkscape:cy="230.87036"
+     inkscape:cx="440.88107"
+     inkscape:cy="273.29676"
      inkscape:window-width="2488"
      inkscape:window-height="1224"
      inkscape:window-x="0"
@@ -229,19 +229,20 @@
   <g
      inkscape:groupmode="layer"
      id="layer4"
-     inkscape:label="z"
+     inkscape:label="x"
+     style="display:inline"
      sodipodi:insensitive="true">
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:298.085px;line-height:1.25;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.263946"
-       x="9.3077955"
-       y="141.3614"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:289.004px;line-height:1.25;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.255905"
+       x="5.7163138"
+       y="137.05496"
        id="text18774"
-       transform="scale(0.99648713,1.0035253)"><tspan
+       transform="scale(0.96613008,1.0350573)"><tspan
          sodipodi:role="line"
          id="tspan18772"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:298.085px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';stroke-width:0.263946"
-         x="9.3077955"
-         y="141.3614">z</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:289.004px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';stroke-width:0.255905"
+         x="5.7163138"
+         y="137.05496">x</tspan></text>
   </g>
 </svg>
