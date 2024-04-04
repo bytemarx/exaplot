@@ -242,7 +242,7 @@ done:
 
 
 PyObject*
-exa_stop(PyObject* module, PyObject* Py_UNUSED(args))
+exa_stop(PyObject* module, [[maybe_unused]] PyObject* args)
 {
     auto state = getModuleState(module);
     return state->iface->stop();
@@ -375,7 +375,7 @@ plotCMVec(exa_state* state, std::size_t plotID, PyObject* const* args, Py_ssize_
 
 
 static PyObject*
-plotCMFrame(exa_state* state, std::size_t plotID, PyObject* const* args, Py_ssize_t nargs)
+plotCMFrame(exa_state* state, std::size_t plotID, PyObject* const* args, [[maybe_unused]] Py_ssize_t nargs)
 {
     auto pyBorrowed_frame = PySequence_Fast(args[0],
                                             EXA_PLOT "() 'frame' argument must be type 'Sequence[Sequence[Real]]'");
