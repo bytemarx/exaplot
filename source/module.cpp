@@ -458,7 +458,7 @@ exa_plot(PyObject* module, PyObject* const* args, Py_ssize_t nargs)
         Py_RETURN_NONE;
     }
 
-    std::function<PyObject*(exa_state*, long, PyObject* const*, Py_ssize_t)> plotFn;
+    std::function<PyObject*(exa_state*, std::size_t, PyObject* const*, Py_ssize_t)> plotFn;
     switch (state->iface->currentPlotType(plotID)) {
     case 0: // 2D
         plotFn = PySequence_Check(args[1]) ? plot2DVec : plot2D;
