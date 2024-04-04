@@ -61,31 +61,31 @@ typedef struct {
 } RunParam;
 
 
-struct EXA_API Error
+struct Error
 {
     typedef const char* Type;
-    constexpr static Type NONE = "NONE";
-    constexpr static Type IMPORT = "IMPORT";
-    constexpr static Type RUNTIME = "RUNTIME";
-    constexpr static Type RELOAD = "RELOAD";
-    constexpr static Type SYSTEM = "SYSTEM";
-    constexpr static Type ARGUMENT = "ARGUMENT";
-    constexpr static Type INTERRUPT = "INTERRUPT";
-    constexpr static Type UNDEFINED = "UNDEFINED";
+    EXA_API constexpr static Type NONE = "NONE";
+    EXA_API constexpr static Type IMPORT = "IMPORT";
+    EXA_API constexpr static Type RUNTIME = "RUNTIME";
+    EXA_API constexpr static Type RELOAD = "RELOAD";
+    EXA_API constexpr static Type SYSTEM = "SYSTEM";
+    EXA_API constexpr static Type ARGUMENT = "ARGUMENT";
+    EXA_API constexpr static Type INTERRUPT = "INTERRUPT";
+    EXA_API constexpr static Type UNDEFINED = "UNDEFINED";
 
     static Error pyerror(Type);
 
-    Error(
+    EXA_API Error(
         const Type type = UNDEFINED,
         const std::string& msg = "",
         const std::string& tb = "");
 
-    explicit operator bool() const noexcept { return strcmp(this->m_type, NONE) != 0; }
-    bool operator==(const Type& other) const noexcept { return strcmp(this->m_type, other) == 0; }
-    bool operator!=(const Type& other) const noexcept { return strcmp(this->m_type, other) != 0; }
-    auto type() const { return this->m_type; }
-    auto message() const { return this->m_message; }
-    auto traceback() const { return this->m_traceback; }
+    EXA_API explicit operator bool() const noexcept { return strcmp(this->m_type, NONE) != 0; }
+    EXA_API bool operator==(const Type& other) const noexcept { return strcmp(this->m_type, other) == 0; }
+    EXA_API bool operator!=(const Type& other) const noexcept { return strcmp(this->m_type, other) != 0; }
+    EXA_API auto type() const { return this->m_type; }
+    EXA_API auto message() const { return this->m_message; }
+    EXA_API auto traceback() const { return this->m_traceback; }
 
 private:
     Type m_type;
@@ -94,42 +94,42 @@ private:
 };
 
 
-class EXA_API Interface
+class Interface
 {
 public:
-    virtual ~Interface();
-    virtual PyObject* init(const std::vector<RunParam>& params, const std::vector<GridPoint>& plots) = 0;
-    virtual PyObject* stop() = 0;
-    virtual PyObject* msg(const std::string& message, bool append) = 0;
-    virtual PyObject* plot2D(std::size_t plotID, double x, double y) = 0;
-    virtual PyObject* plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y) = 0;
-    virtual PyObject* plotCM(std::size_t plotID, int x, int y, double value) = 0;
-    virtual PyObject* plotCMVec(std::size_t plotID, int y, const std::vector<double>& values) = 0;
-    virtual PyObject* plotCMFrame(std::size_t plotID, const std::vector<std::vector<double>>& frame) = 0;
-    virtual PyObject* clear(std::size_t plotID) = 0;
-    virtual PyObject* setPlotProperty(std::size_t plotID, const PlotProperty& property, const PlotProperty::Value& value) = 0;
-    virtual PyObject* getPlotProperty(std::size_t plotID, const PlotProperty& property) = 0;
-    virtual PyObject* showPlot(std::size_t plotID, std::size_t plotType) = 0;
-    virtual Py_ssize_t currentPlotType(std::size_t plotID) = 0;
+    EXA_API virtual ~Interface();
+    EXA_API virtual PyObject* init(const std::vector<RunParam>& params, const std::vector<GridPoint>& plots) = 0;
+    EXA_API virtual PyObject* stop() = 0;
+    EXA_API virtual PyObject* msg(const std::string& message, bool append) = 0;
+    EXA_API virtual PyObject* plot2D(std::size_t plotID, double x, double y) = 0;
+    EXA_API virtual PyObject* plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y) = 0;
+    EXA_API virtual PyObject* plotCM(std::size_t plotID, int x, int y, double value) = 0;
+    EXA_API virtual PyObject* plotCMVec(std::size_t plotID, int y, const std::vector<double>& values) = 0;
+    EXA_API virtual PyObject* plotCMFrame(std::size_t plotID, const std::vector<std::vector<double>>& frame) = 0;
+    EXA_API virtual PyObject* clear(std::size_t plotID) = 0;
+    EXA_API virtual PyObject* setPlotProperty(std::size_t plotID, const PlotProperty& property, const PlotProperty::Value& value) = 0;
+    EXA_API virtual PyObject* getPlotProperty(std::size_t plotID, const PlotProperty& property) = 0;
+    EXA_API virtual PyObject* showPlot(std::size_t plotID, std::size_t plotType) = 0;
+    EXA_API virtual Py_ssize_t currentPlotType(std::size_t plotID) = 0;
 };
 
 
 class ScriptModule;
 
 
-class EXA_API Core
+class Core
 {
 public:
-    static PyStatus init(
+    EXA_API static PyStatus init(
         const std::filesystem::path& executable,
         const std::filesystem::path& prefix);
-    static int deinit();
+    EXA_API static int deinit();
 
-    Core(Interface* interface);
-    ~Core();
-    Core(const Core&) = delete;
+    EXA_API Core(Interface* interface);
+    EXA_API ~Core();
+    EXA_API Core(const Core&) = delete;
 
-    Error load(const std::filesystem::path& file, std::shared_ptr<ScriptModule>& module);
+    EXA_API Error load(const std::filesystem::path& file, std::shared_ptr<ScriptModule>& module);
 
 private:
     static std::size_t coreCount;
@@ -141,14 +141,14 @@ private:
 };
 
 
-class EXA_API ScriptModule
+class ScriptModule
 {
     friend class Core;
 
 public:
-    ~ScriptModule();
-    Error reload();
-    Error run(const std::vector<RunParam>& args);
+    EXA_API ~ScriptModule();
+    EXA_API Error reload();
+    EXA_API Error run(const std::vector<RunParam>& args);
 
 private:
     ScriptModule(PyThreadState* tState, const std::filesystem::path& file);

@@ -18,7 +18,7 @@
 namespace exa {
 
 
-class EXA_API PlotProperty
+class PlotProperty
 {
 public:
     typedef std::variant<int, double, std::string, bool> Value;
@@ -54,13 +54,13 @@ public:
         COLORMAP_AUTORS_DATA,   // bool
     };
 
-    static const char* toStr(Type);
+    EXA_API static const char* toStr(Type);
 
-    PlotProperty(const std::string&);
+    EXA_API PlotProperty(const std::string&);
 
-    constexpr operator Type() const noexcept { return this->m_property; }
-    constexpr bool operator==(Type t) const noexcept { return t == this->m_property; }
-    const char* c_str() const noexcept { return this->m_str.c_str(); }
+    EXA_API constexpr operator Type() const noexcept { return this->m_property; }
+    EXA_API constexpr bool operator==(Type t) const noexcept { return t == this->m_property; }
+    EXA_API const char* c_str() const noexcept { return this->m_str.c_str(); }
 
 private:
     Type m_property;
