@@ -155,6 +155,7 @@ if(WIN32)
     )
     set(COMPILE_FLAGS
         /W4
+        /wd4458
         /std:c++20
     )
 else()
