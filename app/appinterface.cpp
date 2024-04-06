@@ -12,8 +12,11 @@
 #include <iostream>
 
 
-Interface::Interface(QObject* parent)
+Interface::Interface(
+    const std::vector<std::filesystem::path>& searchPaths,
+    QObject* parent)
     : QObject{parent}
+    , searchPaths{searchPaths}
     , core{nullptr}
     , stopRequested{false}
 {

@@ -22,7 +22,7 @@ class AppMain : public QObject
     Q_OBJECT
 
 public:
-    AppMain(int& argc, char* argv[]);
+    AppMain(int& argc, char* argv[], const std::vector<std::filesystem::path>&);
     ~AppMain();
 
     int exec();

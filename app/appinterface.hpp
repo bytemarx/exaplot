@@ -24,7 +24,7 @@ class Interface : public QObject, public exa::Interface
     Q_OBJECT
 
 public:
-    Interface(QObject* parent = nullptr);
+    Interface(const std::vector<std::filesystem::path>& searchPaths, QObject* parent = nullptr);
 
     PyObject* init(const std::vector<exa::RunParam>& params, const std::vector<exa::GridPoint>& plots) override;
     PyObject* stop() override;
@@ -66,9 +66,10 @@ public Q_SLOTS:
 
 private:
     QMutex mutex;
+    const std::vector<std::filesystem::path> searchPaths;
     exa::Core* core;
+    bool stopRequested;
     std::shared_ptr<exa::ScriptModule> module;
     std::vector<PlotEditor::PlotInfo> plots;
     std::vector<exa::RunParam> params;
-    bool stopRequested;
 };

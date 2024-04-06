@@ -16,6 +16,6 @@
 
 int main(int argc, char* argv[])
 {
-    AppMain a{argc, argv};
+    AppMain a{argc, argv, std::vector<std::filesystem::path>{}};
     return a.exec();
 }

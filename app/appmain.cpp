@@ -12,10 +12,10 @@
 #include "config.h"
 
 
-AppMain::AppMain(int& argc, char* argv[])
+AppMain::AppMain(int& argc, char* argv[], const std::vector<std::filesystem::path>& searchPaths)
     : QObject{Q_NULLPTR}
     , ifaceThread{}
-    , iface{}
+    , iface{searchPaths}
     , a{argc, argv}
     , ui{this}
     , scriptRunning{false}
