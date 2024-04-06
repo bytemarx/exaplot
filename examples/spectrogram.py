@@ -1,3 +1,12 @@
+# /// script
+# requires-python = ">=3.12"
+# dependencies = [
+#   "librosa >= 0.10.1",
+#   "numpy >= 1.26.4",
+#   "scipy >= 1.12.0",
+# ]
+# ///
+
 import math
 import pathlib
 import time
