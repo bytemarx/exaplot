@@ -172,7 +172,7 @@ PlotEditor::setPlotTabs(std::size_t n)
         }
     } else if (n < this->plotTabs.size()) {
         for (decltype(n) i = this->plotTabs.size(); i > n; --i) {
-            this->ui.tabWidget_plotTabs->removeTab(i - 1);
+            this->ui.tabWidget_plotTabs->removeTab(static_cast<int>(i - 1));
             delete this->plotTabs[i - 1];
         }
         this->plotTabs.resize(n);

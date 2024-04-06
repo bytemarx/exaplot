@@ -6004,19 +6004,17 @@ QCPLabelPainterPrivate::AnchorSide QCPLabelPainterPrivate::skewedAnchorSide(cons
   if (anchorNormal.x() > sideHorz)
   {
     if (anchorNormal.y() > sideVert) return asTopLeft;
-    else if (anchorNormal.y() < -sideVert) return asBottomLeft;
-    else return asLeft;
-  } else if (anchorNormal.x() < -sideHorz)
+    if (anchorNormal.y() < -sideVert) return asBottomLeft;
+    return asLeft;
+  }
+  if (anchorNormal.x() < -sideHorz)
   {
     if (anchorNormal.y() > sideVert) return asTopRight;
-    else if (anchorNormal.y() < -sideVert) return asBottomRight;
-    else return asRight;
-  } else
-  {
-    if (anchorNormal.y() > 0) return asTop;
-    else return asBottom;
+    if (anchorNormal.y() < -sideVert) return asBottomRight;
+    return asRight;
   }
-  return asBottom; // should never be reached
+  if (anchorNormal.y() > 0) return asTop;
+  return asBottom;
 }
 
 QCPLabelPainterPrivate::AnchorSide QCPLabelPainterPrivate::rotationCorrectedSide(AnchorSide side, double rotation) const

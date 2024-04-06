@@ -15,7 +15,6 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-#include "qcustomplot.h"
 #include "qplot.hpp"
 
 

@@ -130,13 +130,13 @@ ScriptModule::run(const std::vector<RunParam>& args)
                     pyOwned_val = PyFloat_FromDouble(std::stod(arg.value));
                     break;
                 }
-            } catch (std::invalid_argument const& e) {
+            } catch ([[maybe_unused]] std::invalid_argument const& e) {
                 status = Error{
                     Error::ARGUMENT,
                     std::string{"Invalid argument for parameter '"}.append(arg.identifier).append("'")
                 };
                 goto done;
-            } catch (std::out_of_range const& e) {
+            } catch ([[maybe_unused]] std::out_of_range const& e) {
                 status = Error{
                     Error::ARGUMENT,
                     std::string{"Out of range for parameter '"}.append(arg.identifier).append("'")

@@ -156,20 +156,23 @@ Plot*
 QPlot::plot()
 {
     switch (this->m_current) {
-    case Plot::TWODIMEN:
-        return this->m_plot2D;
-    case Plot::COLORMAP:
-        return this->m_plotColorMap;
-    default:
-        assert(false);
-        throw std::runtime_error{QString{"Unexpected plot type: %1"}.arg(this->m_current).toStdString()};
+    case Plot::TWODIMEN: return this->m_plot2D;
+    case Plot::COLORMAP: return this->m_plotColorMap;
+    default: break;
     }
-    return nullptr;
+    assert(false);
+    throw std::runtime_error{QString{"Unexpected plot type: %1"}.arg(this->m_current).toStdString()};
 }
 
 
 const Plot*
 QPlot::plot() const
 {
-    return static_cast<const Plot*>(this->plot());
+    switch (this->m_current) {
+    case Plot::TWODIMEN: return this->m_plot2D;
+    case Plot::COLORMAP: return this->m_plotColorMap;
+    default: break;
+    }
+    assert(false);
+    throw std::runtime_error{QString{"Unexpected plot type: %1"}.arg(this->m_current).toStdString()};
 }
