@@ -9,7 +9,13 @@
 #pragma once
 
 #define PY_SSIZE_T_CLEAN
+#if defined(_WIN32)
+    #pragma warning(push, 0)
+#endif
 #include <Python.h>
+#if defined(_WIN32)
+    #pragma warning(pop)
+#endif
 
 #include <filesystem>
 #include <map>
