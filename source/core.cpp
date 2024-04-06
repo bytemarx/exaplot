@@ -344,12 +344,14 @@ PyThreadState* Core::mainThreadState = NULL;
  * @param executable absolute path of the executable binary for the Python interpreter: 
  * `sys.executable`
  * @param prefix library path
+ * @param searchPaths additional module search paths
  * @return PyStatus 
  */
 PyStatus
 Core::init(
     const std::filesystem::path& executable,
-    const std::filesystem::path& prefix)
+    const std::filesystem::path& prefix,
+    const std::vector<std::filesystem::path>& searchPaths)
 {
     PyStatus status;
     PyConfig config;
@@ -391,6 +393,13 @@ Core::init(
     if (PyStatus_Exception(status)) goto done;
 
     // third-party modules
+    for (const auto& path : searchPaths) {
+        status = PyWideStringList_Append(
+            &config.module_search_paths,
+            path.wstring().c_str()
+        );
+        if (PyStatus_Exception(status)) goto done;
+    }
     if (std::getenv("PYTHONPATH")) {
         status = PyWideStringList_Append(
             &config.module_search_paths,

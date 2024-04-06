@@ -128,7 +128,8 @@ class Core
 public:
     EXA_API static PyStatus init(
         const std::filesystem::path& executable,
-        const std::filesystem::path& prefix);
+        const std::filesystem::path& prefix,
+        const std::vector<std::filesystem::path>& searchPaths = {});
     EXA_API static int deinit();
 
     EXA_API Core(Interface* interface);
