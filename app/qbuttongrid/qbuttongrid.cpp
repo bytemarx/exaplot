@@ -36,6 +36,7 @@ updateIds(const Matrix<QButtonGridNode*>* m)
 /**
  * @brief Checks if the given arrangement is a valid arrangement. If valid, returns `true` and
  * populates the given `cols` and `rows` variables with the total columns and rows, respectively.
+ * Includes bounds checking for maximum column and row values.
  * 
  * @param arrangement 
  * @param cols 
@@ -177,7 +178,11 @@ QButtonGrid::setArrangement(const std::vector<GridPoint>& arrangement)
         for (GridPoint_t r = 0; r < rows; ++r) {
             auto root = new QButtonGridRootNode;
             this->m->setCell(c, r, root);
-            this->gridLayout->addWidget(dynamic_cast<QPushButton*>(root), r, c);
+            this->gridLayout->addWidget(
+                dynamic_cast<QPushButton*>(root),
+                static_cast<int>(r),
+                static_cast<int>(c)
+            );
         }
     }
     for (auto button : arrangement) {
@@ -277,7 +282,11 @@ QButtonGrid::addRow()
     for (std::size_t c = 0; c < this->m->nCols(); ++c) {
         auto root = new QButtonGridRootNode;
         this->m->setCell(c, r, root);
-        this->gridLayout->addWidget(dynamic_cast<QPushButton*>(root), r, c);
+        this->gridLayout->addWidget(
+            dynamic_cast<QPushButton*>(root),
+            static_cast<int>(r),
+            static_cast<int>(c)
+        );
     }
     updateIds(this->m);
     emit this->gridChanged();
@@ -306,7 +315,11 @@ QButtonGrid::delRow()
             auto rowSpan = --root->rs;
             auto colSpan = root->cs;
             this->gridLayout->addWidget(
-                dynamic_cast<QPushButton*>(root), row, col, rowSpan + 1, colSpan + 1
+                dynamic_cast<QPushButton*>(root),
+                static_cast<int>(row),
+                static_cast<int>(col),
+                static_cast<int>(rowSpan + 1),
+                static_cast<int>(colSpan + 1)
             );
         }
         delete node;
@@ -332,7 +345,11 @@ QButtonGrid::addCol()
     for (std::size_t r = 0; r < this->m->nRows(); ++r) {
         auto root = new QButtonGridRootNode;
         this->m->setCell(c, r, root);
-        this->gridLayout->addWidget(dynamic_cast<QPushButton*>(root), r, c);
+        this->gridLayout->addWidget(
+            dynamic_cast<QPushButton*>(root),
+            static_cast<int>(r),
+            static_cast<int>(c)
+        );
     }
     updateIds(this->m);
     emit this->gridChanged();
@@ -355,13 +372,17 @@ QButtonGrid::delCol()
             this->gridLayout->removeWidget(dynamic_cast<QPushButton*>(node));
         } else if (dynamic_cast<QButtonGridExtNode*>(node)->dr == 0) {
             auto root = this->root(this->m->nCols() - 1, r - 1);
+            auto row = r - 1;
+            auto col = this->nCols() - dynamic_cast<QButtonGridExtNode*>(node)->dc - 1;
+            auto rowSpan = root->rs + 1;
+            auto colSpan = --root->cs + 1;
             this->gridLayout->removeWidget(dynamic_cast<QPushButton*>(root));
             this->gridLayout->addWidget(
                 dynamic_cast<QPushButton*>(root),
-                r - 1,
-                this->nCols() - dynamic_cast<QButtonGridExtNode*>(node)->dc - 1,
-                root->rs + 1,
-                --root->cs + 1
+                static_cast<int>(row),
+                static_cast<int>(col),
+                static_cast<int>(rowSpan),
+                static_cast<int>(colSpan)
             );
         }
         delete node;
@@ -410,10 +431,10 @@ QButtonGrid::combine()
     this->m->setCell(colMin, rowMin, root);
     this->gridLayout->addWidget(
         dynamic_cast<QPushButton*>(root),
-        rowMin,
-        colMin,
-        rowSpan + 1,
-        colSpan + 1
+        static_cast<int>(rowMin),
+        static_cast<int>(colMin),
+        static_cast<int>(rowSpan + 1),
+        static_cast<int>(colSpan + 1)
     );
     updateIds(this->m);
     emit this->gridChanged();
@@ -491,12 +512,16 @@ QButtonGrid::split(std::size_t col, std::size_t row)
     auto colEnd = col + root->cs;
     auto rowEnd = row + root->rs;
     this->gridLayout->removeWidget(dynamic_cast<QPushButton*>(root));
-    for (std::size_t c = col; c <= colEnd; ++c) {
-        for (std::size_t r = row; r <= rowEnd; ++r) {
+    for (auto c = col; c <= colEnd; ++c) {
+        for (auto r = row; r <= rowEnd; ++r) {
             delete this->m->itemAt(c, r);
             auto newRoot = new QButtonGridRootNode;
             this->m->setCell(c, r, newRoot);
-            this->gridLayout->addWidget(dynamic_cast<QPushButton*>(newRoot), r, c);
+            this->gridLayout->addWidget(
+                dynamic_cast<QPushButton*>(newRoot),
+                static_cast<int>(r),
+                static_cast<int>(c)
+            );
         }
     }
     return true;

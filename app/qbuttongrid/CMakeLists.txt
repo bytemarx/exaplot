@@ -1,46 +1,24 @@
-cmake_minimum_required(VERSION 3.22)
-
-project(
-    qbuttongrid
-    VERSION 0.0.0
-    LANGUAGES CXX
+set(QBUTTONGRID_LIBS
+    exaplot
+    Qt6::Widgets
 )
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(QTVER "6")
-
-set(CMAKE_AUTOMOC ON)
-
-find_package(Qt${QTVER} REQUIRED COMPONENTS Core Gui UiPlugin Widgets)
-
-qt_add_plugin(qbuttongridplugin)
-
-target_sources(qbuttongridplugin PRIVATE
-    qbuttongrid.hpp
+add_library(qbuttongrid OBJECT
     qbuttongrid.cpp
-    qbuttongridplugin.hpp
-    qbuttongridplugin.cpp
     qbuttongridprivate.hpp
 )
+target_link_libraries(qbuttongrid PRIVATE ${QBUTTONGRID_LIBS})
 
-target_include_directories(
-    qbuttongridplugin PUBLIC
-    "${CMAKE_CURRENT_SOURCE_DIR}/../../include"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../../cpython"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../../cpython/Include"
-)
+if((CMAKE_BUILD_TYPE STREQUAL "Debug") OR WITH_TESTS)
+    add_library(qbuttongridtests OBJECT
+        tests/test.cpp
+    )
+    target_link_libraries(qbuttongridtests PRIVATE gtest ${QBUTTONGRID_LIBS})
+endif()
 
-set_target_properties(qbuttongridplugin PROPERTIES
-    WIN32_EXECUTABLE TRUE
-    MACOSX_BUNDLE TRUE
-)
-
-target_link_libraries(qbuttongridplugin PUBLIC
-    Qt${QTVER}::Core
-    Qt${QTVER}::Gui
-    Qt${QTVER}::UiPlugin
-    Qt${QTVER}::Widgets
-)
-
-add_subdirectory("tests")
+if(APP_PLUGINS)
+    qt_add_plugin(qbuttongridplugin)
+    target_sources(qbuttongridplugin PRIVATE qbuttongridplugin.cpp $<TARGET_OBJECTS:qbuttongrid>)
+    set_target_properties(qbuttongridplugin PROPERTIES WIN32_EXECUTABLE TRUE MACOSX_BUNDLE TRUE)
+    target_link_libraries(qbuttongridplugin PUBLIC ${QBUTTONGRID_LIBS} Qt6::UiPlugin)
+endif()

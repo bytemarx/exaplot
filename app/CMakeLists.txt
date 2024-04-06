@@ -5,81 +5,35 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Widgets Gui Svg PrintSupport)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui PrintSupport Svg UiPlugin Widgets)
 
-set(APP_UI_FILES
-	mainwindow
-	about
-	ploteditor
-)
+file(GLOB APP_FORM_FILES ui/*.ui)
+file(GLOB APP_SOURCES_UI ui/*.cpp)
 
-foreach(ui_file ${APP_UI_FILES})
-	list(APPEND APP_FORM_FILES ui/${ui_file}.ui)
-	list(APPEND APP_SOURCES_UI ui/${ui_file}.cpp)
-endforeach(ui_file)
+add_subdirectory(qbuttongrid)
+add_subdirectory(qplottab)
+add_subdirectory(qplot)
 
-set(QBUTTONGRID_SOURCES
-	qbuttongrid/qbuttongrid.cpp
-	qbuttongrid/qbuttongrid.hpp
-	qbuttongrid/qbuttongridprivate.hpp
-)
-
-set(QPLOTTAB_SOURCES
-	qplottab/qplottab.cpp
-	qplottab/qplottab.hpp
-	qplottab/qplottabprivate.cpp
-	qplottab/qplottabprivate.hpp
-)
-
-set(QCUSTOMPLOT_SOURCES
-	qcustomplot/qcustomplot.cpp
-	qcustomplot/qcustomplot.h
-)
-
-set(QPLOT_SOURCES
-	qplot/plot.cpp
-	qplot/plot.hpp
-	qplot/plot2d.cpp
-	qplot/plot2d.hpp
-	qplot/plotcolormap.cpp
-	qplot/plotcolormap.hpp
-	qplot/qplot.cpp
-	qplot/qplot.hpp
-)
-
-set(APP_SOURCES
+add_executable(app
+	main.cpp
 	${APP_FORM_FILES}
 	${APP_SOURCES_UI}
-	${QBUTTONGRID_SOURCES}
-	${QPLOTTAB_SOURCES}
-	${QCUSTOMPLOT_SOURCES}
-	${QPLOT_SOURCES}
-	appinterface.cpp
-	appmain.cpp
-	appui.cpp
-	main.cpp
 	resources.qrc
+	appmain.cpp
+	appinterface.cpp
+	appui.cpp
+	qcustomplot/qcustomplot.cpp
+	$<TARGET_OBJECTS:qbuttongrid>
+	$<TARGET_OBJECTS:qplottab>
+	$<TARGET_OBJECTS:qplot>
 )
 
-set(ADDITIONAL_LIBRARY_DEPENDENCIES
-	Qt6::Core
-	Qt6::Gui
-	Qt6::Widgets
-	Qt6::Svg
-	Qt6::PrintSupport
-)
-add_executable(app ${APP_SOURCES})
-
-target_include_directories(
-	app PUBLIC
-	"${CMAKE_CURRENT_SOURCE_DIR}/ui"
-	"${CMAKE_CURRENT_SOURCE_DIR}/qbuttongrid"
-	"${CMAKE_CURRENT_SOURCE_DIR}/qplottab"
-	"${CMAKE_CURRENT_SOURCE_DIR}/qcustomplot"
-	"${CMAKE_CURRENT_SOURCE_DIR}/qplot"
-	"${CMAKE_CURRENT_SOURCE_DIR}/../include"
-	"${CMAKE_CURRENT_SOURCE_DIR}/../build"
-    "${PYTHON_INCLUDES}"
+target_include_directories(app PUBLIC
+	ui
+	qbuttongrid
+	qplottab
+	qcustomplot
+	qplot
 )
 
 set_target_properties(app PROPERTIES
@@ -87,4 +41,11 @@ set_target_properties(app PROPERTIES
 	INSTALL_RPATH "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}"
 )
 
-target_link_libraries(app PRIVATE exaplot ${ADDITIONAL_LIBRARY_DEPENDENCIES})
+target_link_libraries(app PRIVATE
+	exaplot
+	Qt6::Core
+	Qt6::Gui
+	Qt6::Widgets
+	Qt6::Svg
+	Qt6::PrintSupport
+)

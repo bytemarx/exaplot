@@ -7,6 +7,8 @@
 
 namespace testing {
 
+namespace qbuttongrid {
+
 
 TEST(BasicTest, Init) {
     auto buttonGrid = new QButtonGrid;
@@ -194,7 +196,7 @@ TEST(ComplexTest, MultipleCombine) {
 
 TEST(ArrangementTest, Simple) {
     QButtonGrid buttonGrid;
-    QList<QButtonGrid::GridPoint> points{
+    std::vector<QButtonGrid::GridPoint> points{
         {
             .x = 0,
             .dx = 0,
@@ -213,7 +215,7 @@ TEST(ArrangementTest, Simple) {
 
 TEST(ArrangementTest, Overwrite) {
     QButtonGrid buttonGrid;
-    QList<QButtonGrid::GridPoint> points{
+    std::vector<QButtonGrid::GridPoint> points{
         {
             .x = 0,
             .dx = 0,
@@ -233,7 +235,7 @@ TEST(ArrangementTest, Overwrite) {
 
 TEST(ArrangementTest, Complex) {
     QButtonGrid buttonGrid;
-    QList<QButtonGrid::GridPoint> points{
+    std::vector<QButtonGrid::GridPoint> points{
         {
             .x = 0,
             .dx = 1,
@@ -271,8 +273,11 @@ TEST(ArrangementTest, Complex) {
 }
 
 
-int main(int argc, char** argv) {
-    QApplication a{argc, argv};
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
 }
+
+
+// int main(int argc, char** argv) {
+//     QApplication a{argc, argv};
+//     ::testing::InitGoogleTest(&argc, argv);
+//     return RUN_ALL_TESTS();
+// }

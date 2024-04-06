@@ -1,43 +1,32 @@
-cmake_minimum_required(VERSION 3.22)
-
-project(
-    qplottab
-    VERSION 0.0.0
-    LANGUAGES CXX
+set(QPLOTTAB_LIBS
+    exaplot
+    Qt6::Widgets
+)
+set(QPLOTTAB_INCL
+    ../qcustomplot
+    ../qplot
+    ../../include
 )
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(QTVER "6")
-
-set(CMAKE_AUTOMOC ON)
-
-find_package(Qt${QTVER} REQUIRED COMPONENTS Core Gui UiPlugin Widgets)
-
-qt_add_plugin(qplottabplugin)
-
-target_sources(qplottabplugin PRIVATE
+add_library(qplottab OBJECT
     qplottab.cpp
     qplottabprivate.cpp
-    qplottabplugin.cpp
 )
+target_link_libraries(qplottab PRIVATE ${QPLOTTAB_LIBS})
+target_include_directories(qplottab PUBLIC ${QPLOTTAB_INCL})
 
-target_include_directories(qplottabplugin PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../qcustomplot"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../qplot"
-)
+if((CMAKE_BUILD_TYPE STREQUAL "Debug") OR WITH_TESTS)
+    add_library(qplottabtests OBJECT
+        tests/test.cpp
+    )
+    target_link_libraries(qplottabtests PRIVATE gtest ${QPLOTTAB_LIBS})
+    target_include_directories(qplottabtests PUBLIC ${QPLOTTAB_INCL})
+endif()
 
-set_target_properties(qplottabplugin PROPERTIES
-    WIN32_EXECUTABLE TRUE
-    MACOSX_BUNDLE TRUE
-)
-
-target_link_libraries(qplottabplugin PUBLIC
-    Qt::Core
-    Qt::Gui
-    Qt::UiPlugin
-    Qt::Widgets
-)
-
-add_subdirectory("tests")
+if(APP_PLUGINS)
+    qt_add_plugin(qplottabplugin)
+    target_sources(qplottabplugin PRIVATE qplottabplugin.cpp $<TARGET_OBJECTS:qplottab>)
+    target_include_directories(qplottabplugin PRIVATE ${QPLOTTAB_INCL})
+    set_target_properties(qplottabplugin PROPERTIES WIN32_EXECUTABLE TRUE MACOSX_BUNDLE TRUE)
+    target_link_libraries(qplottabplugin PUBLIC ${QPLOTTAB_LIBS} Qt::UiPlugin)
+endif()

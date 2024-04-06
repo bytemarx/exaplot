@@ -7,6 +7,8 @@
 
 namespace testing {
 
+namespace qplottab {
+
 
 TEST(BasicTest, Init) {
     auto plotTab = new QPlotTab;
@@ -17,8 +19,11 @@ TEST(BasicTest, Init) {
 }
 
 
-int main(int argc, char** argv) {
-    QApplication a{argc, argv};
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
 }
+
+
+// int main(int argc, char** argv) {
+//     QApplication a{argc, argv};
+//     ::testing::InitGoogleTest(&argc, argv);
+//     return RUN_ALL_TESTS();
+// }

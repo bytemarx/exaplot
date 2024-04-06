@@ -7,6 +7,9 @@
 namespace testing {
 
 
+namespace qplot {
+
+
 TEST(BasicTest, Init) {
     auto plot = new QPlot;
     delete plot;
@@ -38,8 +41,11 @@ TEST(BasicTest, CycleTypes) {
 }
 
 
-int main(int argc, char** argv) {
-    QApplication a{argc, argv};
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
 }
+
+
+// int main(int argc, char** argv) {
+//     QApplication a{argc, argv};
+//     ::testing::InitGoogleTest(&argc, argv);
+//     return RUN_ALL_TESTS();
+// }

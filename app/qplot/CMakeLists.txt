@@ -1,50 +1,31 @@
-cmake_minimum_required(VERSION 3.22)
-
-project(
-    qplot
-    VERSION 0.0.0
-    LANGUAGES CXX
-)
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-set(CMAKE_AUTOMOC ON)
-
-find_package(Qt6 REQUIRED COMPONENTS Core Gui UiPlugin Widgets PrintSupport)
-
-qt_add_plugin(qplotplugin)
-
-target_sources(qplotplugin PRIVATE
-    plot.hpp
-    plot.cpp
-    plot2d.hpp
-    plot2d.cpp
-    plotcolormap.hpp
-    plotcolormap.cpp
-    qplot.hpp
-    qplot.cpp
-    qplotplugin.hpp
-    qplotplugin.cpp
-    ../qcustomplot/qcustomplot.h
-    ../qcustomplot/qcustomplot.cpp
-)
-
-target_include_directories(qplotplugin PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/../qcustomplot"
-)
-
-set_target_properties(qplotplugin PROPERTIES
-    WIN32_EXECUTABLE TRUE
-    MACOSX_BUNDLE TRUE
-)
-
-target_link_libraries(qplotplugin PUBLIC
-    Qt6::Core
-    Qt6::Gui
-    Qt6::UiPlugin
+set(QPLOT_LIBS
     Qt6::Widgets
-    Qt6::PrintSupport
+)
+set(QPLOT_INCL
+    ../qcustomplot
 )
 
-add_subdirectory("tests")
+add_library(qplot OBJECT
+    plot.cpp
+    plot2d.cpp
+    plotcolormap.cpp
+    qplot.cpp
+)
+target_link_libraries(qplot PRIVATE ${QPLOT_LIBS})
+target_include_directories(qplot PUBLIC ${QPLOT_INCL})
+
+if((CMAKE_BUILD_TYPE STREQUAL "Debug") OR WITH_TESTS)
+    add_library(qplottests OBJECT
+        tests/test.cpp
+    )
+    target_link_libraries(qplottests PRIVATE gtest ${QPLOT_LIBS})
+    target_include_directories(qplottests PUBLIC ${QPLOT_INCL})
+endif()
+
+if(APP_PLUGINS)
+    qt_add_plugin(qplotplugin)
+    target_sources(qplotplugin PRIVATE qplotplugin.cpp $<TARGET_OBJECTS:qplot>)
+    target_include_directories(qplotplugin PRIVATE ${QPLOT_INCL})
+    set_target_properties(qplotplugin PROPERTIES WIN32_EXECUTABLE TRUE MACOSX_BUNDLE TRUE)
+    target_link_libraries(qplotplugin PUBLIC ${QPLOT_LIBS} Qt6::UiPlugin)
+endif()

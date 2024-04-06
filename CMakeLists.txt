@@ -84,7 +84,7 @@ else()
         set(CPYTHON_CONFIGURE_COMMAND ./configure --enable-shared --with-pydebug)
         set(CPYTHON_LIB "libpython${PYTHON_VER_MAJ_MIN}d.so.1.0")
     else()
-        set(CPYTHON_CONFIGURE_COMMAND ./configure --enable-shared --disable-test-modules)
+        set(CPYTHON_CONFIGURE_COMMAND ./configure --enable-shared --enable-optimizations)
         set(CPYTHON_LIB "libpython${PYTHON_VER_MAJ_MIN}.so.1.0")
     endif()
     set(CPYTHON_BUILD_COMMAND CFLAGS=-w make -j)
@@ -193,8 +193,20 @@ target_compile_definitions(exaplot PRIVATE BUILD_EXAPLOT=1)
 target_link_libraries(exaplot PUBLIC ${LIBRARIES})
 set_target_properties(exaplot PROPERTIES INSTALL_RPATH "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/exaplot")
 
-if((CMAKE_BUILD_TYPE STREQUAL "Debug") OR WITH_TESTS)
-    add_subdirectory("tests")
-endif()
+add_subdirectory(app)
 
-add_subdirectory("app")
+if((CMAKE_BUILD_TYPE STREQUAL "Debug") OR WITH_TESTS)
+
+    include(FetchContent)
+
+    FetchContent_Declare(
+        googletest
+        GIT_REPOSITORY https://github.com/google/googletest.git
+        GIT_TAG c5be3930f59f3ae99725ed99031aae4d8b8bbb3b # release-1.11.0
+    )
+    FetchContent_MakeAvailable(googletest)
+
+    add_subdirectory(tests)
+    add_subdirectory(app/tests)
+
+endif()
