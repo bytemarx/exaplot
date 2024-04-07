@@ -34,6 +34,7 @@ target_include_directories(app PUBLIC
 	qplottab
 	qcustomplot
 	qplot
+	toml++
 )
 
 set_target_properties(app PROPERTIES

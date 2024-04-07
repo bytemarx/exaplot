@@ -35,3 +35,23 @@ Build Variables:
     - Build with tests (only necessary for non-debug builds)
 - `-DAPP_PLUGINS=1`
     - Build with Qt plugin libraries
+
+
+## Application Configuration
+The `EXACONFIG` environment variable can be used to specify a TOML-based configuration file:
+```sh
+EXACONFIG='docs/sample-config.toml' build/bin/Release/exaplot
+```
+
+### Adding External Libraries
+To include third-party modules within the embedded interpreter's environment, use the `search_paths`
+entry within the `python` table:
+```toml
+[python]
+search_paths = [
+    "/home/user/venvs/exa/lib/python3.12/site-packages",
+]
+```
+Note that external libraries **must** match the Python version of the application (currently 3.12).
+Libraries should be set up externally via `venv`/`pip` or some other Python environment management
+tool(s).

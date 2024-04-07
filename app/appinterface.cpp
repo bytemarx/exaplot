@@ -463,7 +463,7 @@ Interface::pythonInit()
     if (!std::filesystem::exists(prefix))
         prefix = exe.parent_path() / "python";
 
-    PyStatus status = exa::Core::init(exe, prefix);
+    PyStatus status = exa::Core::init(exe, prefix, this->searchPaths);
     if (PyStatus_Exception(status)) {
         if (PyStatus_IsError(status))
             std::cerr << "FATAL PYTHON INITIALIZATION ERROR:\n" << status.func << ": " << status.err_msg << '\n';

@@ -1,0 +1,4 @@
+[python]
+search_paths = [
+    "/home/user/venvs/exa/lib/python3.12/site-packages",
+]
