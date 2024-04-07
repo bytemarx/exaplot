@@ -17,12 +17,23 @@
 #include "appui.hpp"
 
 
+struct Config
+{
+    Config();
+
+    const std::vector<std::filesystem::path>& searchPaths() const { return this->m_searchPaths; }
+
+private:
+    std::vector<std::filesystem::path> m_searchPaths;
+};
+
+
 class AppMain : public QObject
 {
     Q_OBJECT
 
 public:
-    AppMain(int& argc, char* argv[], const std::vector<std::filesystem::path>&);
+    AppMain(int& argc, char* argv[], const Config&);
     ~AppMain();
 
     int exec();

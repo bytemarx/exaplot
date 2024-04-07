@@ -10,12 +10,35 @@
 
 #include "appmain.hpp"
 #include "config.h"
+#include "toml.hpp"
+
+#include <iostream>
+#include <cstdlib>
 
 
-AppMain::AppMain(int& argc, char* argv[], const std::vector<std::filesystem::path>& searchPaths)
+Config::Config() {
+    const char* configPath = std::getenv("EXACONFIG");
+    if (configPath == NULL)
+        return;
+
+    try {
+        auto config = toml::parse_file(configPath);
+
+        const auto& config_searchPaths = config.at_path("python.search_paths");
+        if (config_searchPaths && config_searchPaths.is_array()) {
+            for (auto&& entry : *config_searchPaths.as_array())
+                if (auto path = entry.value<std::string>()) this->m_searchPaths.push_back(*path);
+        }
+    } catch (const toml::parse_error& e) {
+        std::cerr << "Failed to read config (" << configPath << "):\n" << e << '\n';
+    }
+}
+
+
+AppMain::AppMain(int& argc, char* argv[], const Config& config)
     : QObject{Q_NULLPTR}
     , ifaceThread{}
-    , iface{searchPaths}
+    , iface{config.searchPaths()}
     , a{argc, argv}
     , ui{this}
     , scriptRunning{false}
