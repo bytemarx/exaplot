@@ -71,6 +71,7 @@ AppMain::AppMain(int& argc, char* argv[], const Config& config)
     QObject::connect(&this->iface, &Interface::module_showPlot, this, &AppMain::module_showPlot, Qt::QueuedConnection);
 
     this->ifaceThread.start();
+    this->a.setStyle(QStyleFactory::create("fusion"));
 }
 
 
