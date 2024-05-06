@@ -2,3 +2,6 @@
 	path = cpython
 	url = git@github.com:bytemarx/cpython.git
 	branch = orbital
+[submodule "app/hdf5"]
+	path = app/hdf5
+	url = git@github.com:HDFGroup/hdf5.git
