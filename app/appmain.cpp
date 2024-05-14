@@ -12,8 +12,18 @@
 #include "config.h"
 #include "toml.hpp"
 
-#include <iostream>
 #include <cstdlib>
+#include <ctime>
+#include <iostream>
+
+
+static std::string
+datafile()
+{
+    std::time_t result = std::time(nullptr);
+    std::asctime(std::localtime(&result));
+    return std::string{"data_"} + std::to_string(result) + ".hdf5";
+}
 
 
 Config::Config() {
@@ -41,6 +51,7 @@ AppMain::AppMain(int& argc, char* argv[], const Config& config)
     , iface{config.searchPaths()}
     , a{argc, argv}
     , ui{this}
+    , dm{}
     , scriptRunning{false}
 {
     QObject::connect(&this->ifaceThread, &QThread::started, &this->iface, &Interface::pythonInit);
@@ -137,6 +148,7 @@ AppMain::run(const std::vector<std::string>& args)
 {
     if (this->scriptRunning)
         return;
+    this->dm.reset(datafile(), this->ui.plotCount() + 1);
     this->ui.enableRun(false);
     this->ui.enableStop(true);
     this->ui.clear();
@@ -193,6 +205,7 @@ AppMain::module_plot2D(std::size_t plotIdx, double x, double y)
     auto plot = this->ui.plot(plotIdx);
     plot->plot2D()->addData(x, y);
     plot->queue();
+    this->dm.write(plotIdx + 1, x, y);
 }
 
 

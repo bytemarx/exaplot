@@ -15,6 +15,7 @@
 
 #include "appinterface.hpp"
 #include "appui.hpp"
+#include "datamanager.hpp"
 
 
 struct Config
@@ -68,5 +69,6 @@ private:
     Interface iface;
     QApplication a;
     AppUI ui;
+    DataManager dm;
     bool scriptRunning;
 };
