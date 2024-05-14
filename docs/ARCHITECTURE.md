@@ -1,5 +1,4 @@
 ## Overview
-
 ```
          ___________________________________________________________
         |                                                           |
@@ -31,7 +30,6 @@
         |         |               |       |            |-+          |
         |         +---------------+       +------------+            |
         |___________________________________________________________|
-
 ```
 
 
@@ -46,24 +44,18 @@ runtime (but the application currently only uses one core with one script at a t
 
 ## Application
 The application is further compartmentalized via several management objects: the UI manager,
-`AppUI`, the module interface, `Interface`, and the supervisor/mediator of these components,
-`AppMain`.
+`AppUI`, the module interface, `Interface`, the data management unit, `DataManager`, and the
+supervisor/mediator of these components, `AppMain`.
 ```
-                                                 ,-------------.
-                                                (  UI ELEMENTS  )
-                                                 `-------------'
-                                                       /\
-                                                       ||
-                                                       \/
         +---------------+   +---------------+   +---------------+
-        |               |   |               |   |               |
-        |   Interface   |<=>|    AppMain    |<=>|     AppUI     |
-        |               |   |               |   |               |
+        |               |   |               |   |               |    ,-------------.
+        |   Interface   |<=>|    AppMain    |<=>|     AppUI     |<=>(  UI ELEMENTS  )
+        |               |   |               |   |               |    `-------------'
         +---------------+   +---------------+   +---------------+
-               /\
-               ||
-               \/
-         ,-------------.
-        (    MODULE     )
-         `-------------'
+               /\                  /\
+               ||                  ||           +---------------+
+               \/                  ||           |               |    ,-------------.
+         ,-------------.           ++==========>|  DataManager  |<=>(    STORAGE    )
+        (    MODULE     )                       |               |    `-------------'
+         `-------------'                        +---------------+
 ```
