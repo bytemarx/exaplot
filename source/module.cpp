@@ -8,6 +8,7 @@
 
 #include "internal.hpp"
 
+#include <cstring>
 #include <functional>
 #include <limits>
 
@@ -86,7 +87,7 @@ module_clear(PyObject* module)
  * @return PyObject* 
  */
 PyObject*
-exa_init(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
+exa_init(PyObject* module, PyObject* const* args, Py_ssize_t nargs, PyObject* kwnames)
 {
     std::vector<RunParam> params;
     std::vector<GridPoint> plots{{.x=0, .dx=0, .y=0, .dy=0}};
@@ -281,7 +282,12 @@ exa_msg(PyObject* module, PyObject* args, PyObject* kwargs)
 
 
 static PyObject*
-plot2D(exa_state* state, std::size_t plotID, PyObject* const* args, Py_ssize_t nargs)
+plot2D(
+    exa_state* state,
+    std::size_t plotID,
+    PyObject* const* args,
+    Py_ssize_t nargs,
+    bool write)
 {
     if (nargs != 2) {
         PyErr_Format(PyExc_TypeError, EXA_PLOT "() takes 2 positional arguments but %zd were given", nargs);
@@ -291,12 +297,17 @@ plot2D(exa_state* state, std::size_t plotID, PyObject* const* args, Py_ssize_t n
     if (PyErr_Occurred()) return NULL;
     auto y = PyFloat_AsDouble(args[1]);
     if (PyErr_Occurred()) return NULL;
-    return state->iface->plot2D(plotID, x, y);
+    return state->iface->plot2D(plotID, x, y, write);
 }
 
 
 static PyObject*
-plot2DVec(exa_state* state, std::size_t plotID, PyObject* const* args, Py_ssize_t nargs)
+plot2DVec(
+    exa_state* state,
+    std::size_t plotID,
+    PyObject* const* args,
+    Py_ssize_t nargs,
+    bool write)
 {
     if (nargs != 2) {
         PyErr_Format(PyExc_TypeError, EXA_PLOT "() takes 2 positional arguments but %zd were given", nargs);
@@ -326,12 +337,17 @@ plot2DVec(exa_state* state, std::size_t plotID, PyObject* const* args, Py_ssize_
         yData[i] = y;
     }
 
-    return state->iface->plot2DVec(plotID, xData, yData);
+    return state->iface->plot2DVec(plotID, xData, yData, write);
 }
 
 
 static PyObject*
-plotCM(exa_state* state, std::size_t plotID, PyObject* const* args, Py_ssize_t nargs)
+plotCM(
+    exa_state* state,
+    std::size_t plotID,
+    PyObject* const* args,
+    Py_ssize_t nargs,
+    bool write)
 {
     if (nargs != 3) {
         PyErr_Format(PyExc_TypeError, EXA_PLOT "() takes 3 positional arguments but %zd were given", nargs);
@@ -343,12 +359,17 @@ plotCM(exa_state* state, std::size_t plotID, PyObject* const* args, Py_ssize_t n
     if (PyErr_Occurred()) return NULL;
     auto value = PyFloat_AsDouble(args[2]);
     if (PyErr_Occurred()) return NULL;
-    return state->iface->plotCM(plotID, x, y, value);
+    return state->iface->plotCM(plotID, x, y, value, write);
 }
 
 
 static PyObject*
-plotCMVec(exa_state* state, std::size_t plotID, PyObject* const* args, Py_ssize_t nargs)
+plotCMVec(
+    exa_state* state,
+    std::size_t plotID,
+    PyObject* const* args,
+    Py_ssize_t nargs,
+    bool write)
 {
     if (nargs != 2) {
         PyErr_Format(PyExc_TypeError, EXA_PLOT "() takes 2 positional arguments but %zd were given", nargs);
@@ -370,12 +391,17 @@ plotCMVec(exa_state* state, std::size_t plotID, PyObject* const* args, Py_ssize_
         values[i] = value;
     }
 
-    return state->iface->plotCMVec(plotID, y, values);
+    return state->iface->plotCMVec(plotID, y, values, write);
 }
 
 
 static PyObject*
-plotCMFrame(exa_state* state, std::size_t plotID, PyObject* const* args, [[maybe_unused]] Py_ssize_t nargs)
+plotCMFrame(
+    exa_state* state,
+    std::size_t plotID,
+    PyObject* const* args,
+    [[maybe_unused]] Py_ssize_t nargs,
+    bool write)
 {
     auto pyBorrowed_frame = PySequence_Fast(args[0],
                                             EXA_PLOT "() 'frame' argument must be type 'Sequence[Sequence[Real]]'");
@@ -415,7 +441,7 @@ plotCMFrame(exa_state* state, std::size_t plotID, PyObject* const* args, [[maybe
         }
     }
 
-    return state->iface->plotCMFrame(plotID, frame);
+    return state->iface->plotCMFrame(plotID, frame, write);
 }
 
 
@@ -428,7 +454,7 @@ plotCMFrame(exa_state* state, std::size_t plotID, PyObject* const* args, [[maybe
  * @return PyObject* 
  */
 PyObject*
-exa_plot(PyObject* module, PyObject* const* args, Py_ssize_t nargs)
+exa_plot(PyObject* module, PyObject* const* args, Py_ssize_t nargs, PyObject* kwnames)
 {
     assert(nargs >= 0);
     auto state = getModuleState(module);
@@ -448,6 +474,28 @@ exa_plot(PyObject* module, PyObject* const* args, Py_ssize_t nargs)
         return NULL;
     }
 
+    bool write = true;
+    if (kwnames != NULL) {
+        auto nkwargs = PyTuple_GET_SIZE(kwnames);
+        for (decltype(nkwargs) i = 0; i < nkwargs; ++i) {
+            auto pyBorrowed_kwname = PyTuple_GET_ITEM(kwnames, i);
+            auto pyBorrowed_kwvalue = args[nargs + i];
+
+            auto kwname = PyUnicode_AsUTF8(pyBorrowed_kwname);
+            if (kwname == NULL) return NULL;
+            if (std::strcmp(kwname, "write") == 0) {
+                if (!PyBool_Check(pyBorrowed_kwvalue)) {
+                    PyErr_SetString(PyExc_TypeError, EXA_PLOT "() 'write' argument must be type 'bool'");
+                    return NULL;
+                }
+                write = pyBorrowed_kwvalue == Py_True;
+            } else {
+                PyErr_Format(PyExc_TypeError, EXA_PLOT "() got an unexpected keyword argument '%s'", kwname);
+                return NULL;
+            }
+        }
+    }
+
     if (nargs == 1) {
         return state->iface->clear(plotID);
     }
@@ -458,7 +506,7 @@ exa_plot(PyObject* module, PyObject* const* args, Py_ssize_t nargs)
         Py_RETURN_NONE;
     }
 
-    std::function<PyObject*(exa_state*, std::size_t, PyObject* const*, Py_ssize_t)> plotFn;
+    std::function<PyObject*(exa_state*, std::size_t, PyObject* const*, Py_ssize_t, bool)> plotFn;
     switch (state->iface->currentPlotType(plotID)) {
     case 0: // 2D
         plotFn = PySequence_Check(args[1]) ? plot2DVec : plot2D;
@@ -471,7 +519,7 @@ exa_plot(PyObject* module, PyObject* const* args, Py_ssize_t nargs)
     case -1:
         return NULL;
     }
-    return plotFn(state, plotID, &args[1], nargs);
+    return plotFn(state, plotID, &args[1], nargs, write);
 }
 
 

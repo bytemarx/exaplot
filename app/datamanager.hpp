@@ -266,41 +266,42 @@ public:
         if (this->m_fileID == H5I_INVALID_HID)
             throw std::runtime_error{"failed to create HDF5 file"};
 
-        for (std::size_t i = 0; i < datasets; ++i) {
+        // TODO: zeroth/non-plot dataset
+        for (std::size_t i = 1; i < datasets; ++i) {
             auto datasetName = std::string{"dataset"} + std::to_string(i);
             this->m_datasets.push_back(DataSetGroup{this->m_fileID, datasetName});
         }
     }
 
-    int write(std::size_t dataset, double x, double y)
+    int write2D(std::size_t plotIdx, double x, double y)
     {
-        return this->m_datasets.at(dataset).dataset2D()->write(x, y);
+        return this->m_datasets.at(plotIdx).dataset2D()->write(x, y);
     }
-    int write(std::size_t dataset, const std::vector<double>& x, const std::vector<double>& y)
+    int write2D(std::size_t plotIdx, const std::vector<double>& x, const std::vector<double>& y)
     {
-        return this->m_datasets.at(dataset).dataset2D()->write(x, y);
+        return this->m_datasets.at(plotIdx).dataset2D()->write(x, y);
     }
-    int write(std::size_t dataset, int x, int y, double value)
+    int writeCM(std::size_t plotIdx, int x, int y, double value)
     {
-        return this->m_datasets.at(dataset).datasetCM()->write(x, y, value);
+        return this->m_datasets.at(plotIdx).datasetCM()->write(x, y, value);
     }
-    int write(std::size_t dataset, int y, const std::vector<double>& row)
+    int writeCM(std::size_t plotIdx, int y, const std::vector<double>& row)
     {
-        return this->m_datasets.at(dataset).datasetCM()->write(y, row);
+        return this->m_datasets.at(plotIdx).datasetCM()->write(y, row);
     }
-    int write(std::size_t dataset, const std::vector<std::vector<double>>& frame)
+    int writeCM(std::size_t plotIdx, const std::vector<std::vector<double>>& frame)
     {
-        return this->m_datasets.at(dataset).datasetCM()->write(frame);
+        return this->m_datasets.at(plotIdx).datasetCM()->write(frame);
     }
 
-    int flush(std::size_t dataset)
+    int flush(std::size_t plotIdx)
     {
         auto status = 0;
 
-        status = this->m_datasets.at(dataset).dataset2D()->flush();
+        status = this->m_datasets.at(plotIdx).dataset2D()->flush();
         if (status < 0) return status;
 
-        status = this->m_datasets.at(dataset).datasetCM()->flush();
+        status = this->m_datasets.at(plotIdx).datasetCM()->flush();
         return status;
     }
 

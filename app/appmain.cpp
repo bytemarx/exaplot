@@ -200,38 +200,40 @@ AppMain::module_msg(const std::string& message, bool append)
 
 
 void
-AppMain::module_plot2D(std::size_t plotIdx, double x, double y)
+AppMain::module_plot2D(std::size_t plotIdx, double x, double y, bool write)
 {
     auto plot = this->ui.plot(plotIdx);
     plot->plot2D()->addData(x, y);
     plot->queue();
-    this->dm.write(plotIdx + 1, x, y);
+    if (write)
+        this->dm.write2D(plotIdx, x, y);
 }
 
 
 void
-AppMain::module_plot2DVec(
-    std::size_t plotIdx,
-    const std::vector<double>& x,
-    const std::vector<double>& y)
+AppMain::module_plot2DVec(std::size_t plotIdx, const std::vector<double>& x, const std::vector<double>& y, bool write)
 {
     auto plot = this->ui.plot(plotIdx);
     plot->plot2D()->addData({x.cbegin(), x.cend()}, {y.cbegin(), y.cend()});
     plot->queue();
+    if (write)
+        this->dm.write2D(plotIdx, x, y);
 }
 
 
 void
-AppMain::module_plotCM(std::size_t plotIdx, int x, int y, double value)
+AppMain::module_plotCM(std::size_t plotIdx, int x, int y, double value, bool write)
 {
     auto plot = this->ui.plot(plotIdx);
     plot->plotColorMap()->setCell(x, y, value);
     plot->queue();
+    if (write)
+        this->dm.writeCM(plotIdx, x, y, value);
 }
 
 
 void
-AppMain::module_plotCMVec(std::size_t plotIdx, int y, const std::vector<double>& values)
+AppMain::module_plotCMVec(std::size_t plotIdx, int y, const std::vector<double>& values, bool write)
 {
     auto plot = this->ui.plot(plotIdx);
     auto x_end = plot->plotColorMap()->getDataSizeX() < static_cast<int>(values.size())
@@ -240,11 +242,13 @@ AppMain::module_plotCMVec(std::size_t plotIdx, int y, const std::vector<double>&
     for (int x = 0; x < x_end; ++x)
         plot->plotColorMap()->setCell(x, y, values[x]);
     plot->queue();
+    if (write)
+        this->dm.writeCM(plotIdx, y, values);
 }
 
 
 void
-AppMain::module_plotCMFrame(std::size_t plotIdx, const std::vector<std::vector<double>>& frame)
+AppMain::module_plotCMFrame(std::size_t plotIdx, const std::vector<std::vector<double>>& frame, bool write)
 {
     auto plot = this->ui.plot(plotIdx);
     int y = 0;
@@ -257,6 +261,8 @@ AppMain::module_plotCMFrame(std::size_t plotIdx, const std::vector<std::vector<d
         y += 1;
     }
     plot->queue();
+    if (write)
+        this->dm.writeCM(plotIdx, frame);
 }
 
 

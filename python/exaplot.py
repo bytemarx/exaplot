@@ -1,6 +1,6 @@
 from numbers import Real
 
-from _exaplot import (
+from _exaplot import ( # type: ignore
     RunParam,
     init,
     stop,
@@ -153,8 +153,8 @@ class _Plot:
     def __init__(self, n: int):
         self._n = n
 
-    def __call__(self, *args):
-        return _plot(self._n, *args)
+    def __call__(self, *args, **kwargs):
+        return _plot(self._n, *args, **kwargs)
 
     @property
     def title(self):

@@ -107,11 +107,11 @@ public:
     EXA_API virtual PyObject* init(const std::vector<RunParam>& params, const std::vector<GridPoint>& plots) = 0;
     EXA_API virtual PyObject* stop() = 0;
     EXA_API virtual PyObject* msg(const std::string& message, bool append) = 0;
-    EXA_API virtual PyObject* plot2D(std::size_t plotID, double x, double y) = 0;
-    EXA_API virtual PyObject* plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y) = 0;
-    EXA_API virtual PyObject* plotCM(std::size_t plotID, int x, int y, double value) = 0;
-    EXA_API virtual PyObject* plotCMVec(std::size_t plotID, int y, const std::vector<double>& values) = 0;
-    EXA_API virtual PyObject* plotCMFrame(std::size_t plotID, const std::vector<std::vector<double>>& frame) = 0;
+    EXA_API virtual PyObject* plot2D(std::size_t plotID, double x, double y, bool write) = 0;
+    EXA_API virtual PyObject* plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y, bool write) = 0;
+    EXA_API virtual PyObject* plotCM(std::size_t plotID, int x, int y, double value, bool write) = 0;
+    EXA_API virtual PyObject* plotCMVec(std::size_t plotID, int y, const std::vector<double>& values, bool write) = 0;
+    EXA_API virtual PyObject* plotCMFrame(std::size_t plotID, const std::vector<std::vector<double>>& frame, bool write) = 0;
     EXA_API virtual PyObject* clear(std::size_t plotID) = 0;
     EXA_API virtual PyObject* setPlotProperty(std::size_t plotID, const PlotProperty& property, const PlotProperty::Value& value) = 0;
     EXA_API virtual PyObject* getPlotProperty(std::size_t plotID, const PlotProperty& property) = 0;

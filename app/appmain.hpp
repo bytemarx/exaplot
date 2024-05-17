@@ -53,11 +53,11 @@ public Q_SLOTS:
     void runComplete(const QString&);
     void module_init(const std::vector<exa::RunParam>&, const std::vector<exa::GridPoint>&);
     void module_msg(const std::string&, bool);
-    void module_plot2D(std::size_t plotIdx, double, double);
-    void module_plot2DVec(std::size_t plotIdx, const std::vector<double>&, const std::vector<double>&);
-    void module_plotCM(std::size_t plotIdx, int, int, double);
-    void module_plotCMVec(std::size_t plotIdx, int, const std::vector<double>&);
-    void module_plotCMFrame(std::size_t plotIdx, const std::vector<std::vector<double>>&);
+    void module_plot2D(std::size_t plotIdx, double, double, bool);
+    void module_plot2DVec(std::size_t plotIdx, const std::vector<double>&, const std::vector<double>&, bool);
+    void module_plotCM(std::size_t plotIdx, int, int, double, bool);
+    void module_plotCMVec(std::size_t plotIdx, int, const std::vector<double>&, bool);
+    void module_plotCMFrame(std::size_t plotIdx, const std::vector<std::vector<double>>&, bool);
     void module_clear(std::size_t plotIdx);
     void module_setPlotProperty(std::size_t plotIdx, const exa::PlotProperty&, const QPlotTab::Cache&);
     void module_showPlot(std::size_t plotIdx, QPlot::Type);

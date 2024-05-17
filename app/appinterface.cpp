@@ -67,23 +67,23 @@ Interface::msg(const std::string& message, bool append)
 
 
 PyObject*
-Interface::plot2D(std::size_t plotID, double x, double y)
+Interface::plot2D(std::size_t plotID, double x, double y, bool write)
 {
-    emit this->module_plot2D(plotID - 1, x, y);
+    emit this->module_plot2D(plotID - 1, x, y, write);
     Py_RETURN_NONE;
 }
 
 
 PyObject*
-Interface::plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y)
+Interface::plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y, bool write)
 {
-    emit this->module_plot2DVec(plotID - 1, x, y);
+    emit this->module_plot2DVec(plotID - 1, x, y, write);
     Py_RETURN_NONE;
 }
 
 
 PyObject*
-Interface::plotCM(std::size_t plotID, int col, int row, double value)
+Interface::plotCM(std::size_t plotID, int col, int row, double value, bool write)
 {
     auto plot = this->plots.at(plotID - 1);
     if (col >= plot.attributes.colorMap.dataSize.x) {
@@ -94,13 +94,13 @@ Interface::plotCM(std::size_t plotID, int col, int row, double value)
         PyErr_SetString(PyExc_ValueError, EXA_PLOT "() 'row' argument out of bounds");
         return NULL;
     }
-    emit this->module_plotCM(plotID - 1, col, row, value);
+    emit this->module_plotCM(plotID - 1, col, row, value, write);
     Py_RETURN_NONE;
 }
 
 
 PyObject*
-Interface::plotCMVec(std::size_t plotID, int row, const std::vector<double>& values)
+Interface::plotCMVec(std::size_t plotID, int row, const std::vector<double>& values, bool write)
 {
     auto plot = this->plots.at(plotID - 1);
     if (row >= plot.attributes.colorMap.dataSize.y) {
@@ -111,13 +111,13 @@ Interface::plotCMVec(std::size_t plotID, int row, const std::vector<double>& val
         PyErr_SetString(PyExc_ValueError, EXA_PLOT "() 'values' argument contains too many values");
         return NULL;
     }
-    emit this->module_plotCMVec(plotID - 1, row, values);
+    emit this->module_plotCMVec(plotID - 1, row, values, write);
     Py_RETURN_NONE;
 }
 
 
 PyObject*
-Interface::plotCMFrame(std::size_t plotID, const std::vector<std::vector<double>>& frame)
+Interface::plotCMFrame(std::size_t plotID, const std::vector<std::vector<double>>& frame, bool write)
 {
     auto plot = this->plots.at(plotID - 1);
     if (frame.size() > static_cast<std::size_t>(plot.attributes.colorMap.dataSize.y)) {
@@ -132,7 +132,7 @@ Interface::plotCMFrame(std::size_t plotID, const std::vector<std::vector<double>
         }
         i += 1;
     }
-    emit this->module_plotCMFrame(plotID - 1, frame);
+    emit this->module_plotCMFrame(plotID - 1, frame, write);
     Py_RETURN_NONE;
 }
 

@@ -66,7 +66,7 @@ int module_clear(PyObject*);
 PyObject* exa_init(PyObject*, PyObject* const*, Py_ssize_t, PyObject*);
 PyObject* exa_stop(PyObject*, PyObject*);
 PyObject* exa_msg(PyObject*, PyObject*, PyObject*);
-PyObject* exa_plot(PyObject*, PyObject* const*, Py_ssize_t);
+PyObject* exa_plot(PyObject*, PyObject* const*, Py_ssize_t, PyObject*);
 PyObject* exa__set_plot_property(PyObject*, PyObject*);
 PyObject* exa__get_plot_property(PyObject*, PyObject*);
 PyObject* exa__show_plot(PyObject*, PyObject*);

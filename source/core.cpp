@@ -43,7 +43,7 @@ moduleMethods[] =
     {
         EXA_PLOT,
         (PyCFunction)exa_plot,
-        METH_FASTCALL,
+        METH_FASTCALL | METH_KEYWORDS,
         NULL
     },
     {

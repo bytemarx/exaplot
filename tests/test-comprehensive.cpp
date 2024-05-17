@@ -17,7 +17,7 @@ class ComprehensiveTest : public ModuleTest
 public:
     void init(const std::vector<exa::RunParam>& params, const std::vector<exa::GridPoint>& plots) override;
     void msg(const std::string& message, bool append) override;
-    void plot2D(std::size_t plotID, double x, double y) override {};
+    void plot2D(std::size_t plotID, double x, double y, bool write) override;
     void plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y) override {};
     void clear(std::size_t plotID) override {};
 protected:
@@ -153,6 +153,19 @@ ComprehensiveTest::msg(const std::string& message, bool append)
 {
     ASSERT_STREQ(message.c_str(), "test");
     ASSERT_TRUE(append);
+}
+
+TEST_F(ComprehensiveTest, TestPlot)
+{
+    this->run("test-comprehensive-plot.py");
+}
+
+void
+ComprehensiveTest::plot2D(std::size_t plotID, double x, double y, bool write)
+{
+    ASSERT_EQ(x, 0.0);
+    ASSERT_EQ(y, 1.0);
+    ASSERT_FALSE(write);
 }
 
 
