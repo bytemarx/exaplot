@@ -18,9 +18,17 @@ Interface::Interface(
     : QObject{parent}
     , searchPaths{searchPaths}
     , core{nullptr}
+    , error{false}
     , stopRequested{false}
 {
 }
+
+
+#define CHECK_APP_ERROR \
+if (this->error) { \
+    PyErr_SetString(PyExc_SystemError, "runtime application error"); \
+    return NULL; \
+} \
 
 
 PyObject*
@@ -28,6 +36,8 @@ Interface::init(
     const std::vector<exa::RunParam>& params,
     const std::vector<exa::GridPoint>& plots)
 {
+    CHECK_APP_ERROR
+
     this->params = params;
     emit this->module_init(params, plots);
     QEventLoop waitLoop;
@@ -52,6 +62,8 @@ Interface::init(
 PyObject*
 Interface::stop()
 {
+    CHECK_APP_ERROR
+
     if (this->stopRequested)
         Py_RETURN_TRUE;
     Py_RETURN_FALSE;
@@ -61,6 +73,8 @@ Interface::stop()
 PyObject*
 Interface::msg(const std::string& message, bool append)
 {
+    CHECK_APP_ERROR
+
     emit this->module_msg(message, append);
     Py_RETURN_NONE;
 }
@@ -69,6 +83,8 @@ Interface::msg(const std::string& message, bool append)
 PyObject*
 Interface::plot2D(std::size_t plotID, double x, double y, bool write)
 {
+    CHECK_APP_ERROR
+
     emit this->module_plot2D(plotID - 1, x, y, write);
     Py_RETURN_NONE;
 }
@@ -77,6 +93,8 @@ Interface::plot2D(std::size_t plotID, double x, double y, bool write)
 PyObject*
 Interface::plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y, bool write)
 {
+    CHECK_APP_ERROR
+
     emit this->module_plot2DVec(plotID - 1, x, y, write);
     Py_RETURN_NONE;
 }
@@ -85,6 +103,8 @@ Interface::plot2DVec(std::size_t plotID, const std::vector<double>& x, const std
 PyObject*
 Interface::plotCM(std::size_t plotID, int col, int row, double value, bool write)
 {
+    CHECK_APP_ERROR
+
     auto plot = this->plots.at(plotID - 1);
     if (col >= plot.attributes.colorMap.dataSize.x) {
         PyErr_SetString(PyExc_ValueError, EXA_PLOT "() 'col' argument out of bounds");
@@ -102,6 +122,8 @@ Interface::plotCM(std::size_t plotID, int col, int row, double value, bool write
 PyObject*
 Interface::plotCMVec(std::size_t plotID, int row, const std::vector<double>& values, bool write)
 {
+    CHECK_APP_ERROR
+
     auto plot = this->plots.at(plotID - 1);
     if (row >= plot.attributes.colorMap.dataSize.y) {
         PyErr_SetString(PyExc_ValueError, EXA_PLOT "() 'row' argument out of bounds");
@@ -119,6 +141,8 @@ Interface::plotCMVec(std::size_t plotID, int row, const std::vector<double>& val
 PyObject*
 Interface::plotCMFrame(std::size_t plotID, const std::vector<std::vector<double>>& frame, bool write)
 {
+    CHECK_APP_ERROR
+
     auto plot = this->plots.at(plotID - 1);
     if (frame.size() > static_cast<std::size_t>(plot.attributes.colorMap.dataSize.y)) {
         PyErr_SetString(PyExc_ValueError, EXA_PLOT "() 'frame' argument contains too many rows");
@@ -140,6 +164,8 @@ Interface::plotCMFrame(std::size_t plotID, const std::vector<std::vector<double>
 PyObject*
 Interface::clear(std::size_t plotID)
 {
+    CHECK_APP_ERROR
+
     auto plotIdx = plotID - 1;
     if (plotIdx >= this->plots.size()) {
         PyErr_SetString(PyExc_IndexError, "plot ID out of range");
@@ -156,6 +182,8 @@ Interface::setPlotProperty(
     const exa::PlotProperty& property,
     const exa::PlotProperty::Value& value)
 {
+    CHECK_APP_ERROR
+
     if (plotID == 0) {
         PyErr_SetString(PyExc_IndexError, "invalid plot ID");
         return NULL;
@@ -314,6 +342,8 @@ Interface::setPlotProperty(
 PyObject*
 Interface::getPlotProperty(std::size_t plotID, const exa::PlotProperty& property)
 {
+    CHECK_APP_ERROR
+
     if (plotID == 0) {
         PyErr_SetString(PyExc_IndexError, "invalid plot ID");
         return NULL;
@@ -408,6 +438,8 @@ Interface::getPlotProperty(std::size_t plotID, const exa::PlotProperty& property
 PyObject*
 Interface::showPlot(std::size_t plotID, std::size_t plotType)
 {
+    CHECK_APP_ERROR
+
     if (plotID == 0) {
         PyErr_SetString(PyExc_IndexError, "invalid plot ID");
         return NULL;
@@ -480,6 +512,20 @@ Interface::pythonDeInit()
 {
     delete this->core;
     exa::Core::deinit();
+}
+
+
+/**
+ * @brief This flag is for when shit hits the fan in the application thread and you need the script
+ * thread to chill out (e.g. the data manager encounters an error and can't write data to disk).
+ * This will (attempt to) stop the script by raising a system exception.
+ * 
+ * @param status 
+ */
+void
+Interface::setError(bool status)
+{
+    this->error = status;
 }
 
 

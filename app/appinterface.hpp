@@ -59,6 +59,7 @@ Q_SIGNALS:
 public Q_SLOTS:
     void pythonInit();
     void pythonDeInit();
+    void setError(bool);
     void loadScript(const QString&);
     void runScript(const std::vector<std::string>&);
     void requestStop();
@@ -68,6 +69,7 @@ private:
     QMutex mutex;
     const std::vector<std::filesystem::path> searchPaths;
     exa::Core* core;
+    bool error;
     bool stopRequested;
     std::shared_ptr<exa::ScriptModule> module;
     std::vector<PlotEditor::PlotInfo> plots;

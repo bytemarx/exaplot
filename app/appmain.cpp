@@ -64,6 +64,7 @@ AppMain::AppMain(int& argc, char* argv[], const Config& config)
     QObject::connect(&this->ui, &AppUI::scriptRun, this, &AppMain::run);
     QObject::connect(&this->ui, &AppUI::scriptStop, this, &AppMain::stop);
     QObject::connect(&this->ui, &AppUI::plotsSet, &this->iface, &Interface::updatePlotProperties, Qt::QueuedConnection);
+    QObject::connect(this, &AppMain::setError, &this->iface, &Interface::setError, Qt::QueuedConnection);
     QObject::connect(this, &AppMain::scriptLoaded, &this->iface, &Interface::loadScript, Qt::QueuedConnection);
     QObject::connect(this, &AppMain::scriptRan, &this->iface, &Interface::runScript, Qt::QueuedConnection);
     QObject::connect(this, &AppMain::scriptStopped, &this->iface, &Interface::requestStop);

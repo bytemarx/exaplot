@@ -40,6 +40,7 @@ public:
     int exec();
 
 Q_SIGNALS:
+    void setError(bool);
     void scriptLoaded(const QString&);
     void scriptRan(const std::vector<std::string>&);
     void scriptStopped();
