@@ -6,9 +6,13 @@
  * Copyright (C) 2024 bytemarx
  */
 
+#include <QMutexLocker>
+
 #include "appinterface.hpp"
 #include "config.h"
 
+#include <algorithm>
+#include <cctype>
 #include <iostream>
 
 
@@ -16,11 +20,30 @@ Interface::Interface(
     const std::vector<std::filesystem::path>& searchPaths,
     QObject* parent)
     : QObject{parent}
+    , error{false}
     , searchPaths{searchPaths}
     , core{nullptr}
-    , error{false}
+    , scriptRunning{false}
     , stopRequested{false}
 {
+}
+
+
+/**
+ * @brief This flag is for when shit hits the fan in the application thread and you need the script
+ * thread to chill out (e.g. the data manager encounters an error and can't write data to disk).
+ * This will (attempt to) stop the script by raising a system exception.
+ * 
+ * We use an atomic boolean here as this is meant to be called from the application thread to
+ * bypass the event loop (if this were set via a signal, it would never be updated during the run
+ * as the event loop wouldn't execute the slot until the run slot had finished).
+ * 
+ * @param status 
+ */
+void
+Interface::setError(bool status)
+{
+    this->error = status;
 }
 
 
@@ -28,7 +51,23 @@ Interface::Interface(
 if (this->error) { \
     PyErr_SetString(PyExc_SystemError, "runtime application error"); \
     return NULL; \
-} \
+}
+
+
+#define CHECK_NONRUN_ONLY \
+CHECK_APP_ERROR \
+if (this->scriptRunning) { \
+    PyErr_SetString(PyExc_SystemError, "cannot call within 'run' function"); \
+    return NULL; \
+}
+
+
+#define CHECK_RUN_ONLY \
+CHECK_APP_ERROR \
+if (!this->scriptRunning) { \
+    PyErr_SetString(PyExc_SystemError, "cannot call outside of 'run' function"); \
+    return NULL; \
+}
 
 
 PyObject*
@@ -36,23 +75,27 @@ Interface::init(
     const std::vector<exa::RunParam>& params,
     const std::vector<exa::GridPoint>& plots)
 {
-    CHECK_APP_ERROR
+    CHECK_NONRUN_ONLY
 
     this->params = params;
-    emit this->module_init(params, plots);
+
     QEventLoop waitLoop;
     bool status = true;
     auto conn = QObject::connect(
-        this, &Interface::initializationCompleted,
-        [&](bool result){ status = result; waitLoop.quit(); }
+        this,
+        &Interface::initializationCompleted,
+        &waitLoop,
+        [&](bool result) {
+            status = result;
+            waitLoop.quit();
+        },
+        Qt::QueuedConnection
     );
+    emit this->module_init(params, plots);
     waitLoop.exec();
-    if (!QObject::disconnect(conn)) {
-        PyErr_SetString(PyExc_SystemError, "!!!Failed to disconnect wait loop!!!");
-        return NULL;
-    }
+
     if (!status) {
-        PyErr_SetString(PyExc_ValueError, "Invalid plot arrangement");
+        PyErr_SetString(PyExc_ValueError, "invalid plot arrangement");
         return NULL;
     }
     Py_RETURN_NONE;
@@ -81,9 +124,21 @@ Interface::msg(const std::string& message, bool append)
 
 
 PyObject*
+Interface::datafile(const exa::DatafileConfig& config, PyObject* path, bool prompt)
+{
+    CHECK_NONRUN_ONLY
+
+    if (path != NULL)
+        this->module->setDatafile(path);
+    emit this->module_datafile(config, prompt);
+    Py_RETURN_NONE;
+}
+
+
+PyObject*
 Interface::plot2D(std::size_t plotID, double x, double y, bool write)
 {
-    CHECK_APP_ERROR
+    CHECK_RUN_ONLY
 
     emit this->module_plot2D(plotID - 1, x, y, write);
     Py_RETURN_NONE;
@@ -93,7 +148,7 @@ Interface::plot2D(std::size_t plotID, double x, double y, bool write)
 PyObject*
 Interface::plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y, bool write)
 {
-    CHECK_APP_ERROR
+    CHECK_RUN_ONLY
 
     emit this->module_plot2DVec(plotID - 1, x, y, write);
     Py_RETURN_NONE;
@@ -103,7 +158,7 @@ Interface::plot2DVec(std::size_t plotID, const std::vector<double>& x, const std
 PyObject*
 Interface::plotCM(std::size_t plotID, int col, int row, double value, bool write)
 {
-    CHECK_APP_ERROR
+    CHECK_RUN_ONLY
 
     auto plot = this->plots.at(plotID - 1);
     if (col >= plot.attributes.colorMap.dataSize.x) {
@@ -122,7 +177,7 @@ Interface::plotCM(std::size_t plotID, int col, int row, double value, bool write
 PyObject*
 Interface::plotCMVec(std::size_t plotID, int row, const std::vector<double>& values, bool write)
 {
-    CHECK_APP_ERROR
+    CHECK_RUN_ONLY
 
     auto plot = this->plots.at(plotID - 1);
     if (row >= plot.attributes.colorMap.dataSize.y) {
@@ -141,7 +196,7 @@ Interface::plotCMVec(std::size_t plotID, int row, const std::vector<double>& val
 PyObject*
 Interface::plotCMFrame(std::size_t plotID, const std::vector<std::vector<double>>& frame, bool write)
 {
-    CHECK_APP_ERROR
+    CHECK_RUN_ONLY
 
     auto plot = this->plots.at(plotID - 1);
     if (frame.size() > static_cast<std::size_t>(plot.attributes.colorMap.dataSize.y)) {
@@ -176,6 +231,14 @@ Interface::clear(std::size_t plotID)
 }
 
 
+static std::string
+lowercase(std::string s)
+{
+    std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c){ return std::tolower(c); });
+    return s;
+}
+
+
 PyObject*
 Interface::setPlotProperty(
     std::size_t plotID,
@@ -207,21 +270,24 @@ Interface::setPlotProperty(
     case PlotProperty::TWODIMEN_YRANGE_MIN: properties.twoDimen.yRange.min = std::get<double>(value); break;
     case PlotProperty::TWODIMEN_YRANGE_MAX: properties.twoDimen.yRange.max = std::get<double>(value); break;
     case PlotProperty::TWODIMEN_LINE_TYPE:
-        if (std::get<std::string>(value).compare("none") == 0) {
-            properties.twoDimen.line.type = QCPGraph::LineStyle::lsNone;
-        } else if (std::get<std::string>(value).compare("line") == 0) {
-            properties.twoDimen.line.type = QCPGraph::LineStyle::lsLine;
-        } else if (std::get<std::string>(value).compare("step-left") == 0) {
-            properties.twoDimen.line.type = QCPGraph::LineStyle::lsStepLeft;
-        } else if (std::get<std::string>(value).compare("step-right") == 0) {
-            properties.twoDimen.line.type = QCPGraph::LineStyle::lsStepRight;
-        } else if (std::get<std::string>(value).compare("step-center") == 0) {
-            properties.twoDimen.line.type = QCPGraph::LineStyle::lsStepCenter;
-        } else if (std::get<std::string>(value).compare("impulse") == 0) {
-            properties.twoDimen.line.type = QCPGraph::LineStyle::lsImpulse;
-        } else {
-            PyErr_Format(PyExc_ValueError, "invalid line type: %s", std::get<std::string>(value).c_str());
-            return NULL;
+        {
+            auto lineType = lowercase(std::get<std::string>(value));
+            if (lineType.compare("none") == 0) {
+                properties.twoDimen.line.type = QCPGraph::LineStyle::lsNone;
+            } else if (lineType.compare("line") == 0) {
+                properties.twoDimen.line.type = QCPGraph::LineStyle::lsLine;
+            } else if (lineType.compare("step-left") == 0) {
+                properties.twoDimen.line.type = QCPGraph::LineStyle::lsStepLeft;
+            } else if (lineType.compare("step-right") == 0) {
+                properties.twoDimen.line.type = QCPGraph::LineStyle::lsStepRight;
+            } else if (lineType.compare("step-center") == 0) {
+                properties.twoDimen.line.type = QCPGraph::LineStyle::lsStepCenter;
+            } else if (lineType.compare("impulse") == 0) {
+                properties.twoDimen.line.type = QCPGraph::LineStyle::lsImpulse;
+            } else {
+                PyErr_Format(PyExc_ValueError, "invalid line type: %s", std::get<std::string>(value).c_str());
+                return NULL;
+            }
         }
         break;
     case PlotProperty::TWODIMEN_LINE_COLOR:
@@ -235,57 +301,63 @@ Interface::setPlotProperty(
         }
         break;
     case PlotProperty::TWODIMEN_LINE_STYLE:
-        if (std::get<std::string>(value).compare("solid") == 0) {
-            properties.twoDimen.line.style = Qt::PenStyle::SolidLine;
-        } else if (std::get<std::string>(value).compare("dashed") == 0) {
-            properties.twoDimen.line.style = Qt::PenStyle::DashLine;
-        } else if (std::get<std::string>(value).compare("dotted") == 0) {
-            properties.twoDimen.line.style = Qt::PenStyle::DotLine;
-        } else if (std::get<std::string>(value).compare("dash-dotted") == 0) {
-            properties.twoDimen.line.style = Qt::PenStyle::DashDotLine;
-        } else if (std::get<std::string>(value).compare("dash-double-dotted") == 0) {
-            properties.twoDimen.line.style = Qt::PenStyle::DashDotDotLine;
-        } else {
-            PyErr_Format(PyExc_ValueError, "invalid line style: %s", std::get<std::string>(value).c_str());
-            return NULL;
+        {
+            auto lineStyle = lowercase(std::get<std::string>(value));
+            if (lineStyle.compare("solid") == 0) {
+                properties.twoDimen.line.style = Qt::PenStyle::SolidLine;
+            } else if (lineStyle.compare("dashed") == 0) {
+                properties.twoDimen.line.style = Qt::PenStyle::DashLine;
+            } else if (lineStyle.compare("dotted") == 0) {
+                properties.twoDimen.line.style = Qt::PenStyle::DotLine;
+            } else if (lineStyle.compare("dash-dotted") == 0) {
+                properties.twoDimen.line.style = Qt::PenStyle::DashDotLine;
+            } else if (lineStyle.compare("dash-double-dotted") == 0) {
+                properties.twoDimen.line.style = Qt::PenStyle::DashDotDotLine;
+            } else {
+                PyErr_Format(PyExc_ValueError, "invalid line style: %s", std::get<std::string>(value).c_str());
+                return NULL;
+            }
         }
         break;
     case PlotProperty::TWODIMEN_POINTS_SHAPE:
-        if (std::get<std::string>(value).compare("none") == 0) {
-            properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssNone;
-        } else if (std::get<std::string>(value).compare("dot") == 0) {
-            properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssDot;
-        } else if (std::get<std::string>(value).compare("cross") == 0) {
-            properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssCross;
-        } else if (std::get<std::string>(value).compare("plus") == 0) {
-            properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssPlus;
-        } else if (std::get<std::string>(value).compare("circle") == 0) {
-            properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssCircle;
-        } else if (std::get<std::string>(value).compare("disc") == 0) {
-            properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssDisc;
-        } else if (std::get<std::string>(value).compare("square") == 0) {
-            properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssSquare;
-        } else if (std::get<std::string>(value).compare("diamond") == 0) {
-            properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssDiamond;
-        } else if (std::get<std::string>(value).compare("star") == 0) {
-            properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssStar;
-        } else if (std::get<std::string>(value).compare("triangle") == 0) {
-            properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssTriangle;
-        } else if (std::get<std::string>(value).compare("triangle-inverted") == 0) {
-            properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssTriangleInverted;
-        } else if (std::get<std::string>(value).compare("cross-square") == 0) {
-            properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssCrossSquare;
-        } else if (std::get<std::string>(value).compare("plus-square") == 0) {
-            properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssPlusSquare;
-        } else if (std::get<std::string>(value).compare("cross-circle") == 0) {
-            properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssCrossCircle;
-        } else if (std::get<std::string>(value).compare("plus-circle") == 0) {
-            properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssPlusCircle;
-        } else if (std::get<std::string>(value).compare("peace") == 0) {
-            properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssPeace;
-        } else {
-            PyErr_Format(PyExc_ValueError, "invalid shape: %s", std::get<std::string>(value).c_str());
-            return NULL;
+        {
+            auto pointsShape = lowercase(std::get<std::string>(value));
+            if (pointsShape.compare("none") == 0) {
+                properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssNone;
+            } else if (pointsShape.compare("dot") == 0) {
+                properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssDot;
+            } else if (pointsShape.compare("cross") == 0) {
+                properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssCross;
+            } else if (pointsShape.compare("plus") == 0) {
+                properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssPlus;
+            } else if (pointsShape.compare("circle") == 0) {
+                properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssCircle;
+            } else if (pointsShape.compare("disc") == 0) {
+                properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssDisc;
+            } else if (pointsShape.compare("square") == 0) {
+                properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssSquare;
+            } else if (pointsShape.compare("diamond") == 0) {
+                properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssDiamond;
+            } else if (pointsShape.compare("star") == 0) {
+                properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssStar;
+            } else if (pointsShape.compare("triangle") == 0) {
+                properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssTriangle;
+            } else if (pointsShape.compare("triangle-inverted") == 0) {
+                properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssTriangleInverted;
+            } else if (pointsShape.compare("cross-square") == 0) {
+                properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssCrossSquare;
+            } else if (pointsShape.compare("plus-square") == 0) {
+                properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssPlusSquare;
+            } else if (pointsShape.compare("cross-circle") == 0) {
+                properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssCrossCircle;
+            } else if (pointsShape.compare("plus-circle") == 0) {
+                properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssPlusCircle;
+            } else if (pointsShape.compare("peace") == 0) {
+                properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssPeace;
+            } else {
+                PyErr_Format(PyExc_ValueError, "invalid shape: %s", std::get<std::string>(value).c_str());
+                return NULL;
+            }
         }
         break;
     case PlotProperty::TWODIMEN_POINTS_COLOR:
@@ -515,26 +587,13 @@ Interface::pythonDeInit()
 }
 
 
-/**
- * @brief This flag is for when shit hits the fan in the application thread and you need the script
- * thread to chill out (e.g. the data manager encounters an error and can't write data to disk).
- * This will (attempt to) stop the script by raising a system exception.
- * 
- * @param status 
- */
-void
-Interface::setError(bool status)
-{
-    this->error = status;
-}
-
-
 void
 Interface::loadScript(const QString& file)
 {
     assert(this->core != nullptr);
     QMutexLocker locker{&this->mutex};
     std::cerr << "Loading: " << file.toStdString() << '\n';
+    this->error = false;
     auto status = this->core->load(std::filesystem::path{file.toStdString()}, this->module);
     if (status) {
         auto message = status.message();
@@ -552,19 +611,21 @@ Interface::runScript(const std::vector<std::string>& args)
         emit this->runCompleted("No script loaded");
         return;
     }
+
     QMutexLocker locker{&this->mutex};
+
+    // collect run arguments
     assert(args.size() == this->params.size());
     auto params = this->params;
     for (std::size_t i = 0; i < args.size(); ++i)
         params[i].value = args[i];
+
+    this->error = false;
     this->stopRequested = false;
-    auto status = this->module.get()->run(params);
-    if (status && status != exa::Error::INTERRUPT) {
-        auto message = status.message();
-        if (!status.traceback().empty())
-            message.append("\n").append(status.traceback());
-        emit this->scriptErrored(message.c_str(), QString{"ERROR::"}.append(status.type()));
-    }
+
+    this->scriptRunning = true;
+    this->initDatafileAndRun(params);
+    this->scriptRunning = false;
     emit this->runCompleted("Completed");
 }
 
@@ -580,4 +641,56 @@ void
 Interface::updatePlotProperties(const std::vector<PlotEditor::PlotInfo>& plots)
 {
     this->plots = plots;
+}
+
+
+/**
+ * @brief Internal helper function for handling the initialization of the datafile and invocation
+ * of the script run function. The script is considered to be in the "running" state throughout the
+ * execution of this function (this includes the custom datafile function if one is registered).
+ * 
+ * @param args 
+ */
+void
+Interface::initDatafileAndRun(const std::vector<exa::RunParam> &args)
+{
+    // initialize datafile
+    emit this->scriptStatusUpdated("Initializing data file...");
+    std::filesystem::path datafile;
+    auto datafileStatus = this->module.get()->getDatafile(datafile);
+    if (datafileStatus) {
+        auto message = datafileStatus.message();
+        if (!datafileStatus.traceback().empty())
+            message.append("\n").append(datafileStatus.traceback());
+        emit this->scriptErrored(message.c_str(), QString{"ERROR::"}.append(datafileStatus.type()));
+        return;
+    }
+
+    QEventLoop waitLoop;
+    bool datafileInitializationError = false;
+    auto conn = QObject::connect(
+        this,
+        &Interface::datafileInitializationCompleted,
+        &waitLoop,
+        [&](bool result) {
+            datafileInitializationError = result;
+            waitLoop.quit();
+        },
+        Qt::QueuedConnection
+    );
+    emit this->initializeDatafile(datafile);
+    waitLoop.exec();
+
+    if (datafileInitializationError)
+        return;
+
+    // call script run function
+    emit this->scriptStatusUpdated("Running...");
+    auto status = this->module.get()->run(args);
+    if (status && status != exa::Error::INTERRUPT) {
+        auto message = status.message();
+        if (!status.traceback().empty())
+            message.append("\n").append(status.traceback());
+        emit this->scriptErrored(message.c_str(), QString{"ERROR::"}.append(status.type()));
+    }
 }

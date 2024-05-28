@@ -15,15 +15,16 @@
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
+#include <regex>
 
 
-static std::string
-datafile()
-{
-    std::time_t result = std::time(nullptr);
-    std::asctime(std::localtime(&result));
-    return std::string{"data_"} + std::to_string(result) + ".hdf5";
-}
+// static std::string
+// datafile(const std::string& fmt)
+// {
+//     std::time_t result = std::time(nullptr);
+//     std::asctime(std::localtime(&result));
+//     return std::string{"data_"} + std::to_string(result) + ".hdf5";
+// }
 
 
 Config::Config() {
@@ -49,30 +50,45 @@ AppMain::AppMain(int& argc, char* argv[], const Config& config)
     : QObject{Q_NULLPTR}
     , ifaceThread{}
     , iface{config.searchPaths()}
+    , dmThread{}
+    , dm{}
     , a{argc, argv}
     , ui{this}
-    , dm{}
+    , promptBeforeRun{false}
     , scriptRunning{false}
 {
     QObject::connect(&this->ifaceThread, &QThread::started, &this->iface, &Interface::pythonInit);
     QObject::connect(&this->ifaceThread, &QThread::finished, &this->iface, &Interface::pythonDeInit);
     this->iface.moveToThread(&this->ifaceThread);
 
+    this->dm.moveToThread(&this->dmThread);
+
     QObject::connect(&this->a, &QApplication::aboutToQuit, [this] { this->shutdown(0); });
+    QObject::connect(&this->dm, &DataManager::error, this, &AppMain::dmError);
     QObject::connect(&this->ui, &AppUI::closed, [this] { this->shutdown(0); });
     QObject::connect(&this->ui, &AppUI::scriptLoad, this, &AppMain::load);
     QObject::connect(&this->ui, &AppUI::scriptRun, this, &AppMain::run);
     QObject::connect(&this->ui, &AppUI::scriptStop, this, &AppMain::stop);
     QObject::connect(&this->ui, &AppUI::plotsSet, &this->iface, &Interface::updatePlotProperties, Qt::QueuedConnection);
-    QObject::connect(this, &AppMain::setError, &this->iface, &Interface::setError, Qt::QueuedConnection);
     QObject::connect(this, &AppMain::scriptLoaded, &this->iface, &Interface::loadScript, Qt::QueuedConnection);
     QObject::connect(this, &AppMain::scriptRan, &this->iface, &Interface::runScript, Qt::QueuedConnection);
     QObject::connect(this, &AppMain::scriptStopped, &this->iface, &Interface::requestStop);
+    QObject::connect(this, &AppMain::dmConfigure, &this->dm, &DataManager::configure, Qt::QueuedConnection);
+    QObject::connect(this, &AppMain::dmReset, &this->dm, &DataManager::reset, Qt::QueuedConnection);
+    QObject::connect(this, &AppMain::dmWrite2D, &this->dm, &DataManager::write2D, Qt::QueuedConnection);
+    QObject::connect(this, &AppMain::dmWrite2DVec, &this->dm, &DataManager::write2DVec, Qt::QueuedConnection);
+    QObject::connect(this, &AppMain::dmWriteCM, &this->dm, &DataManager::writeCM, Qt::QueuedConnection);
+    QObject::connect(this, &AppMain::dmWriteCMVec, &this->dm, &DataManager::writeCMVec, Qt::QueuedConnection);
+    QObject::connect(this, &AppMain::dmWriteCMFrame, &this->dm, &DataManager::writeCMFrame, Qt::QueuedConnection);
+    QObject::connect(this, &AppMain::dmFlush, &this->dm, &DataManager::flush, Qt::QueuedConnection);
     QObject::connect(&this->iface, &Interface::fatalError, this, &AppMain::shutdown, Qt::QueuedConnection);
+    QObject::connect(&this->iface, &Interface::initializeDatafile, this, &AppMain::initializeDatafile, Qt::QueuedConnection);
     QObject::connect(&this->iface, &Interface::scriptErrored, this, &AppMain::scriptError, Qt::QueuedConnection);
+    QObject::connect(&this->iface, &Interface::scriptStatusUpdated, this, &AppMain::updateScriptStatus, Qt::QueuedConnection);
     QObject::connect(&this->iface, &Interface::runCompleted, this, &AppMain::runComplete, Qt::QueuedConnection);
     QObject::connect(&this->iface, &Interface::module_init, this, &AppMain::module_init, Qt::QueuedConnection);
     QObject::connect(&this->iface, &Interface::module_msg, this, &AppMain::module_msg, Qt::QueuedConnection);
+    QObject::connect(&this->iface, &Interface::module_datafile, this, &AppMain::module_datafile, Qt::QueuedConnection);
     QObject::connect(&this->iface, &Interface::module_plot2D, this, &AppMain::module_plot2D, Qt::QueuedConnection);
     QObject::connect(&this->iface, &Interface::module_plot2DVec, this, &AppMain::module_plot2DVec, Qt::QueuedConnection);
     QObject::connect(&this->iface, &Interface::module_plotCM, this, &AppMain::module_plotCM, Qt::QueuedConnection);
@@ -83,6 +99,7 @@ AppMain::AppMain(int& argc, char* argv[], const Config& config)
     QObject::connect(&this->iface, &Interface::module_showPlot, this, &AppMain::module_showPlot, Qt::QueuedConnection);
 
     this->ifaceThread.start();
+    this->dmThread.start();
     this->a.setStyle(QStyleFactory::create("fusion"));
 }
 
@@ -116,6 +133,7 @@ AppMain::shutdown(int status)
             case QMessageBox::Yes: terminate = true;
         }
     }
+    this->dmThread.quit();
     if (this->scriptRunning && terminate) {
         this->ifaceThread.terminate();
         this->scriptRunning = false;
@@ -123,8 +141,17 @@ AppMain::shutdown(int status)
         this->ifaceThread.quit();
         this->ifaceThread.wait();
     }
+    this->dmThread.wait();
     this->ui.close();
     this->a.exit(status);
+}
+
+
+void
+AppMain::dmError(const QString& msg)
+{
+    this->iface.setError(true);
+    this->scriptError(msg, "Data Error");
 }
 
 
@@ -149,11 +176,9 @@ AppMain::run(const std::vector<std::string>& args)
 {
     if (this->scriptRunning)
         return;
-    this->dm.reset(datafile(), this->ui.plotCount() + 1);
     this->ui.enableRun(false);
     this->ui.enableStop(true);
     this->ui.clear();
-    this->ui.setScriptStatus("Running...");
     emit this->scriptRan(args);
     this->scriptRunning = true;
 }
@@ -170,10 +195,48 @@ AppMain::stop()
 
 
 void
-AppMain::runComplete(const QString& message)
+AppMain::initializeDatafile(std::filesystem::path datafile)
+{
+    if (this->promptBeforeRun)
+        datafile = this->ui.promptDatafile(datafile);
+
+    QEventLoop waitLoop;
+    bool datafileError = false;
+    QString datafileErrorMsg;
+    bool completed = false;
+    auto conn = QObject::connect(
+        &this->dm,
+        &DataManager::resetCompleted,
+        &waitLoop,
+        [&](bool error, const QString& message) {
+            completed = true;
+            datafileError = error;
+            datafileErrorMsg = message;
+            waitLoop.quit();
+        },
+        Qt::QueuedConnection
+    );
+    emit this->dmReset(datafile, this->ui.plotCount() + 1);
+    waitLoop.exec();
+
+    emit this->iface.datafileInitializationCompleted(datafileError);
+    if (datafileError)
+        this->scriptError(datafileErrorMsg, "Data Error");
+}
+
+
+void
+AppMain::updateScriptStatus(const QString& scriptStatus)
+{
+    this->ui.setScriptStatus(scriptStatus);
+}
+
+
+void
+AppMain::runComplete(const QString& scriptStatus)
 {
     this->scriptRunning = false;
-    this->ui.setScriptStatus(message);
+    this->ui.setScriptStatus(scriptStatus);
     this->ui.enableStop(false);
     this->ui.enableRun(true);
 }
@@ -201,13 +264,21 @@ AppMain::module_msg(const std::string& message, bool append)
 
 
 void
+AppMain::module_datafile(const exa::DatafileConfig& config, bool prompt)
+{
+    this->promptBeforeRun = prompt;
+    emit this->dmConfigure(config);
+}
+
+
+void
 AppMain::module_plot2D(std::size_t plotIdx, double x, double y, bool write)
 {
     auto plot = this->ui.plot(plotIdx);
     plot->plot2D()->addData(x, y);
     plot->queue();
     if (write)
-        this->dm.write2D(plotIdx, x, y);
+        emit this->dmWrite2D(plotIdx, x, y);
 }
 
 
@@ -218,7 +289,7 @@ AppMain::module_plot2DVec(std::size_t plotIdx, const std::vector<double>& x, con
     plot->plot2D()->addData({x.cbegin(), x.cend()}, {y.cbegin(), y.cend()});
     plot->queue();
     if (write)
-        this->dm.write2D(plotIdx, x, y);
+        emit this->dmWrite2DVec(plotIdx, x, y);
 }
 
 
@@ -229,7 +300,7 @@ AppMain::module_plotCM(std::size_t plotIdx, int x, int y, double value, bool wri
     plot->plotColorMap()->setCell(x, y, value);
     plot->queue();
     if (write)
-        this->dm.writeCM(plotIdx, x, y, value);
+        emit this->dmWriteCM(plotIdx, x, y, value);
 }
 
 
@@ -244,7 +315,7 @@ AppMain::module_plotCMVec(std::size_t plotIdx, int y, const std::vector<double>&
         plot->plotColorMap()->setCell(x, y, values[x]);
     plot->queue();
     if (write)
-        this->dm.writeCM(plotIdx, y, values);
+        emit this->dmWriteCMVec(plotIdx, y, values);
 }
 
 
@@ -263,7 +334,7 @@ AppMain::module_plotCMFrame(std::size_t plotIdx, const std::vector<std::vector<d
     }
     plot->queue();
     if (write)
-        this->dm.writeCM(plotIdx, frame);
+        emit this->dmWriteCMFrame(plotIdx, frame);
 }
 
 
@@ -299,6 +370,7 @@ AppMain::module_showPlot(std::size_t plotIdx, QPlot::Type plotType)
 void
 AppMain::reset()
 {
+    this->promptBeforeRun = false;
     this->ui.reset();
 }
 

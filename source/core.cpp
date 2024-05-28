@@ -41,6 +41,12 @@ moduleMethods[] =
         NULL
     },
     {
+        EXA_DATAFILE,
+        (PyCFunction)exa_datafile,
+        METH_VARARGS | METH_KEYWORDS,
+        NULL
+    },
+    {
         EXA_PLOT,
         (PyCFunction)exa_plot,
         METH_FASTCALL | METH_KEYWORDS,

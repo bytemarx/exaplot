@@ -9,7 +9,6 @@
 #pragma once
 
 #include <QMutex>
-#include <QMutexLocker>
 #include <QObject>
 #include <QString>
 
@@ -17,6 +16,8 @@
 #include "ploteditor.hpp"
 #include "qplot.hpp"
 #include "qplottab.hpp"
+
+#include <atomic>
 
 
 class Interface : public QObject, public exa::Interface
@@ -26,9 +27,12 @@ class Interface : public QObject, public exa::Interface
 public:
     Interface(const std::vector<std::filesystem::path>& searchPaths, QObject* parent = nullptr);
 
+    void setError(bool);
+
     PyObject* init(const std::vector<exa::RunParam>& params, const std::vector<exa::GridPoint>& plots) override;
     PyObject* stop() override;
     PyObject* msg(const std::string& message, bool append) override;
+    PyObject* datafile(const exa::DatafileConfig& config, PyObject* path, bool prompt) override;
     PyObject* plot2D(std::size_t plotID, double x, double y, bool write) override;
     PyObject* plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y, bool write) override;
     PyObject* plotCM(std::size_t plotID, int col, int row, double value, bool write) override;
@@ -44,9 +48,13 @@ Q_SIGNALS:
     void fatalError(int);
     void scriptErrored(const QString&, const QString&);
     void initializationCompleted(bool);
+    void initializeDatafile(std::filesystem::path);
+    void datafileInitializationCompleted(bool);
+    void scriptStatusUpdated(const QString&);
     void runCompleted(const QString&);
     void module_init(const std::vector<exa::RunParam>&, const std::vector<exa::GridPoint>&) const;
     void module_msg(const std::string&, bool) const;
+    void module_datafile(const exa::DatafileConfig& config, bool prompt) const;
     void module_plot2D(std::size_t plotIdx, double, double, bool) const;
     void module_plot2DVec(std::size_t plotIdx, const std::vector<double>&, const std::vector<double>&, bool) const;
     void module_plotCM(std::size_t plotIdx, int, int, double, bool) const;
@@ -59,17 +67,19 @@ Q_SIGNALS:
 public Q_SLOTS:
     void pythonInit();
     void pythonDeInit();
-    void setError(bool);
     void loadScript(const QString&);
     void runScript(const std::vector<std::string>&);
     void requestStop();
     void updatePlotProperties(const std::vector<PlotEditor::PlotInfo>&);
 
 private:
+    void initDatafileAndRun(const std::vector<exa::RunParam> &args);
+
+    std::atomic_bool error;
     QMutex mutex;
     const std::vector<std::filesystem::path> searchPaths;
     exa::Core* core;
-    bool error;
+    bool scriptRunning;
     bool stopRequested;
     std::shared_ptr<exa::ScriptModule> module;
     std::vector<PlotEditor::PlotInfo> plots;

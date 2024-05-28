@@ -281,6 +281,37 @@ exa_msg(PyObject* module, PyObject* args, PyObject* kwargs)
 }
 
 
+static char*
+datafile_keywords[] = {
+    (char*)"enable",
+    (char*)"path",
+    (char*)"prompt",
+    NULL
+};
+
+
+PyObject*
+exa_datafile(PyObject* module, PyObject* args, PyObject* kwargs)
+{
+    int c_enable = -1;
+    PyObject* pyBorrowed_path = NULL;
+    int c_prompt = 0;
+    if (!PyArg_ParseTupleAndKeywords(
+            args, kwargs, "|$pOp:" EXA_DATAFILE, datafile_keywords,
+            &c_enable,
+            &pyBorrowed_path,
+            &c_prompt
+        )) return NULL;
+
+    DatafileConfig config;
+    if (c_enable != -1)
+        config.enable = c_enable != 0;
+
+    auto state = getModuleState(module);
+    return state->iface->datafile(config, pyBorrowed_path, c_prompt != 0);
+}
+
+
 static PyObject*
 plot2D(
     exa_state* state,
