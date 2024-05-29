@@ -1,5 +1,7 @@
 from numbers import Real
-from typing import overload, Generic, Sequence, TypeVar
+from os import PathLike
+from pathlib import Path
+from typing import Callable, Generic, Sequence, TypeVar, overload
 
 RunParamType = TypeVar('RunParamType', str, int, float)
 class RunParam(Generic[RunParamType]):
@@ -36,6 +38,21 @@ def init(plots: list[tuple[int, int, int, int]], /, **params: str | int | float 
 
     :param plots: plot arrangement
     :type plots: list[tuple[int, int, int, int]]
+    """
+def datafile(
+        *,
+        enable: bool = True,
+        path: PathLike | Callable[[], PathLike] = Path("data.hdf5"),
+        prompt: bool = False,
+    ) -> None:
+    """Configure data file settings.
+
+    :param enable: enable or disable writing to a data file, defaults to True
+    :type enable: bool, optional
+    :param path: data file path, defaults to Path("data.hdf5")
+    :type path: PathLike | Callable[[], PathLike], optional
+    :param prompt: prompt before running, defaults to False
+    :type prompt: bool, optional
     """
 def stop() -> bool:
     """Check if a stop signal has been received.

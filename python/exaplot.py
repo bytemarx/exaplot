@@ -1,10 +1,12 @@
 from numbers import Real
+from os import PathLike
 
 from _exaplot import ( # type: ignore
     RunParam,
     init,
     stop,
     msg,
+    datafile as _datafile,
     plot as _plot,
     _Interrupt,
     _set_plot_property,
@@ -16,6 +18,12 @@ from _exaplot import ( # type: ignore
 def breakpoint():
     if stop():
         raise _Interrupt
+
+
+def datafile(**kwargs):
+    if "path" in kwargs and not isinstance(kwargs["path"], PathLike):
+        raise TypeError("'path' argument must be type 'PathLike'")
+    return _datafile(**kwargs)
 
 
 class _PlotProperties:

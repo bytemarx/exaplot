@@ -10,12 +10,19 @@
 
 #include "hdf5.h"
 
+#include <QObject>
+
 #include <cassert>
 #include <cstdlib>
+#include <iostream>
+#include <filesystem>
 #include <memory>
 #include <stdexcept>
+#include <string>
 #include <utility>
 #include <vector>
+
+#include "dataconfig.hpp"
 
 
 template<typename T>
@@ -78,73 +85,77 @@ public:
     virtual ~DataSet()
     {
         if (this->m_valid) {
-            this->flush();
+            try {
+                this->flush();
+            } catch (std::runtime_error const& e) {
+                std::cerr << "Failed to flush dataset during destruction: " << e.what() << '\n';
+            }
             H5Dclose(this->m_dataset);
         }
     }
 
-    int flush()
+    void flush()
     {
-        auto status = this->writeToDataset();
-        if (status < 0)
-            return status;
-        return H5Dflush(this->m_dataset);
+        this->writeToDataset();
+        if (H5Dflush(this->m_dataset) < 0)
+            throw std::runtime_error{"failed to flush dataset"};
     }
 
 protected:
-    int writeToDataset()
+    void writeToDataset()
     {
-        int status = 0;
-
         if (this->m_buffer.size() == 0)
-            return status;
+            return;
 
         auto dataspaceID = H5Dget_space(this->m_dataset);
         if (dataspaceID == H5I_INVALID_HID)
-            return -1;
+            throw std::runtime_error{"failed to get dataspace (initial)"};
 
         // retrieve current dataset dimensions
         hsize_t currentDims[2] = {0};
-        status = H5Sget_simple_extent_dims(dataspaceID, currentDims, NULL);
+        int ndims = H5Sget_simple_extent_dims(dataspaceID, currentDims, NULL);
         H5Sclose(dataspaceID);
-        if (status < 0)
-            return status;
+        if (ndims < 0)
+            throw std::runtime_error{"failed to retrieve dataset dimensions"};
 
         hsize_t length = static_cast<hsize_t>(this->m_buffer.size()) / currentDims[1];
 
         // extend the dataset
         hsize_t updatedDims[2] = {currentDims[0] + length, currentDims[1]};
-        if (status = H5Dset_extent(this->m_dataset, updatedDims), status < 0)
-            return status;
+        if (H5Dset_extent(this->m_dataset, updatedDims) < 0)
+            throw std::runtime_error{"failed to extend dataset"};
 
         // select the extended region
-        auto filespaceID = H5Dget_space(this->m_dataset);
-        if (filespaceID == H5I_INVALID_HID)
-            return -1;
+        dataspaceID = H5Dget_space(this->m_dataset);
+        if (dataspaceID == H5I_INVALID_HID)
+            throw std::runtime_error{"failed to get dataspace (extended)"};
         hsize_t start[] = {currentDims[0], 0};
         hsize_t count[] = {length, currentDims[1]};
-        if (H5Sselect_hyperslab(filespaceID, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
-            return -1;
+        if (H5Sselect_hyperslab(dataspaceID, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
+            throw std::runtime_error{"failed to select extended dataspace"};
 
         auto memspaceID = H5Screate_simple(2, count, NULL);
         if (memspaceID == H5I_INVALID_HID) {
-            H5Sclose(filespaceID);
-            return -1;
+            H5Sclose(dataspaceID);
+            throw std::runtime_error{"failed to create memory dataspace"};
         }
 
         // write the buffer to the extended region of the dataset
-        status = H5Dwrite(
+        auto status = H5Dwrite(
             this->m_dataset,
             this->m_datatype,
             memspaceID,
-            filespaceID,
+            dataspaceID,
             H5P_DEFAULT,
             this->m_buffer.data()
         );
-        H5Sclose(filespaceID);
+
+        // TODO: check close returns?
+        H5Sclose(dataspaceID);
         H5Sclose(memspaceID);
+        if (status < 0)
+            throw std::runtime_error{"failed to write buffer to dataset"};
         this->m_buffer.clear();
-        return status;
     }
 
     bool m_valid;
@@ -159,8 +170,8 @@ class DataSet2D : public DataSet<double>
 public:
     DataSet2D(hid_t fileID, const std::string& name);
 
-    int write(double x, double y);
-    int write(const std::vector<double>& x, const std::vector<double>& y);
+    void write(double x, double y);
+    void write(const std::vector<double>& x, const std::vector<double>& y);
 };
 
 
@@ -177,9 +188,9 @@ class DataSetCM : public DataSet<CMData>
 public:
     DataSetCM(hid_t fileID, const std::string& name);
 
-    int write(int x, int y, double value);
-    int write(int y, const std::vector<double>& row);
-    int write(const std::vector<std::vector<double>>& frame);
+    void write(int x, int y, double value);
+    void write(int y, const std::vector<double>& row);
+    void write(const std::vector<std::vector<double>>& frame);
 };
 
 
@@ -199,24 +210,35 @@ private:
 };
 
 
-class DataManager
+class DataManager : public QObject
 {
+    Q_OBJECT
+
 public:
     DataManager();
     ~DataManager();
 
-    void reset(const std::string& filename, std::size_t datasets);
+Q_SIGNALS:
+    void error(const QString&);
+    void resetCompleted(bool, const QString&);
 
-    int write2D(std::size_t plotIdx, double x, double y);
-    int write2D(std::size_t plotIdx, const std::vector<double>& x, const std::vector<double>& y);
+public Q_SLOTS:
+    void configure(const exa::DatafileConfig& config);
+    void reset(const std::filesystem::path& path, std::size_t datasets);
 
-    int writeCM(std::size_t plotIdx, int x, int y, double value);
-    int writeCM(std::size_t plotIdx, int y, const std::vector<double>& row);
-    int writeCM(std::size_t plotIdx, const std::vector<std::vector<double>>& frame);
+    void write2D(std::size_t plotIdx, double x, double y);
+    void write2DVec(std::size_t plotIdx, const std::vector<double>& x, const std::vector<double>& y);
 
-    int flush(std::size_t plotIdx);
+    void writeCM(std::size_t plotIdx, int x, int y, double value);
+    void writeCMVec(std::size_t plotIdx, int y, const std::vector<double>& row);
+    void writeCMFrame(std::size_t plotIdx, const std::vector<std::vector<double>>& frame);
+
+    void flush(std::size_t plotIdx);
 
 private:
+    void setEnabled(bool enabled);
+
+    bool m_enabled;
     std::vector<DataSetGroup> m_datasets;
     hid_t m_fileID;
 };

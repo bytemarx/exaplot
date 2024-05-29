@@ -22,6 +22,7 @@ protected:
         PyObject* init(const std::vector<exa::RunParam>&, const std::vector<exa::GridPoint>&) override { Py_RETURN_NONE; }
         PyObject* stop() override { Py_RETURN_NONE; }
         PyObject* msg(const std::string&, bool) override { Py_RETURN_NONE; }
+        PyObject* datafile(const exa::DatafileConfig&, PyObject*, bool) override { Py_RETURN_NONE; }
         PyObject* plot2D(std::size_t, double, double, bool) override { Py_RETURN_NONE; }
         PyObject* plot2DVec(std::size_t, const std::vector<double>&, const std::vector<double>&, bool) override { Py_RETURN_NONE; }
         PyObject* plotCM(std::size_t, int, int, double, bool) override { Py_RETURN_NONE; }

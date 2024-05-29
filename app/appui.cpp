@@ -16,6 +16,7 @@ AppUI::AppUI(QObject* parent)
     , mainWindow{new MainWindow}
     , aboutDialog{new About{this->mainWindow}}
     , plotEditorDialog{new PlotEditor{this->mainWindow}}
+    , preRunDialog{new PreRun{this->mainWindow}}
 {
     this->mainWindow->setPlots(this->plotEditorDialog->plots());
 
@@ -255,6 +256,18 @@ AppUI::showPlot(std::size_t plotIdx, QPlot::Type plotType)
 {
     this->plot(plotIdx)->setType(plotType);
     this->plotEditorDialog->setSelectedPlot(plotIdx, plotType);
+}
+
+
+std::filesystem::path
+AppUI::promptDatafile(const std::filesystem::path& path) const
+{
+    auto file = QFileDialog::getSaveFileName(
+        this->mainWindow,
+        tr("Data File"),
+        QString::fromStdString(path.string())
+    );
+    return std::filesystem::path{file.toStdString()};
 }
 
 
