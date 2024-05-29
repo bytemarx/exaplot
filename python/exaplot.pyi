@@ -1,5 +1,7 @@
 from numbers import Real
-from typing import overload, Generic, Sequence, TypeVar
+from os import PathLike
+from pathlib import Path
+from typing import Callable, Generic, Sequence, TypeVar, overload
 
 RunParamType = TypeVar('RunParamType', str, int, float)
 class RunParam(Generic[RunParamType]):
@@ -36,6 +38,21 @@ def init(plots: list[tuple[int, int, int, int]], /, **params: str | int | float 
 
     :param plots: plot arrangement
     :type plots: list[tuple[int, int, int, int]]
+    """
+def datafile(
+        *,
+        enable: bool = True,
+        path: PathLike | Callable[[], PathLike] = Path("data.hdf5"),
+        prompt: bool = False,
+    ) -> None:
+    """Configure data file settings.
+
+    :param enable: enable or disable writing to a data file, defaults to True
+    :type enable: bool, optional
+    :param path: data file path, defaults to Path("data.hdf5")
+    :type path: PathLike | Callable[[], PathLike], optional
+    :param prompt: prompt before running, defaults to False
+    :type prompt: bool, optional
     """
 def stop() -> bool:
     """Check if a stop signal has been received.
@@ -172,25 +189,29 @@ class _Plot:
     def __call__(self) -> None:
         """Clears the plot."""
     @overload
-    def __call__(self, x: Real, y: Real) -> None:
+    def __call__(self, x: Real, y: Real, *, write: bool = True) -> None:
         """Plots a data point to the 2D plot.
 
         :param x: x-value
         :type x: Real
         :param y: y-value
         :type y: Real
+        :param write: write data to disk, defaults to True
+        :type write: bool, optional
         """
     @overload
-    def __call__(self, x: Sequence[Real], y: Sequence[Real]) -> None:
+    def __call__(self, x: Sequence[Real], y: Sequence[Real], *, write: bool = True) -> None:
         """Plots multiple data points to the 2D plot.
 
         :param x: x-values
         :type x: Sequence[Real]
         :param y: y-values
         :type y: Sequence[Real]
+        :param write: write data to disk, defaults to True
+        :type write: bool, optional
         """
     @overload
-    def __call__(self, col: int, row: int, value: Real) -> None:
+    def __call__(self, col: int, row: int, value: Real, *, write: bool = True) -> None:
         """Plots a value to a specifed cell in the color map.
 
         :param col: target column (from left to right)
@@ -199,22 +220,28 @@ class _Plot:
         :type row: int
         :param value: cell value
         :type value: Real
+        :param write: write data to disk, defaults to True
+        :type write: bool, optional
         """
     @overload
-    def __call__(self, row: int, values: Sequence[Real]) -> None:
+    def __call__(self, row: int, values: Sequence[Real], *, write: bool = True) -> None:
         """Plots a row of cell values to the color map.
 
         :param row: target row (from down to up)
         :type row: int
         :param values: row values
         :type values: Sequence[Real]
+        :param write: write data to disk, defaults to True
+        :type write: bool, optional
         """
     @overload
-    def __call__(self, frame: Sequence[Sequence[Real]]) -> None:
+    def __call__(self, frame: Sequence[Sequence[Real]], *, write: bool = True) -> None:
         """Plots a frame of cell values to the color map.
 
         :param frame: sequence of rows
         :type frame: Sequence[Sequence[Real]]
+        :param write: write data to disk, defaults to True
+        :type write: bool, optional
         """
     @property
     def title(self) -> str: ...

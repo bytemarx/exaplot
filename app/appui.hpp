@@ -14,6 +14,7 @@
 #include "mainwindow.hpp"
 #include "about.hpp"
 #include "ploteditor.hpp"
+#include "prerun.hpp"
 
 #include <map>
 #include <string>
@@ -41,6 +42,7 @@ public:
     void enableStop(bool);
     void setPlotProperty(std::size_t, const exa::PlotProperty&, const QPlotTab::Cache&);
     void showPlot(std::size_t, QPlot::Type);
+    std::filesystem::path promptDatafile(const std::filesystem::path& path) const;
 
 public Q_SLOTS:
     void displayError(const QString&, const QString& = "ERROR");
@@ -61,4 +63,5 @@ private:
     MainWindow* mainWindow;
     About* aboutDialog;
     PlotEditor* plotEditorDialog;
+    PreRun* preRunDialog;
 };

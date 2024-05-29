@@ -14,7 +14,12 @@ except TypeError as e:
 try:
     _plot(1, foo=None)
 except TypeError as e:
-    assert(str(e) == "_exaplot.plot() takes no keyword arguments")
+    assert(str(e) == "plot() got an unexpected keyword argument 'foo'")
+
+try:
+    _plot(1, write=None)
+except TypeError as e:
+    assert(str(e) == "plot() 'write' argument must be type 'bool'")
 
 try:
     _plot(1, "")

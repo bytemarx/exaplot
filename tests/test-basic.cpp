@@ -17,7 +17,7 @@ class BasicTest : public ModuleTest
 public:
     void init(const std::vector<exa::RunParam>& params, const std::vector<exa::GridPoint>& plots) override;
     void msg(const std::string& message, bool append) override;
-    void plot2D(std::size_t plotID, double x, double y) override;
+    void plot2D(std::size_t plotID, double x, double y, bool write) override;
     void plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y) override;
     void clear(std::size_t plotID) override;
 protected:
@@ -95,11 +95,12 @@ TEST_F(BasicTest, TestPlot)
 }
 
 void
-BasicTest::plot2D(std::size_t plotID, double x, double y)
+BasicTest::plot2D(std::size_t plotID, double x, double y, bool write)
 {
     ASSERT_EQ(plotID, 1);
     ASSERT_EQ(x, 1);
     ASSERT_EQ(y, 2.2);
+    ASSERT_TRUE(write);
 }
 
 // plotVec(2, [0, 1, 2, 3], [1, 2, 3.3, 4.4])

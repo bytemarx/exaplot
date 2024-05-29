@@ -10,18 +10,21 @@ Requires:
 - CPython dependencies
 - Qt6
 
-### Linux
+### Linux (Bash)
 ```sh
 cmake -DCMAKE_BUILD_TYPE=Release -B build/
-make -C build/
+make -j -C build/
 ```
 
-### Windows
+### Windows (PowerShell)
 ```powershell
 $Env:QT_DIR = "C:\Qt\6.4.0\msvc2019_64"
 $Env:MSBUILD = "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe"
 .\winbuild.ps1
 ```
+
+Built applications can be found in `build/bin/<BUILD-TYPE>/` where `<BUILD-TYPE>` corresponds to
+the build type specified by `CMAKE_BUILD_TYPE` (typically either `Release` or `Debug`).
 
 
 ## Developing

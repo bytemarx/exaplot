@@ -6,6 +6,8 @@
  * Copyright (C) 2024 bytemarx
  */
 
+#include <QMutexLocker>
+
 #include "appinterface.hpp"
 #include "config.h"
 
@@ -16,10 +18,53 @@ Interface::Interface(
     const std::vector<std::filesystem::path>& searchPaths,
     QObject* parent)
     : QObject{parent}
+    , error{false}
     , searchPaths{searchPaths}
     , core{nullptr}
+    , scriptRunning{false}
     , stopRequested{false}
 {
+}
+
+
+/**
+ * @brief This flag is for when shit hits the fan in the application thread and you need the script
+ * thread to chill out (e.g. the data manager encounters an error and can't write data to disk).
+ * This will (attempt to) stop the script by raising a system exception.
+ * 
+ * We use an atomic boolean here as this is meant to be called from the application thread to
+ * bypass the event loop (if this were set via a signal, it would never be updated during the run
+ * as the event loop wouldn't execute the slot until the run slot had finished).
+ * 
+ * @param status 
+ */
+void
+Interface::setError(bool status)
+{
+    this->error = status;
+}
+
+
+#define CHECK_APP_ERROR \
+if (this->error) { \
+    PyErr_SetString(PyExc_SystemError, "runtime application error"); \
+    return NULL; \
+}
+
+
+#define CHECK_NONRUN_ONLY \
+CHECK_APP_ERROR \
+if (this->scriptRunning) { \
+    PyErr_SetString(PyExc_SystemError, "cannot call within 'run' function"); \
+    return NULL; \
+}
+
+
+#define CHECK_RUN_ONLY \
+CHECK_APP_ERROR \
+if (!this->scriptRunning) { \
+    PyErr_SetString(PyExc_SystemError, "cannot call outside of 'run' function"); \
+    return NULL; \
 }
 
 
@@ -28,21 +73,27 @@ Interface::init(
     const std::vector<exa::RunParam>& params,
     const std::vector<exa::GridPoint>& plots)
 {
+    CHECK_NONRUN_ONLY
+
     this->params = params;
-    emit this->module_init(params, plots);
+
     QEventLoop waitLoop;
     bool status = true;
     auto conn = QObject::connect(
-        this, &Interface::initializationCompleted,
-        [&](bool result){ status = result; waitLoop.quit(); }
+        this,
+        &Interface::initializationCompleted,
+        &waitLoop,
+        [&](bool result) {
+            status = result;
+            waitLoop.quit();
+        },
+        Qt::QueuedConnection
     );
+    emit this->module_init(params, plots);
     waitLoop.exec();
-    if (!QObject::disconnect(conn)) {
-        PyErr_SetString(PyExc_SystemError, "!!!Failed to disconnect wait loop!!!");
-        return NULL;
-    }
+
     if (!status) {
-        PyErr_SetString(PyExc_ValueError, "Invalid plot arrangement");
+        PyErr_SetString(PyExc_ValueError, "invalid plot arrangement");
         return NULL;
     }
     Py_RETURN_NONE;
@@ -52,6 +103,8 @@ Interface::init(
 PyObject*
 Interface::stop()
 {
+    CHECK_APP_ERROR
+
     if (this->stopRequested)
         Py_RETURN_TRUE;
     Py_RETURN_FALSE;
@@ -61,30 +114,50 @@ Interface::stop()
 PyObject*
 Interface::msg(const std::string& message, bool append)
 {
+    CHECK_APP_ERROR
+
     emit this->module_msg(message, append);
     Py_RETURN_NONE;
 }
 
 
 PyObject*
-Interface::plot2D(std::size_t plotID, double x, double y)
+Interface::datafile(const exa::DatafileConfig& config, PyObject* path, bool prompt)
 {
-    emit this->module_plot2D(plotID - 1, x, y);
+    CHECK_NONRUN_ONLY
+
+    if (path != NULL)
+        this->module->setDatafile(path);
+    emit this->module_datafile(config, prompt);
     Py_RETURN_NONE;
 }
 
 
 PyObject*
-Interface::plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y)
+Interface::plot2D(std::size_t plotID, double x, double y, bool write)
 {
-    emit this->module_plot2DVec(plotID - 1, x, y);
+    CHECK_RUN_ONLY
+
+    emit this->module_plot2D(plotID - 1, x, y, write);
     Py_RETURN_NONE;
 }
 
 
 PyObject*
-Interface::plotCM(std::size_t plotID, int col, int row, double value)
+Interface::plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y, bool write)
 {
+    CHECK_RUN_ONLY
+
+    emit this->module_plot2DVec(plotID - 1, x, y, write);
+    Py_RETURN_NONE;
+}
+
+
+PyObject*
+Interface::plotCM(std::size_t plotID, int col, int row, double value, bool write)
+{
+    CHECK_RUN_ONLY
+
     auto plot = this->plots.at(plotID - 1);
     if (col >= plot.attributes.colorMap.dataSize.x) {
         PyErr_SetString(PyExc_ValueError, EXA_PLOT "() 'col' argument out of bounds");
@@ -94,14 +167,16 @@ Interface::plotCM(std::size_t plotID, int col, int row, double value)
         PyErr_SetString(PyExc_ValueError, EXA_PLOT "() 'row' argument out of bounds");
         return NULL;
     }
-    emit this->module_plotCM(plotID - 1, col, row, value);
+    emit this->module_plotCM(plotID - 1, col, row, value, write);
     Py_RETURN_NONE;
 }
 
 
 PyObject*
-Interface::plotCMVec(std::size_t plotID, int row, const std::vector<double>& values)
+Interface::plotCMVec(std::size_t plotID, int row, const std::vector<double>& values, bool write)
 {
+    CHECK_RUN_ONLY
+
     auto plot = this->plots.at(plotID - 1);
     if (row >= plot.attributes.colorMap.dataSize.y) {
         PyErr_SetString(PyExc_ValueError, EXA_PLOT "() 'row' argument out of bounds");
@@ -111,14 +186,16 @@ Interface::plotCMVec(std::size_t plotID, int row, const std::vector<double>& val
         PyErr_SetString(PyExc_ValueError, EXA_PLOT "() 'values' argument contains too many values");
         return NULL;
     }
-    emit this->module_plotCMVec(plotID - 1, row, values);
+    emit this->module_plotCMVec(plotID - 1, row, values, write);
     Py_RETURN_NONE;
 }
 
 
 PyObject*
-Interface::plotCMFrame(std::size_t plotID, const std::vector<std::vector<double>>& frame)
+Interface::plotCMFrame(std::size_t plotID, const std::vector<std::vector<double>>& frame, bool write)
 {
+    CHECK_RUN_ONLY
+
     auto plot = this->plots.at(plotID - 1);
     if (frame.size() > static_cast<std::size_t>(plot.attributes.colorMap.dataSize.y)) {
         PyErr_SetString(PyExc_ValueError, EXA_PLOT "() 'frame' argument contains too many rows");
@@ -132,7 +209,7 @@ Interface::plotCMFrame(std::size_t plotID, const std::vector<std::vector<double>
         }
         i += 1;
     }
-    emit this->module_plotCMFrame(plotID - 1, frame);
+    emit this->module_plotCMFrame(plotID - 1, frame, write);
     Py_RETURN_NONE;
 }
 
@@ -140,6 +217,8 @@ Interface::plotCMFrame(std::size_t plotID, const std::vector<std::vector<double>
 PyObject*
 Interface::clear(std::size_t plotID)
 {
+    CHECK_APP_ERROR
+
     auto plotIdx = plotID - 1;
     if (plotIdx >= this->plots.size()) {
         PyErr_SetString(PyExc_IndexError, "plot ID out of range");
@@ -156,6 +235,8 @@ Interface::setPlotProperty(
     const exa::PlotProperty& property,
     const exa::PlotProperty::Value& value)
 {
+    CHECK_APP_ERROR
+
     if (plotID == 0) {
         PyErr_SetString(PyExc_IndexError, "invalid plot ID");
         return NULL;
@@ -314,6 +395,8 @@ Interface::setPlotProperty(
 PyObject*
 Interface::getPlotProperty(std::size_t plotID, const exa::PlotProperty& property)
 {
+    CHECK_APP_ERROR
+
     if (plotID == 0) {
         PyErr_SetString(PyExc_IndexError, "invalid plot ID");
         return NULL;
@@ -408,6 +491,8 @@ Interface::getPlotProperty(std::size_t plotID, const exa::PlotProperty& property
 PyObject*
 Interface::showPlot(std::size_t plotID, std::size_t plotType)
 {
+    CHECK_APP_ERROR
+
     if (plotID == 0) {
         PyErr_SetString(PyExc_IndexError, "invalid plot ID");
         return NULL;
@@ -489,6 +574,7 @@ Interface::loadScript(const QString& file)
     assert(this->core != nullptr);
     QMutexLocker locker{&this->mutex};
     std::cerr << "Loading: " << file.toStdString() << '\n';
+    this->error = false;
     auto status = this->core->load(std::filesystem::path{file.toStdString()}, this->module);
     if (status) {
         auto message = status.message();
@@ -506,19 +592,21 @@ Interface::runScript(const std::vector<std::string>& args)
         emit this->runCompleted("No script loaded");
         return;
     }
+
     QMutexLocker locker{&this->mutex};
+
+    // collect run arguments
     assert(args.size() == this->params.size());
     auto params = this->params;
     for (std::size_t i = 0; i < args.size(); ++i)
         params[i].value = args[i];
+
+    this->error = false;
     this->stopRequested = false;
-    auto status = this->module.get()->run(params);
-    if (status && status != exa::Error::INTERRUPT) {
-        auto message = status.message();
-        if (!status.traceback().empty())
-            message.append("\n").append(status.traceback());
-        emit this->scriptErrored(message.c_str(), QString{"ERROR::"}.append(status.type()));
-    }
+
+    this->scriptRunning = true;
+    this->initDatafileAndRun(params);
+    this->scriptRunning = false;
     emit this->runCompleted("Completed");
 }
 
@@ -534,4 +622,56 @@ void
 Interface::updatePlotProperties(const std::vector<PlotEditor::PlotInfo>& plots)
 {
     this->plots = plots;
+}
+
+
+/**
+ * @brief Internal helper function for handling the initialization of the datafile and invocation
+ * of the script run function. The script is considered to be in the "running" state throughout the
+ * execution of this function (this includes the custom datafile function if one is registered).
+ * 
+ * @param args 
+ */
+void
+Interface::initDatafileAndRun(const std::vector<exa::RunParam> &args)
+{
+    // initialize datafile
+    emit this->scriptStatusUpdated("Initializing data file...");
+    std::filesystem::path datafile;
+    auto datafileStatus = this->module.get()->getDatafile(datafile);
+    if (datafileStatus) {
+        auto message = datafileStatus.message();
+        if (!datafileStatus.traceback().empty())
+            message.append("\n").append(datafileStatus.traceback());
+        emit this->scriptErrored(message.c_str(), QString{"ERROR::"}.append(datafileStatus.type()));
+        return;
+    }
+
+    QEventLoop waitLoop;
+    bool datafileInitializationError = false;
+    auto conn = QObject::connect(
+        this,
+        &Interface::datafileInitializationCompleted,
+        &waitLoop,
+        [&](bool result) {
+            datafileInitializationError = result;
+            waitLoop.quit();
+        },
+        Qt::QueuedConnection
+    );
+    emit this->initializeDatafile(datafile);
+    waitLoop.exec();
+
+    if (datafileInitializationError)
+        return;
+
+    // call script run function
+    emit this->scriptStatusUpdated("Running...");
+    auto status = this->module.get()->run(args);
+    if (status && status != exa::Error::INTERRUPT) {
+        auto message = status.message();
+        if (!status.traceback().empty())
+            message.append("\n").append(status.traceback());
+        emit this->scriptErrored(message.c_str(), QString{"ERROR::"}.append(status.type()));
+    }
 }

@@ -23,6 +23,7 @@
 #include <string>
 #include <vector>
 
+#include "dataconfig.hpp"
 #include "plotproperty.hpp"
 
 
@@ -33,6 +34,7 @@
 #define EXA_INIT       "init"                  // init(plots = 1, **params)
 #define EXA_STOP       "stop"                  // stop()
 #define EXA_MSG        "msg"                   // msg(message, append = False)
+#define EXA_DATAFILE   "datafile"              // datafile(enable = True, filename = "data_%(time)d")
 #define EXA_PLOT       "plot"                  // plot(data_set, *data)
 #define EXA_SET_PLOT   "_set_plot_property"    // _set_plot_property(plot_id, prop, value)
 #define EXA_GET_PLOT   "_get_plot_property"    // _get_plot_property(plot_id, prop)
@@ -77,6 +79,7 @@ struct Error
     EXA_API constexpr static Type SYSTEM = "SYSTEM";
     EXA_API constexpr static Type ARGUMENT = "ARGUMENT";
     EXA_API constexpr static Type INTERRUPT = "INTERRUPT";
+    EXA_API constexpr static Type DATAFILE = "DATAFILE";
     EXA_API constexpr static Type UNDEFINED = "UNDEFINED";
 
     static Error pyerror(Type);
@@ -107,11 +110,12 @@ public:
     EXA_API virtual PyObject* init(const std::vector<RunParam>& params, const std::vector<GridPoint>& plots) = 0;
     EXA_API virtual PyObject* stop() = 0;
     EXA_API virtual PyObject* msg(const std::string& message, bool append) = 0;
-    EXA_API virtual PyObject* plot2D(std::size_t plotID, double x, double y) = 0;
-    EXA_API virtual PyObject* plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y) = 0;
-    EXA_API virtual PyObject* plotCM(std::size_t plotID, int x, int y, double value) = 0;
-    EXA_API virtual PyObject* plotCMVec(std::size_t plotID, int y, const std::vector<double>& values) = 0;
-    EXA_API virtual PyObject* plotCMFrame(std::size_t plotID, const std::vector<std::vector<double>>& frame) = 0;
+    EXA_API virtual PyObject* datafile(const DatafileConfig& config, PyObject* path, bool prompt) = 0;
+    EXA_API virtual PyObject* plot2D(std::size_t plotID, double x, double y, bool write) = 0;
+    EXA_API virtual PyObject* plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y, bool write) = 0;
+    EXA_API virtual PyObject* plotCM(std::size_t plotID, int x, int y, double value, bool write) = 0;
+    EXA_API virtual PyObject* plotCMVec(std::size_t plotID, int y, const std::vector<double>& values, bool write) = 0;
+    EXA_API virtual PyObject* plotCMFrame(std::size_t plotID, const std::vector<std::vector<double>>& frame, bool write) = 0;
     EXA_API virtual PyObject* clear(std::size_t plotID) = 0;
     EXA_API virtual PyObject* setPlotProperty(std::size_t plotID, const PlotProperty& property, const PlotProperty::Value& value) = 0;
     EXA_API virtual PyObject* getPlotProperty(std::size_t plotID, const PlotProperty& property) = 0;
@@ -156,6 +160,8 @@ public:
     EXA_API ~ScriptModule();
     EXA_API Error reload();
     EXA_API Error run(const std::vector<RunParam>& args);
+    EXA_API void setDatafile(PyObject* pyBorrowed_datafile);
+    EXA_API Error getDatafile(std::filesystem::path& datafile);
 
 private:
     ScriptModule(PyThreadState* tState, const std::filesystem::path& file);
@@ -165,6 +171,7 @@ private:
     PyThreadState* m_tState;
     std::filesystem::path m_file;
     PyObject* m_pyOwned_module;
+    PyObject* m_pyOwned_datafile;
 };
 
 
