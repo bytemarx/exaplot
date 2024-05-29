@@ -229,6 +229,14 @@ Interface::clear(std::size_t plotID)
 }
 
 
+static std::string
+lowercase(std::string s)
+{
+    std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c){ return std::tolower(c); });
+    return s;
+}
+
+
 PyObject*
 Interface::setPlotProperty(
     std::size_t plotID,
@@ -260,21 +268,24 @@ Interface::setPlotProperty(
     case PlotProperty::TWODIMEN_YRANGE_MIN: properties.twoDimen.yRange.min = std::get<double>(value); break;
     case PlotProperty::TWODIMEN_YRANGE_MAX: properties.twoDimen.yRange.max = std::get<double>(value); break;
     case PlotProperty::TWODIMEN_LINE_TYPE:
-        if (std::get<std::string>(value).compare("none") == 0) {
-            properties.twoDimen.line.type = QCPGraph::LineStyle::lsNone;
-        } else if (std::get<std::string>(value).compare("line") == 0) {
-            properties.twoDimen.line.type = QCPGraph::LineStyle::lsLine;
-        } else if (std::get<std::string>(value).compare("step-left") == 0) {
-            properties.twoDimen.line.type = QCPGraph::LineStyle::lsStepLeft;
-        } else if (std::get<std::string>(value).compare("step-right") == 0) {
-            properties.twoDimen.line.type = QCPGraph::LineStyle::lsStepRight;
-        } else if (std::get<std::string>(value).compare("step-center") == 0) {
-            properties.twoDimen.line.type = QCPGraph::LineStyle::lsStepCenter;
-        } else if (std::get<std::string>(value).compare("impulse") == 0) {
-            properties.twoDimen.line.type = QCPGraph::LineStyle::lsImpulse;
-        } else {
-            PyErr_Format(PyExc_ValueError, "invalid line type: %s", std::get<std::string>(value).c_str());
-            return NULL;
+        {
+            auto lineType = lowercase(std::get<std::string>(value));
+            if (lineType.compare("none") == 0) {
+                properties.twoDimen.line.type = QCPGraph::LineStyle::lsNone;
+            } else if (lineType.compare("line") == 0) {
+                properties.twoDimen.line.type = QCPGraph::LineStyle::lsLine;
+            } else if (lineType.compare("step-left") == 0) {
+                properties.twoDimen.line.type = QCPGraph::LineStyle::lsStepLeft;
+            } else if (lineType.compare("step-right") == 0) {
+                properties.twoDimen.line.type = QCPGraph::LineStyle::lsStepRight;
+            } else if (lineType.compare("step-center") == 0) {
+                properties.twoDimen.line.type = QCPGraph::LineStyle::lsStepCenter;
+            } else if (lineType.compare("impulse") == 0) {
+                properties.twoDimen.line.type = QCPGraph::LineStyle::lsImpulse;
+            } else {
+                PyErr_Format(PyExc_ValueError, "invalid line type: %s", std::get<std::string>(value).c_str());
+                return NULL;
+            }
         }
         break;
     case PlotProperty::TWODIMEN_LINE_COLOR:
@@ -288,57 +299,63 @@ Interface::setPlotProperty(
         }
         break;
     case PlotProperty::TWODIMEN_LINE_STYLE:
-        if (std::get<std::string>(value).compare("solid") == 0) {
-            properties.twoDimen.line.style = Qt::PenStyle::SolidLine;
-        } else if (std::get<std::string>(value).compare("dashed") == 0) {
-            properties.twoDimen.line.style = Qt::PenStyle::DashLine;
-        } else if (std::get<std::string>(value).compare("dotted") == 0) {
-            properties.twoDimen.line.style = Qt::PenStyle::DotLine;
-        } else if (std::get<std::string>(value).compare("dash-dotted") == 0) {
-            properties.twoDimen.line.style = Qt::PenStyle::DashDotLine;
-        } else if (std::get<std::string>(value).compare("dash-double-dotted") == 0) {
-            properties.twoDimen.line.style = Qt::PenStyle::DashDotDotLine;
-        } else {
-            PyErr_Format(PyExc_ValueError, "invalid line style: %s", std::get<std::string>(value).c_str());
-            return NULL;
+        {
+            auto lineStyle = lowercase(std::get<std::string>(value));
+            if (lineStyle.compare("solid") == 0) {
+                properties.twoDimen.line.style = Qt::PenStyle::SolidLine;
+            } else if (lineStyle.compare("dashed") == 0) {
+                properties.twoDimen.line.style = Qt::PenStyle::DashLine;
+            } else if (lineStyle.compare("dotted") == 0) {
+                properties.twoDimen.line.style = Qt::PenStyle::DotLine;
+            } else if (lineStyle.compare("dash-dotted") == 0) {
+                properties.twoDimen.line.style = Qt::PenStyle::DashDotLine;
+            } else if (lineStyle.compare("dash-double-dotted") == 0) {
+                properties.twoDimen.line.style = Qt::PenStyle::DashDotDotLine;
+            } else {
+                PyErr_Format(PyExc_ValueError, "invalid line style: %s", std::get<std::string>(value).c_str());
+                return NULL;
+            }
         }
         break;
     case PlotProperty::TWODIMEN_POINTS_SHAPE:
-        if (std::get<std::string>(value).compare("none") == 0) {
-            properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssNone;
-        } else if (std::get<std::string>(value).compare("dot") == 0) {
-            properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssDot;
-        } else if (std::get<std::string>(value).compare("cross") == 0) {
-            properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssCross;
-        } else if (std::get<std::string>(value).compare("plus") == 0) {
-            properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssPlus;
-        } else if (std::get<std::string>(value).compare("circle") == 0) {
-            properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssCircle;
-        } else if (std::get<std::string>(value).compare("disc") == 0) {
-            properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssDisc;
-        } else if (std::get<std::string>(value).compare("square") == 0) {
-            properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssSquare;
-        } else if (std::get<std::string>(value).compare("diamond") == 0) {
-            properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssDiamond;
-        } else if (std::get<std::string>(value).compare("star") == 0) {
-            properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssStar;
-        } else if (std::get<std::string>(value).compare("triangle") == 0) {
-            properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssTriangle;
-        } else if (std::get<std::string>(value).compare("triangle-inverted") == 0) {
-            properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssTriangleInverted;
-        } else if (std::get<std::string>(value).compare("cross-square") == 0) {
-            properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssCrossSquare;
-        } else if (std::get<std::string>(value).compare("plus-square") == 0) {
-            properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssPlusSquare;
-        } else if (std::get<std::string>(value).compare("cross-circle") == 0) {
-            properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssCrossCircle;
-        } else if (std::get<std::string>(value).compare("plus-circle") == 0) {
-            properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssPlusCircle;
-        } else if (std::get<std::string>(value).compare("peace") == 0) {
-            properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssPeace;
-        } else {
-            PyErr_Format(PyExc_ValueError, "invalid shape: %s", std::get<std::string>(value).c_str());
-            return NULL;
+        {
+            auto pointsShape = lowercase(std::get<std::string>(value));
+            if (pointsShape.compare("none") == 0) {
+                properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssNone;
+            } else if (pointsShape.compare("dot") == 0) {
+                properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssDot;
+            } else if (pointsShape.compare("cross") == 0) {
+                properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssCross;
+            } else if (pointsShape.compare("plus") == 0) {
+                properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssPlus;
+            } else if (pointsShape.compare("circle") == 0) {
+                properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssCircle;
+            } else if (pointsShape.compare("disc") == 0) {
+                properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssDisc;
+            } else if (pointsShape.compare("square") == 0) {
+                properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssSquare;
+            } else if (pointsShape.compare("diamond") == 0) {
+                properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssDiamond;
+            } else if (pointsShape.compare("star") == 0) {
+                properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssStar;
+            } else if (pointsShape.compare("triangle") == 0) {
+                properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssTriangle;
+            } else if (pointsShape.compare("triangle-inverted") == 0) {
+                properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssTriangleInverted;
+            } else if (pointsShape.compare("cross-square") == 0) {
+                properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssCrossSquare;
+            } else if (pointsShape.compare("plus-square") == 0) {
+                properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssPlusSquare;
+            } else if (pointsShape.compare("cross-circle") == 0) {
+                properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssCrossCircle;
+            } else if (pointsShape.compare("plus-circle") == 0) {
+                properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssPlusCircle;
+            } else if (pointsShape.compare("peace") == 0) {
+                properties.twoDimen.points.shape = QCPScatterStyle::ScatterShape::ssPeace;
+            } else {
+                PyErr_Format(PyExc_ValueError, "invalid shape: %s", std::get<std::string>(value).c_str());
+                return NULL;
+            }
         }
         break;
     case PlotProperty::TWODIMEN_POINTS_COLOR:
