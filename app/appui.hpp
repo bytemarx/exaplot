@@ -14,7 +14,6 @@
 #include "mainwindow.hpp"
 #include "about.hpp"
 #include "ploteditor.hpp"
-#include "prerun.hpp"
 
 #include <map>
 #include <string>
@@ -63,5 +62,4 @@ private:
     MainWindow* mainWindow;
     About* aboutDialog;
     PlotEditor* plotEditorDialog;
-    PreRun* preRunDialog;
 };

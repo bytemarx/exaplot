@@ -78,13 +78,13 @@ Interface::init(
     this->params = params;
 
     QEventLoop waitLoop;
-    bool status = true;
-    auto conn = QObject::connect(
+    bool plotArrangementIsValid = true;
+    QObject::connect(
         this,
         &Interface::initializationCompleted,
         &waitLoop,
         [&](bool result) {
-            status = result;
+            plotArrangementIsValid = result;
             waitLoop.quit();
         },
         Qt::QueuedConnection
@@ -92,7 +92,7 @@ Interface::init(
     emit this->module_init(params, plots);
     waitLoop.exec();
 
-    if (!status) {
+    if (!plotArrangementIsValid) {
         PyErr_SetString(PyExc_ValueError, "invalid plot arrangement");
         return NULL;
     }
@@ -126,8 +126,7 @@ Interface::datafile(const exa::DatafileConfig& config, PyObject* path, bool prom
 {
     CHECK_NONRUN_ONLY
 
-    if (path != NULL)
-        this->module->setDatafile(path);
+    this->module->setDatafile(path);
     emit this->module_datafile(config, prompt);
     Py_RETURN_NONE;
 }
@@ -666,7 +665,7 @@ Interface::initDatafileAndRun(const std::vector<exa::RunParam> &args)
 
     QEventLoop waitLoop;
     bool datafileInitializationError = false;
-    auto conn = QObject::connect(
+    QObject::connect(
         this,
         &Interface::datafileInitializationCompleted,
         &waitLoop,

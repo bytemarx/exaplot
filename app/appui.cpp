@@ -16,7 +16,6 @@ AppUI::AppUI(QObject* parent)
     , mainWindow{new MainWindow}
     , aboutDialog{new About{this->mainWindow}}
     , plotEditorDialog{new PlotEditor{this->mainWindow}}
-    , preRunDialog{new PreRun{this->mainWindow}}
 {
     this->mainWindow->setPlots(this->plotEditorDialog->plots());
 

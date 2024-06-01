@@ -221,10 +221,13 @@ public:
 Q_SIGNALS:
     void error(const QString&);
     void resetCompleted(bool, const QString&);
+    void opened(bool, const QString&);
+    void closed(bool, const QString&);
 
 public Q_SLOTS:
     void configure(const exa::DatafileConfig& config);
-    void reset(const std::filesystem::path& path, std::size_t datasets);
+    void open(const std::filesystem::path& path, std::size_t datasets);
+    void close();
 
     void write2D(std::size_t plotIdx, double x, double y);
     void write2DVec(std::size_t plotIdx, const std::vector<double>& x, const std::vector<double>& y);

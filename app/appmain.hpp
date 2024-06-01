@@ -46,7 +46,8 @@ Q_SIGNALS:
     void scriptStopped();
 
     void dmConfigure(const exa::DatafileConfig& config);
-    void dmReset(const std::filesystem::path& path, std::size_t datasets);
+    void dmOpen(const std::filesystem::path& path, std::size_t datasets);
+    void dmClose();
     void dmWrite2D(std::size_t plotIdx, double x, double y);
     void dmWrite2DVec(std::size_t plotIdx, const std::vector<double>& x, const std::vector<double>& y);
     void dmWriteCM(std::size_t plotIdx, int x, int y, double value);

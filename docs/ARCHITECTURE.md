@@ -101,19 +101,18 @@ signals to the application manager that the run has completed.
 ```
 (EL) = event loop (thread yields execution to event loop)
 . = idle state (thread awaiting signal(s))
-? = unknown state (e.g. signals may still be queued from previous run)
 
                    PYTHON                        APP                          DATA
                    THREAD                       THREAD                       THREAD
 LOAD ==============================================================================================
-                      ,--------------------- AppMain::load                      ?
-                      |                            |                            ?
-                      v                            v                            ?
-            Interface::loadScript                (EL)                           ?
-                      |                            .                            ?
-                      v                            .                            ?
-             Interface::datafile ------------------.                            ?
-                      |                            |                          (EL)
+                      ,--------------------- AppMain::load                    (EL)
+                      |                            |                            .
+                      v                            v                            .
+            Interface::loadScript                (EL)                           .
+                      |                            .                            .
+                      v                            .                            .
+             Interface::datafile ------------------.                            .
+                      |                            |                            .
                       v                            v                            .
                     (EL)               AppMain::module_datafile ----------------.
                       .                            |                            |
@@ -136,32 +135,26 @@ RUN ============================================================================
                       .               AppMain::initializeDatafile --------------.
                       .                            .                            |
                       .                            .                            v
-                      .                            ,------------------ DataManager::reset
+                      .                            ,------------------ DataManager::open
                       .                            |                            |
                       .                            v                            v
                       ,-------------- AppMain::initializeDatafile             (EL)
-                      |                            |
-                      v                            v
-        Interface::initDatafileAndRun            (EL)
-                      |                            .
-                      v                            .
-            Interface::runScript ------------------.
-                      |                            |
-                      v                            v
-                    (EL)                 AppMain::runComplete
+                      |                            |                            .
+                      v                            v                            .
+        Interface::initDatafileAndRun            (EL)                           .
+                      |                            .                            .
+                      v                            .                            .
+            Interface::runScript ------------------.                            .
+                      |                            |                            .
+                      v                            v                            .
+                    (EL)                 AppMain::runComplete ------------------.
+                                                   .                            |
+                                                   .                            v
+                                                   ,------------------ DataManager::close
+                                                   |                            |
+                                                   v                            v
+                                         AppMain::runComplete                 (EL)
 ```
 
-Note that in a RUN-RUN sequence, the state of the data thread is unknown (for the same reasons it's
-initially unknown in the diagram above during the load phase). Until the data manager resets its
-data, it's possible for the data thread to have a queue of signals awaiting execution from a
-previous run (meaning it can occur in both a RUN-LOAD-RUN sequence and a RUN-RUN sequence). The app
-thread synchronizes with the data thread at the beginning of each run by waiting for the data
-manager to complete its reset during the data file initialization (any queued signals in the data
-thread will execute before the reset), so the data thread is always in a consistent state when the
-run function is called.
-
 Not shown are the (possible) signals emitted from the Python thread to the app thread (and
-subsequently to the data thread) during the script's run. As mentioned , it's possible for these
-signals to still be queued within the data thread when the run completes (the execution of the
-`AppMain::runComplete` slot ensures that no signals are queued within the app thread from the
-script's run, so only the data thread may have outstanding signals).
+subsequently to the data thread) during the script's run.

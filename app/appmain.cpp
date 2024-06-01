@@ -63,7 +63,8 @@ AppMain::AppMain(int& argc, char* argv[], const Config& config)
     QObject::connect(this, &AppMain::scriptRan, &this->iface, &Interface::runScript, Qt::QueuedConnection);
     QObject::connect(this, &AppMain::scriptStopped, &this->iface, &Interface::requestStop);
     QObject::connect(this, &AppMain::dmConfigure, &this->dm, &DataManager::configure, Qt::QueuedConnection);
-    QObject::connect(this, &AppMain::dmReset, &this->dm, &DataManager::reset, Qt::QueuedConnection);
+    QObject::connect(this, &AppMain::dmOpen, &this->dm, &DataManager::open, Qt::QueuedConnection);
+    QObject::connect(this, &AppMain::dmClose, &this->dm, &DataManager::close, Qt::QueuedConnection);
     QObject::connect(this, &AppMain::dmWrite2D, &this->dm, &DataManager::write2D, Qt::QueuedConnection);
     QObject::connect(this, &AppMain::dmWrite2DVec, &this->dm, &DataManager::write2DVec, Qt::QueuedConnection);
     QObject::connect(this, &AppMain::dmWriteCM, &this->dm, &DataManager::writeCM, Qt::QueuedConnection);
@@ -192,20 +193,18 @@ AppMain::initializeDatafile(std::filesystem::path datafile)
     QEventLoop waitLoop;
     bool datafileError = false;
     QString datafileErrorMsg;
-    bool completed = false;
-    auto conn = QObject::connect(
+    QObject::connect(
         &this->dm,
-        &DataManager::resetCompleted,
+        &DataManager::opened,
         &waitLoop,
         [&](bool error, const QString& message) {
-            completed = true;
             datafileError = error;
             datafileErrorMsg = message;
             waitLoop.quit();
         },
         Qt::QueuedConnection
     );
-    emit this->dmReset(datafile, this->ui.plotCount() + 1);
+    emit this->dmOpen(datafile, this->ui.plotCount() + 1);
     waitLoop.exec();
 
     emit this->iface.datafileInitializationCompleted(datafileError);
@@ -224,10 +223,30 @@ AppMain::updateScriptStatus(const QString& scriptStatus)
 void
 AppMain::runComplete(const QString& scriptStatus)
 {
+    QEventLoop waitLoop;
+    bool datafileError = false;
+    QString datafileErrorMsg;
+    QObject::connect(
+        &this->dm,
+        &DataManager::closed,
+        &waitLoop,
+        [&](bool error, const QString& message) {
+            datafileError = error;
+            datafileErrorMsg = message;
+            waitLoop.quit();
+        },
+        Qt::QueuedConnection
+    );
+    emit this->dmClose();
+    waitLoop.exec();
+
     this->scriptRunning = false;
     this->ui.setScriptStatus(scriptStatus);
     this->ui.enableStop(false);
     this->ui.enableRun(true);
+
+    if (datafileError)
+        this->scriptError(datafileErrorMsg, "Data Error");
 }
 
 

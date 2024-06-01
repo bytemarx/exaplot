@@ -122,40 +122,56 @@ DataManager::setEnabled(bool enabled)
 
 
 void
-DataManager::reset(const std::filesystem::path& path, std::size_t datasets)
+DataManager::open(const std::filesystem::path& path, std::size_t datasets)
 {
-    if (!this->m_enabled) {
-        emit this->resetCompleted(false, "");
-        return;
-    }
+    if (this->m_enabled) {
+        assert(this->m_fileID == H5I_INVALID_HID);
 
-    this->m_datasets.clear();
-    if (this->m_fileID != H5I_INVALID_HID) {
-        if (H5Fclose(this->m_fileID) < 0) {
-            emit this->resetCompleted(true, "Error resetting data: failed to close HDF5 file");
+        this->m_fileID = H5Fcreate(path.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        if (this->m_fileID == H5I_INVALID_HID) {
+            emit this->opened(true, "failed to create HDF5 file");
+            return;
+        }
+
+        // TODO: zeroth/non-plot dataset
+        try {
+            for (std::size_t i = 1; i < datasets; ++i) {
+                auto datasetName = std::string{"dataset"} + std::to_string(i);
+                this->m_datasets.push_back(DataSetGroup{this->m_fileID, datasetName});
+            }
+        } catch (const std::runtime_error& e) {
+            this->m_datasets.clear();
+            auto status = H5Fclose(this->m_fileID);
             this->m_fileID = H5I_INVALID_HID;
+            auto message = QString{"error creating dataset: "}.append(e.what());
+            if (status < 0)
+                message.append(" (failed to close HDF5 file while handling error)");
+            emit this->opened(true, message);
             return;
         }
     }
 
-    this->m_fileID = H5Fcreate(path.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    if (this->m_fileID == H5I_INVALID_HID) {
-        emit this->resetCompleted(true, "Error resetting data: failed to create HDF5 file");
-        return;
-    }
+    emit this->opened(false, "");
+}
 
-    // TODO: zeroth/non-plot dataset
-    try {
-        for (std::size_t i = 1; i < datasets; ++i) {
-            auto datasetName = std::string{"dataset"} + std::to_string(i);
-            this->m_datasets.push_back(DataSetGroup{this->m_fileID, datasetName});
+
+void
+DataManager::close()
+{
+    if (this->m_enabled) {
+        this->m_datasets.clear();
+
+        if (this->m_fileID != H5I_INVALID_HID) {
+            auto status = H5Fclose(this->m_fileID);
+            this->m_fileID = H5I_INVALID_HID;
+            if (status < 0) {
+                emit this->closed(true, "failed to close HDF5 file");
+                return;
+            }
         }
-    } catch (const std::runtime_error& e) {
-        emit this->resetCompleted(true, QString{"Error resetting data: "}.append(e.what()));
-        return;
     }
 
-    emit this->resetCompleted(false, "");
+    emit this->closed(false, "");
 }
 
 
