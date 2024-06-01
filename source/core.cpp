@@ -482,6 +482,11 @@ Core::~Core()
             //   manually decrement its reference and nullify its
             //   contents (use of a script with a destroyed core is
             //   a fatal error).
+            if (h_script.get()->m_pyOwned_datafile) {
+                assert(h_script.get()->m_pyOwned_datafile->ob_refcnt > 0);
+                Py_DECREF(h_script.get()->m_pyOwned_datafile);
+                h_script.get()->m_pyOwned_datafile = NULL;
+            }
             if (h_script.get()->m_pyOwned_module) {
                 assert(h_script.get()->m_pyOwned_module->ob_refcnt > 0);
                 Py_DECREF(h_script.get()->m_pyOwned_module);

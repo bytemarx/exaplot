@@ -26,8 +26,8 @@ ScriptModule::ScriptModule(PyThreadState* tState, const std::filesystem::path& f
 
 ScriptModule::~ScriptModule()
 {
-    Py_XDECREF(this->m_pyOwned_module);
     Py_XDECREF(this->m_pyOwned_datafile);
+    Py_XDECREF(this->m_pyOwned_module);
 }
 
 
@@ -68,12 +68,14 @@ ScriptModule::load()
     if (codeObject == NULL)
         return Error::pyerror(Error::IMPORT);
 
+    Py_XDECREF(this->m_pyOwned_datafile);
+    this->m_pyOwned_datafile = NULL;
+
     PyObject* pyOwned_module = PyImport_ExecCodeModule(EXA_SCRIPT_MODULE, codeObject);
     Py_DECREF(codeObject);
     if (pyOwned_module == NULL)
         return Error::pyerror(Error::IMPORT);
-    if (this->m_pyOwned_module != NULL)
-        Py_DECREF(this->m_pyOwned_module);
+    Py_XDECREF(this->m_pyOwned_module);
     this->m_pyOwned_module = pyOwned_module;
 
     return Error{Error::NONE};
@@ -184,11 +186,9 @@ void
 ScriptModule::setDatafile(PyObject* pyBorrowed_datafile)
 {
     this->ensureThreadState();
-    if (this->m_pyOwned_datafile != NULL)
-        Py_DECREF(this->m_pyOwned_datafile);
+    Py_XDECREF(this->m_pyOwned_datafile);
     this->m_pyOwned_datafile = pyBorrowed_datafile;
-    if (this->m_pyOwned_datafile != NULL)
-        Py_INCREF(this->m_pyOwned_datafile);
+    Py_XINCREF(this->m_pyOwned_datafile);
 }
 
 
