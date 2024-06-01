@@ -17,6 +17,7 @@ class InvalidTest : public ModuleTest
 public:
     void init(const std::vector<exa::RunParam>&, const std::vector<exa::GridPoint>&) override;
     void msg(const std::string&, bool) override;
+    void datafile(const exa::DatafileConfig& config, PyObject* path, bool prompt) override;
     void plot2D(std::size_t, double, double, bool) override;
     void plot2DVec(std::size_t, const std::vector<double>&, const std::vector<double>&) override;
     void clear(std::size_t) override;
@@ -48,6 +49,21 @@ void
 InvalidTest::msg(
     [[maybe_unused]] const std::string& message,
     [[maybe_unused]] bool append)
+{
+    ASSERT_FALSE(true);
+}
+
+
+TEST_F(InvalidTest, TestDatafile)
+{
+    this->run("test-invalid-datafile.py");
+}
+
+void
+InvalidTest::datafile(
+    [[maybe_unused]] const exa::DatafileConfig& config,
+    [[maybe_unused]] PyObject* path,
+    [[maybe_unused]] bool prompt)
 {
     ASSERT_FALSE(true);
 }

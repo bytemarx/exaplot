@@ -17,6 +17,7 @@ class ComprehensiveTest : public ModuleTest
 public:
     void init(const std::vector<exa::RunParam>& params, const std::vector<exa::GridPoint>& plots) override;
     void msg(const std::string& message, bool append) override;
+    void datafile(const exa::DatafileConfig& config, PyObject* path, bool prompt) override {}
     void plot2D(std::size_t plotID, double x, double y, bool write) override;
     void plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y) override {};
     void clear(std::size_t plotID) override {};

@@ -85,6 +85,14 @@ ModuleTest::Interface::msg(const std::string& message, bool append)
 
 
 PyObject*
+ModuleTest::Interface::datafile(const exa::DatafileConfig& config, PyObject* path, bool prompt)
+{
+    this->m_tester->datafile(config, path, prompt);
+    Py_RETURN_NONE;
+}
+
+
+PyObject*
 ModuleTest::Interface::plot2D(std::size_t plotID, double x, double y, bool write)
 {
     this->m_tester->plot2D(plotID, x, y, write);

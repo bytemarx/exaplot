@@ -22,6 +22,7 @@ class ModuleTest : public ::testing::Test
 public:
     virtual void init(const std::vector<exa::RunParam>& params, const std::vector<exa::GridPoint>& plots) = 0;
     virtual void msg(const std::string& message, bool append) = 0;
+    virtual void datafile(const exa::DatafileConfig& config, PyObject* path, bool prompt) = 0;
     virtual void plot2D(std::size_t plotID, double x, double y, bool write) = 0;
     virtual void plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y) = 0;
     virtual void clear(std::size_t plotID) = 0;
@@ -34,7 +35,7 @@ private:
         PyObject* init(const std::vector<exa::RunParam>&, const std::vector<exa::GridPoint>&) override;
         PyObject* stop() override { Py_RETURN_NONE; }
         PyObject* msg(const std::string&, bool) override;
-        PyObject* datafile(const exa::DatafileConfig&, PyObject*, bool) override { Py_RETURN_NONE; }
+        PyObject* datafile(const exa::DatafileConfig&, PyObject*, bool) override;
         PyObject* plot2D(std::size_t, double, double, bool) override;
         PyObject* plot2DVec(std::size_t, const std::vector<double>&, const std::vector<double>&, bool) override;
         PyObject* plotCM(std::size_t, int, int, double, bool) override { Py_RETURN_NONE; }

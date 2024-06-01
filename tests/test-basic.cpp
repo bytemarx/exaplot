@@ -17,12 +17,14 @@ class BasicTest : public ModuleTest
 public:
     void init(const std::vector<exa::RunParam>& params, const std::vector<exa::GridPoint>& plots) override;
     void msg(const std::string& message, bool append) override;
+    void datafile(const exa::DatafileConfig& config, PyObject* path, bool prompt) override;
     void plot2D(std::size_t plotID, double x, double y, bool write) override;
     void plot2DVec(std::size_t plotID, const std::vector<double>& x, const std::vector<double>& y) override;
     void clear(std::size_t plotID) override;
 protected:
     BasicTest() { this->scriptsDir = this->scriptsDir / "basic"; }
 };
+
 
 // init(a='', b='', c=1, d=10.0)
 
@@ -73,6 +75,7 @@ BasicTest::init(
     }
 }
 
+
 // msg("test", append=False)
 
 TEST_F(BasicTest, TestMsg)
@@ -86,6 +89,23 @@ BasicTest::msg(const std::string& message, bool append)
     ASSERT_STREQ(message.c_str(), "test");
     ASSERT_FALSE(append);
 }
+
+
+// datafile()
+
+TEST_F(BasicTest, TestDatafile)
+{
+    this->run("test-basic-datafile.py");
+}
+
+void
+BasicTest::datafile(const exa::DatafileConfig& config, PyObject* path, bool prompt)
+{
+    ASSERT_TRUE(config.enable);
+    ASSERT_FALSE(prompt);
+    ASSERT_EQ(path, nullptr);
+}
+
 
 // plot(1, 1, 2.2)
 
@@ -103,6 +123,7 @@ BasicTest::plot2D(std::size_t plotID, double x, double y, bool write)
     ASSERT_TRUE(write);
 }
 
+
 // plotVec(2, [0, 1, 2, 3], [1, 2, 3.3, 4.4])
 
 TEST_F(BasicTest, TestPlotVec)
@@ -119,6 +140,7 @@ BasicTest::plot2DVec(std::size_t plotID, const std::vector<double>& x, const std
     std::vector<double> expected_y{1, 2, 3.3, 4.4};
     ASSERT_EQ(y, expected_y);
 }
+
 
 // plot(3)
 
