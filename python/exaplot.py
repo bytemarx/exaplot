@@ -1,5 +1,6 @@
 from numbers import Real
 from os import PathLike
+from typing import Callable
 
 from _exaplot import ( # type: ignore
     RunParam,
@@ -21,8 +22,11 @@ def breakpoint():
 
 
 def datafile(**kwargs):
-    if "path" in kwargs and not isinstance(kwargs["path"], PathLike):
-        raise TypeError("'path' argument must be type 'PathLike'")
+    if (
+        (path := kwargs.get("path"))
+        and not (isinstance(path, PathLike) or isinstance(path, Callable))
+    ):
+        raise TypeError("'path' argument must be type 'PathLike' or 'Callable'")
     return _datafile(**kwargs)
 
 
