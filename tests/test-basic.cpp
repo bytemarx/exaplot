@@ -101,7 +101,7 @@ TEST_F(BasicTest, TestDatafile)
 void
 BasicTest::datafile(const exa::DatafileConfig& config, PyObject* path, bool prompt)
 {
-    ASSERT_TRUE(config.enable);
+    ASSERT_TRUE(config.enable && *config.enable);
     ASSERT_FALSE(prompt);
     ASSERT_EQ(path, nullptr);
 }
