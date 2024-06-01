@@ -98,6 +98,22 @@ DataManager::~DataManager()
 }
 
 
+/**
+ * @brief Reset data manager settings to default values.
+ * 
+ */
+void
+DataManager::reset()
+{
+    this->setEnabled(false);
+}
+
+
+/**
+ * @brief Configure data manager settings.
+ * 
+ * @param config 
+ */
 void
 DataManager::configure(const exa::DatafileConfig& config)
 {

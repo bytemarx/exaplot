@@ -45,6 +45,7 @@ Q_SIGNALS:
     void scriptRan(const std::vector<std::string>&);
     void scriptStopped();
 
+    void dmReset();
     void dmConfigure(const exa::DatafileConfig& config);
     void dmOpen(const std::filesystem::path& path, std::size_t datasets);
     void dmClose();

@@ -62,6 +62,7 @@ AppMain::AppMain(int& argc, char* argv[], const Config& config)
     QObject::connect(this, &AppMain::scriptLoaded, &this->iface, &Interface::loadScript, Qt::QueuedConnection);
     QObject::connect(this, &AppMain::scriptRan, &this->iface, &Interface::runScript, Qt::QueuedConnection);
     QObject::connect(this, &AppMain::scriptStopped, &this->iface, &Interface::requestStop);
+    QObject::connect(this, &AppMain::dmReset, &this->dm, &DataManager::reset, Qt::QueuedConnection);
     QObject::connect(this, &AppMain::dmConfigure, &this->dm, &DataManager::configure, Qt::QueuedConnection);
     QObject::connect(this, &AppMain::dmOpen, &this->dm, &DataManager::open, Qt::QueuedConnection);
     QObject::connect(this, &AppMain::dmClose, &this->dm, &DataManager::close, Qt::QueuedConnection);
@@ -374,11 +375,28 @@ AppMain::module_showPlot(std::size_t plotIdx, QPlot::Type plotType)
 }
 
 
+/**
+ * @brief Resets the application to the pre-load state. This should
+ * be called immediately before a script is loaded.
+ * 
+ * The pre-load state resets the following elements to their
+ * respective default values:
+ * - datafile settings
+ *   - datafile is disabled
+ *   - prompt is disabled
+ *   - path is set to "data.hdf5"
+ * - UI
+ *   - plots are reset to a single (new) plot with default properties
+ *   - script message box is cleared
+ *   - script status box is cleared
+ * 
+ */
 void
 AppMain::reset()
 {
     this->promptBeforeRun = false;
     this->ui.reset();
+    emit this->dmReset();
 }
 
 

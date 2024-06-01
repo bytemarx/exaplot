@@ -225,6 +225,7 @@ Q_SIGNALS:
     void closed(bool, const QString&);
 
 public Q_SLOTS:
+    void reset();
     void configure(const exa::DatafileConfig& config);
     void open(const std::filesystem::path& path, std::size_t datasets);
     void close();
