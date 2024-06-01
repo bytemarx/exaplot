@@ -293,7 +293,7 @@ datafile_keywords[] = {
 PyObject*
 exa_datafile(PyObject* module, PyObject* args, PyObject* kwargs)
 {
-    int c_enable = -1;
+    int c_enable = 1;
     PyObject* pyBorrowed_path = NULL;
     int c_prompt = 0;
     if (!PyArg_ParseTupleAndKeywords(
