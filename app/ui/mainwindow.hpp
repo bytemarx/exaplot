@@ -36,7 +36,7 @@ public:
     void setMessage(const QString& = {}, bool = false);
     void initArgs(const std::vector<std::pair<std::string, std::string>>&);
     std::vector<std::string> scriptArgs() const;
-    void setScriptStatus(const QString&);
+    void setScriptStatus(const QString& = {});
     QPlot* plot(std::size_t);
     std::size_t plotCount() const;
     void enableRun(bool);

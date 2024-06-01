@@ -34,7 +34,7 @@ public:
     std::vector<std::string> scriptArgs() const;
     void setMessage(const QString&, bool);
     bool init(const std::vector<exa::GridPoint>&, const std::vector<std::pair<std::string, std::string>>&);
-    void setScriptStatus(const QString& = "");
+    void setScriptStatus(const QString&);
     QPlot* plot(std::size_t);
     std::size_t plotCount() const;
     void enableRun(bool);

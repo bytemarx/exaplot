@@ -81,6 +81,7 @@ AppUI::reset()
     this->mainWindow->setPlots(this->plotEditorDialog->plots());
     this->mainWindow->plot(0)->clear();
     this->mainWindow->setMessage();
+    this->mainWindow->setScriptStatus();
 }
 
 

@@ -155,7 +155,6 @@ AppMain::load(const QString& file)
         );
         return;
     }
-    this->ui.setScriptStatus();
     this->reset();
     emit this->scriptLoaded(file);
 }
