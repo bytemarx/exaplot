@@ -22,10 +22,16 @@ def run(ring_density: float):
         r = ring_density * math.sqrt(x**2 + y**2) + 0.01
         return 4 * x * (math.cos(r + 2 + phi) / (r - math.sin(r + 2 + phi) / r))
 
-    for t in range(500):
+    sec_per_frame = 1.0 / 30.0
+    t_i = time.time()
+    for frame in range(500):
         breakpoint()
         plot([
-            [f(0.1 * col - 5.0, 0.1 * row - 5.0, -0.1 * t) for col in range(100)]
+            [f(0.1 * col - 5.0, 0.1 * row - 5.0, -0.1 * frame) for col in range(100)]
             for row in range(100)
         ])
-        time.sleep(0.02)
+        t_f = time.time()
+        dt = t_f - t_i
+        if dt < sec_per_frame:
+            time.sleep(sec_per_frame - dt)
+        t_i = t_f
