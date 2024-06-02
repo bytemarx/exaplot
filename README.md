@@ -1,3 +1,29 @@
+# ExaPlot
+
+A framework for plotting and collecting real-time data with Python.
+
+
+A trivial example script:
+```python
+import math
+
+from exaplot import datafile, init, plot, stop
+
+# Initialize the data file and plots (we'll just use the default
+# settings for each), and set parameters for the 'run' function.
+datafile()
+init(frequency=5.0)
+
+
+def run(frequency: float):
+    x = -10.0
+    while x <= 10.0 and not stop():
+        y = 10 * math.sin(frequency * math.pi * x) * math.exp(-(x**2)/10.0)
+        plot[1](x, y)
+        x += 0.001
+```
+
+
 ### Supported Platforms
 - Linux
 - Windows
@@ -7,17 +33,20 @@
 
 Requires:
 - CMake 3.22+
-- CPython dependencies
+- [CPython dependencies](https://devguide.python.org/getting-started/setup-building/index.html#build-dependencies)
 - Qt6
+- HDF5 dependencies
 
 ### Linux (Bash)
 ```sh
+git submodule update --init --recursive
 cmake -DCMAKE_BUILD_TYPE=Release -B build/
 make -j -C build/
 ```
 
 ### Windows (PowerShell)
 ```powershell
+git submodule update --init --recursive
 $Env:QT_DIR = "C:\Qt\6.4.0\msvc2019_64"
 $Env:MSBUILD = "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe"
 .\winbuild.ps1
@@ -58,3 +87,29 @@ search_paths = [
 Note that external libraries **must** match the Python version of the application (currently 3.12).
 Libraries should be set up externally via `venv`/`pip` or some other Python environment management
 tool(s).
+
+
+## Data Files
+Data is saved using the [HDF5 file format](https://www.hdfgroup.org/solutions/hdf5/). If enabled,
+a new data file will be generated each run containing datasets for each plot. Calls to `plot()`
+will append new data to the respective dataset (unless the `write` argument is `False`, e.g.
+`plot[1](x, y, write=False)`). For each plot, the data file will have two datasets corresponding to
+each plot type (so for each plot, there will be a dataset for 2D plot data and a dataset for
+colormap data).
+
+Dataset names are formed by the following convention:
+```
+dataset<#>.<type>
+```
+where `<#>` corresponds to the plot ID, and `<type>` is the plot type (either `twodimen` or
+`colormap`). So, for example, the 2D dataset of plot 1 would have the name `dataset1.twodimen`.
+
+Anything that can read HDF5 files should be able to provide access to the data. For example, we can
+use the [HDF5 Python library](https://docs.h5py.org/en/stable/):
+```python
+import h5py
+
+with h5py.File('data.hdf5', 'r') as f:
+    dataset = f['dataset1.twodimen']
+    ...
+```
