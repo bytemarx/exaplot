@@ -30,13 +30,13 @@ def datafile(**kwargs):
     return _datafile(**kwargs)
 
 
-class _PlotProperties:
+class PlotProperties:
     class _Property:
         def __init_subclass__(cls, /, **kwargs):
             for p, t in kwargs.items():
-                def getter(self: '_PlotProperties._Property', p=p):
+                def getter(self: 'PlotProperties._Property', p=p):
                     return _get_plot_property(self._n, f"{self._id}.{p}")
-                def setter(self: '_PlotProperties._Property', value, p=p, t=t):
+                def setter(self: 'PlotProperties._Property', value, p=p, t=t):
                     if not isinstance(value, t):
                         raise TypeError(f"{self._id}.{p} must be type '{t.__name__}'")
                     _set_plot_property(self._n, f"{self._id}.{p}", value)
@@ -81,7 +81,7 @@ class _PlotProperties:
 
         @property
         def x_range(self):
-            return _PlotProperties.Range(self._n, f"{self._id}.x_range")
+            return PlotProperties.Range(self._n, f"{self._id}.x_range")
 
         @x_range.setter
         def x_range(self, value: tuple[int, int]):
@@ -92,7 +92,7 @@ class _PlotProperties:
 
         @property
         def y_range(self):
-            return _PlotProperties.Range(self._n, f"{self._id}.y_range")
+            return PlotProperties.Range(self._n, f"{self._id}.y_range")
 
         @y_range.setter
         def y_range(self, value: tuple[int, int]):
@@ -104,7 +104,7 @@ class _PlotProperties:
     class TwoDimen(_Tab, autorescale_axes=bool):
         @property
         def line(self):
-            return _PlotProperties.Line(self._n, f"{self._id}.line")
+            return PlotProperties.Line(self._n, f"{self._id}.line")
 
         @line.setter
         def line(self, value: tuple[str, str, str]):
@@ -116,7 +116,7 @@ class _PlotProperties:
 
         @property
         def points(self):
-            return _PlotProperties.Points(self._n, f"{self._id}.points")
+            return PlotProperties.Points(self._n, f"{self._id}.points")
 
         @points.setter
         def points(self, value: tuple[str, str, float]):
@@ -129,7 +129,7 @@ class _PlotProperties:
     class ColorMap(_Tab, autorescale_axes=bool, autorescale_data=bool):
         @property
         def z_range(self):
-            return _PlotProperties.Range(self._n, f"{self._id}.z_range")
+            return PlotProperties.Range(self._n, f"{self._id}.z_range")
 
         @z_range.setter
         def z_range(self, value: tuple[int, int]):
@@ -140,7 +140,7 @@ class _PlotProperties:
 
         @property
         def data_size(self):
-            return _PlotProperties.DataSize(self._n, f"{self._id}.data_size")
+            return PlotProperties.DataSize(self._n, f"{self._id}.data_size")
 
         @data_size.setter
         def data_size(self, value: tuple[int, int]):
@@ -151,7 +151,7 @@ class _PlotProperties:
 
         @property
         def color(self):
-            return _PlotProperties.Color(self._n, f"{self._id}.color")
+            return PlotProperties.Color(self._n, f"{self._id}.color")
 
         @color.setter
         def color(self, value: tuple[str, str]):
@@ -161,7 +161,7 @@ class _PlotProperties:
             self.color.max = value[1]
 
 
-class _Plot:
+class Plot:
     def __init__(self, n: int):
         self._n = n
 
@@ -200,7 +200,7 @@ class _Plot:
 
     @property
     def min_size(self):
-        return _PlotProperties.MinSize(self._n, "min_size")
+        return PlotProperties.MinSize(self._n, "min_size")
 
     @min_size.setter
     def min_size(self, value: tuple[int, int]):
@@ -211,22 +211,22 @@ class _Plot:
 
     @property
     def two_dimen(self):
-        return _PlotProperties.TwoDimen(self._n, "two_dimen")
+        return PlotProperties.TwoDimen(self._n, "two_dimen")
 
     @property
     def color_map(self):
-        return _PlotProperties.ColorMap(self._n, "color_map")
+        return PlotProperties.ColorMap(self._n, "color_map")
 
 
 class _Plots:
     def __init__(self):
-        self._plots: dict[int, _Plot] = {1: _Plot(1)}
+        self._plots: dict[int, Plot] = {1: Plot(1)}
 
     def __getitem__(self, index: int):
         try:
             return self._plots[index]
         except KeyError:
-            self._plots[index] = _Plot(index)
+            self._plots[index] = Plot(index)
             return self._plots[index]
 
 
