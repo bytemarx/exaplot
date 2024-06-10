@@ -45,10 +45,17 @@ make -j -C build/
 ```
 
 ### Windows (PowerShell)
+Set
+- `QT_DIR` to your Qt6 MSVC folder
+- `MSBUILD` to your `MSBuild.exe`
+- `VCPKG_ROOT` to your vcpkg folder (with [zlib](https://vcpkg.io/en/package/zlib.html) installed)
+
+and run the `winbuild.ps1` PowerShell script:
 ```powershell
 git submodule update --init --recursive
 $Env:QT_DIR = "C:\Qt\6.4.0\msvc2019_64"
-$Env:MSBUILD = "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe"
+$Env:MSBUILD = "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe"
+$Env:VCPKG_ROOT = "C:\vcpkg"
 .\winbuild.ps1
 ```
 

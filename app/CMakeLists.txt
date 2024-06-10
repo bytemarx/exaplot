@@ -21,7 +21,10 @@ ExternalProject_Add(
 	hdf5
 	PREFIX ${CMAKE_BINARY_DIR}/app/hdf5
 	SOURCE_DIR ${CMAKE_SOURCE_DIR}/app/hdf5
-	CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+	CMAKE_ARGS
+		-DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+		-DCMAKE_BUILD_TYPE=Release
+		-DBUILD_TESTING=OFF
 )
 
 file(GLOB APP_SOURCES_UI ui/*.cpp)
@@ -45,6 +48,7 @@ add_executable(app
 	$<TARGET_OBJECTS:qplot>
 	datamanager.cpp
 )
+add_dependencies(app hdf5)
 
 target_include_directories(app PUBLIC
 	ui
@@ -61,6 +65,19 @@ set_target_properties(app PROPERTIES
 	INSTALL_RPATH "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}"
 )
 
+if(WIN32)
+	set(HDF5_LIBS
+		${CMAKE_BINARY_DIR}/app/hdf5/lib/libhdf5.lib
+		ZLIB::ZLIB
+		Shlwapi
+	)
+else()
+	set(HDF5_LIBS
+		${CMAKE_BINARY_DIR}/app/hdf5/lib/libhdf5.a
+		ZLIB::ZLIB
+	)
+endif()
+
 target_link_libraries(app PRIVATE
 	exaplot
 	Qt6::Core
@@ -68,6 +85,5 @@ target_link_libraries(app PRIVATE
 	Qt6::PrintSupport
 	Qt6::Svg
 	Qt6::Widgets
-	${CMAKE_BINARY_DIR}/app/hdf5/lib/libhdf5.a
-	ZLIB::ZLIB
+    ${HDF5_LIBS}
 )

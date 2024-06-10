@@ -143,7 +143,7 @@ DataManager::open(const std::filesystem::path& path, std::size_t datasets)
     if (this->m_enabled) {
         assert(this->m_fileID == H5I_INVALID_HID);
 
-        this->m_fileID = H5Fcreate(path.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        this->m_fileID = H5Fcreate(path.string().c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
         if (this->m_fileID == H5I_INVALID_HID) {
             emit this->opened(true, "failed to create HDF5 file");
             return;
@@ -198,7 +198,7 @@ DataManager::write2D(std::size_t plotIdx, double x, double y)
 
     try {
         this->m_datasets.at(plotIdx).dataset2D()->write(x, y);
-    } catch (const std::out_of_range& e) {
+    } catch (const std::out_of_range&) {
         emit this->error(QString{"Error writing data: plot index out of range"});
     } catch (const std::runtime_error& e) {
         emit this->error(QString{"Error writing data: "}.append(e.what()));
@@ -213,7 +213,7 @@ DataManager::write2DVec(std::size_t plotIdx, const std::vector<double>& x, const
 
     try {
         this->m_datasets.at(plotIdx).dataset2D()->write(x, y);
-    } catch (const std::out_of_range& e) {
+    } catch (const std::out_of_range&) {
         emit this->error(QString{"Error writing data: plot index out of range"});
     } catch (const std::runtime_error& e) {
         emit this->error(QString{"Error writing data: "}.append(e.what()));
@@ -228,7 +228,7 @@ DataManager::writeCM(std::size_t plotIdx, int x, int y, double value)
 
     try {
         this->m_datasets.at(plotIdx).datasetCM()->write(x, y, value);
-    } catch (const std::out_of_range& e) {
+    } catch (const std::out_of_range&) {
         emit this->error(QString{"Error writing data: plot index out of range"});
     } catch (const std::runtime_error& e) {
         emit this->error(QString{"Error writing data: "}.append(e.what()));
@@ -243,7 +243,7 @@ DataManager::writeCMVec(std::size_t plotIdx, int y, const std::vector<double>& r
 
     try {
         this->m_datasets.at(plotIdx).datasetCM()->write(y, row);
-    } catch (const std::out_of_range& e) {
+    } catch (const std::out_of_range&) {
         emit this->error(QString{"Error writing data: plot index out of range"});
     } catch (const std::runtime_error& e) {
         emit this->error(QString{"Error writing data: "}.append(e.what()));
@@ -258,7 +258,7 @@ DataManager::writeCMFrame(std::size_t plotIdx, const std::vector<std::vector<dou
 
     try {
         this->m_datasets.at(plotIdx).datasetCM()->write(frame);
-    } catch (const std::out_of_range& e) {
+    } catch (const std::out_of_range&) {
         emit this->error(QString{"Error writing data: plot index out of range"});
     } catch (const std::runtime_error& e) {
         emit this->error(QString{"Error writing data: "}.append(e.what()));
@@ -274,7 +274,7 @@ DataManager::flush(std::size_t plotIdx)
     try {
         this->m_datasets.at(plotIdx).dataset2D()->flush();
         this->m_datasets.at(plotIdx).datasetCM()->flush();
-    } catch (const std::out_of_range& e) {
+    } catch (const std::out_of_range&) {
         emit this->error(QString{"Error flushing data: plot index out of range"});
     } catch (const std::runtime_error& e) {
         emit this->error(QString{"Error flushing data: "}.append(e.what()));
