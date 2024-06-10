@@ -1,4 +1,9 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
-inkscape --export-filename=icon-128.png --export-type=png --export-width=128 --export-height=128 icon.svg
-inkscape --export-filename=icon-256.png --export-type=png --export-width=256 --export-height=256 icon.svg
+sizes=(16 32 64 128 256)
+
+for size in "${sizes[@]}"; do
+    inkscape --export-filename="icon-${size}.png" --export-type=png --export-width="${size}" --export-height="${size}" icon.svg
+done
+
+magick icon-16.png icon-32.png icon.ico
