@@ -5,3 +5,4 @@
 [submodule "app/hdf5"]
 	path = app/hdf5
 	url = git@github.com:HDFGroup/hdf5.git
+	branch = hdf5-1_14_2
