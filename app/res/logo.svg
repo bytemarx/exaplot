@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<!--
+   ExaPlot
+   application logo
+
+   SPDX-License-Identifier: GPL-3.0
+   Copyright (C) 2024 bytemarx
+-->
+
+<svg
+   width="100"
+   height="100"
+   viewBox="0 0 100 100"
+   version="1.1"
+   id="svg1021"
+   inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
+   sodipodi:docname="icon-bg.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1023"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="px"
+     showgrid="true"
+     units="px"
+     scale-x="1"
+     inkscape:zoom="8"
+     inkscape:cx="49.5"
+     inkscape:cy="45.875"
+     inkscape:window-width="1925"
+     inkscape:window-height="1133"
+     inkscape:window-x="26"
+     inkscape:window-y="23"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer4">
+    <inkscape:grid
+       type="xygrid"
+       id="grid1082"
+       spacingx="5"
+       spacingy="5"
+       empspacing="1" />
+  </sodipodi:namedview>
+  <defs
+     id="defs1018">
+    <marker
+       style="overflow:visible"
+       id="arrowMarker"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="TriangleOutL"
+       inkscape:isstock="true">
+      <path
+         transform="scale(0.8)"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
+         d="M 5.77,0 -2.88,5 V -5 Z"
+         id="path3406-62" />
+    </marker>
+  </defs>
+  <g
+     id="layer1"
+     style="display:inline"
+     inkscape:label="grid"
+     inkscape:groupmode="layer"
+     sodipodi:insensitive="true">
+    <rect
+       style="fill:#FFFFFF;fill-opacity:1;fill-rule:evenodd;stroke:#505050;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect1212"
+       width="80"
+       height="80"
+       x="10"
+       y="10" />
+    <g
+       id="grid-lines">
+      <path
+         style="fill:none;stroke:#505050;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 20,10 V 90"
+         id="grid-line" />
+      <use
+         xlink:href="#grid-line"
+         transform="translate(10)"
+         id="use9"
+         x="0"
+         y="0"
+         width="100%"
+         height="100%" />
+      <use
+         xlink:href="#grid-line"
+         transform="translate(20)"
+         id="use11"
+         x="0"
+         y="0"
+         width="100%"
+         height="100%" />
+      <use
+         xlink:href="#grid-line"
+         transform="translate(40)"
+         id="use13"
+         x="0"
+         y="0"
+         width="100%"
+         height="100%" />
+      <use
+         xlink:href="#grid-line"
+         transform="translate(50)"
+         id="use15"
+         x="0"
+         y="0"
+         width="100%"
+         height="100%" />
+      <use
+         xlink:href="#grid-line"
+         transform="translate(60)"
+         id="use17"
+         x="0"
+         y="0"
+         width="100%"
+         height="100%" />
+    </g>
+    <use
+       xlink:href="#grid-lines"
+       transform="rotate(90,50,50)"
+       id="use20"
+       x="0"
+       y="0"
+       width="100%"
+       height="100%" />
+  </g>
+  <g
+     id="layer2"
+     style="display:inline"
+     inkscape:label="axes"
+     inkscape:groupmode="layer"
+     sodipodi:insensitive="true">
+    <g
+       id="axis">
+      <path
+         style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 50,10 V 90"
+         id="axis-line" />
+      <g
+         id="arrowTop">
+        <path
+           style="fill:none;stroke:#000000;stroke-width:0.7;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#arrowMarker)"
+           d="M 50,14 V 4"
+           id="arrowTop-marker"
+           inkscape:transform-center-x="0.11542719"
+           inkscape:transform-center-y="-5.1134054" />
+        <path
+           style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           d="m 50,5 v 5"
+           id="arrowTop-segment" />
+      </g>
+      <g
+         id="arrowBottom"
+         transform="rotate(180,50,50)">
+        <path
+           style="fill:none;stroke:#000000;stroke-width:0.7;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#arrowMarker)"
+           d="M 50,14 V 4"
+           id="arrowBottom-marker" />
+        <path
+           style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           d="m 50,5 v 5"
+           id="arrowBottom-segment" />
+      </g>
+    </g>
+    <use
+       xlink:href="#axis"
+       transform="rotate(90,50,50)"
+       id="use31"
+       x="0"
+       y="0"
+       width="100%"
+       height="100%" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="x"
+     sodipodi:insensitive="true"
+     style="display:inline">
+    <text
+       xml:space="preserve"
+       style="font-size:165px;line-height:1.25;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, ';fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:4px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="10.035579"
+       y="85.403999"
+       id="text46406"
+       transform="scale(0.974,1.0308807)"><tspan
+         sodipodi:role="line"
+         id="tspan46404"
+         x="10.035579"
+         y="85.403999">x</tspan></text>
+  </g>
+</svg>

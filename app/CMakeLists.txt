@@ -47,6 +47,7 @@ add_executable(app
 	$<TARGET_OBJECTS:qplottab>
 	$<TARGET_OBJECTS:qplot>
 	datamanager.cpp
+	res/resources.rc
 )
 add_dependencies(app hdf5)
 

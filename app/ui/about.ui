@@ -53,7 +53,7 @@
    <item>
     <widget class="QLabel" name="label_icon">
      <property name="pixmap">
-      <pixmap resource="../resources.qrc">:/res/icon-128.png</pixmap>
+      <pixmap resource="../resources.qrc">:/res/logo.png</pixmap>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>

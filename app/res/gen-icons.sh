@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
 
-sizes=(16 32 64 128 256)
+SIZES=(16 24 32 48 256)
+FILES=()
 
-for size in "${sizes[@]}"; do
+for size in "${SIZES[@]}"; do
     inkscape --export-filename="icon-${size}.png" --export-type=png --export-width="${size}" --export-height="${size}" icon.svg
+    FILES+=("icon-${size}.png")
 done
 
-magick icon-16.png icon-32.png icon.ico
+magick ${FILES[@]} icon.ico
+
+inkscape --export-filename=logo.png --export-type=png --export-width=128 --export-height=128 logo.svg
