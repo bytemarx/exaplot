@@ -2,6 +2,8 @@
 
 A framework for plotting and collecting real-time data with Python.
 
+![ExaPlot Preview](https://raw.githubusercontent.com/bytemarx/exaplot-gifs/5b231381077c7d591c79a28ce79b33d0f093a5ca/exaplot.gif)
+
 
 A trivial example script:
 ```python
@@ -18,7 +20,7 @@ init(frequency=5.0)
 def run(frequency: float):
     x = -10.0
     while x <= 10.0 and not stop():
-        y = 10 * math.sin(frequency * math.pi * x) * math.exp(-(x**2)/10.0)
+        y = 10 * math.sin(frequency * x) * math.exp(-x**2 / 10.0)
         plot[1](x, y)
         x += 0.001
 ```
