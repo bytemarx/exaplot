@@ -1,0 +1,15 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Fragment>
+    <ComponentGroup Id="AppComponents" Directory="INSTALLFOLDER">
+	    <Files Include="$(env.BUILDDIR)\bin\Release\**">
+        <Exclude Files="$(env.BUILDDIR)\bin\Release\exaplot.exe" />
+      </Files>
+      <Component Id="AppExecutable">
+        <File Source="$(env.BUILDDIR)\bin\Release\exaplot.exe">
+          <Shortcut Id="StartMenuShortcut" Name="!(bind.Property.ProductName)" Directory="AppProgramMenuFolder" />
+          <Shortcut Id="DesktopShortcut" Name="!(bind.Property.ProductName)" Directory="DesktopFolder" />
+        </File>
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+</Wix>

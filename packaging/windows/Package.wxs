@@ -1,0 +1,13 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package Name="ExaPlot" Manufacturer="bytemarx" Version="0.0.0" UpgradeCode="3b2c80ef-cb27-4d90-8850-a262f07aae0a">
+    <MajorUpgrade DowngradeErrorMessage="!(loc.DowngradeError)" />
+
+	<MediaTemplate EmbedCab="yes" />
+
+    <Feature Id="Main">
+      <ComponentGroupRef Id="AppComponents" />
+    </Feature>
+    <Icon Id="AppARPIcon" SourceFile="$(env.ICONFILE)" />
+    <Property Id="ARPPRODUCTICON" Value="AppARPIcon" />
+  </Package>
+</Wix>
