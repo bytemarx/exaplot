@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>384</width>
+    <width>512</width>
     <height>512</height>
    </rect>
   </property>
@@ -61,20 +61,24 @@
     </widget>
    </item>
    <item>
-    <widget class="QPlainTextEdit" name="plainTextEdit_attributions">
-     <property name="font">
-      <font>
-       <pointsize>9</pointsize>
-      </font>
-     </property>
-     <property name="readOnly">
-      <bool>true</bool>
-     </property>
-     <property name="plainText">
-      <string/>
-     </property>
-     <property name="textInteractionFlags">
-      <set>Qt::TextBrowserInteraction</set>
+    <widget class="QTextBrowser" name="textBrowser">
+     <property name="html">
+      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:10pt;&quot;&gt;&amp;quot;The ancients had only the books which they themselves wrote, but we have all their books and moreover all those which have been written from the beginning until our time.… Hence we are like a dwarf perched on the shoulders of a giant. The former sees further than the giant, not because of his own stature, but because of the stature of his bearer. Similarly, we see more than the ancients, because our writings, modest as they are, are added to their great works.&amp;quot;&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;right&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:10pt; font-style:italic;&quot;&gt;- Guillaume de Conches, 1123&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:10pt;&quot;&gt;Acknowledgments:&lt;/span&gt;&lt;/p&gt;
+&lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; font-family:'Times New Roman'; font-size:10pt;&quot; style=&quot; margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;QCustomPlot, a Qt-based plotting library by Emanuel Eichhammer, &amp;lt;https://www.qcustomplot.com&amp;gt;&lt;/li&gt;
+&lt;li style=&quot; font-family:'Times New Roman'; font-size:10pt;&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The HDF5 library, a performant data processing library by the HDF Group, &amp;lt;https://www.hdfgroup.org/solutions/hdf5&amp;gt;&lt;/li&gt;
+&lt;li style=&quot; font-family:'Times New Roman'; font-size:10pt;&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The Qt framework, an application development framework by the Qt Group, &amp;lt;https://www.qt.io/product/framework&amp;gt;&lt;/li&gt;
+&lt;li style=&quot; font-family:'Times New Roman'; font-size:10pt;&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;CPython, the reference implementation of Python, by the Python Software Foundation, &amp;lt;https://github.com/python/cpython&amp;gt;&lt;/li&gt;
+&lt;li style=&quot; font-family:'Times New Roman'; font-size:10pt;&quot; style=&quot; margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;and the many others that contribute to the free and open source software that this project is built on&lt;/li&gt;&lt;/ul&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Times New Roman'; font-size:10pt;&quot;&gt;Attributions:&lt;/span&gt;&lt;/p&gt;
+&lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; font-family:'Times New Roman'; font-size:10pt;&quot; style=&quot; margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&amp;quot;Plot Editor Apply Green Checkmark Icon&amp;quot; by Emoji One, CC BY-SA 4.0 &amp;lt;https://creativecommons.org/licenses/by-sa/4.0&amp;gt;, via Wikimedia Commons&lt;/li&gt;
+&lt;li style=&quot; font-family:'Times New Roman'; font-size:10pt;&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&amp;quot;Plot Editor Apply Red Exclamation Mark Icon&amp;quot; based on &amp;quot;Green Checkmark Icon&amp;quot; by Emoji One, modified by bytemarx/exaplot, CC BY-SA 4.0 &amp;lt;https://creativecommons.org/licenses/by-sa/4.0&amp;gt;, via Wikimedia Commons&lt;/li&gt;
+&lt;li style=&quot; font-family:'Times New Roman'; font-size:10pt;&quot; style=&quot; margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Quote by Guillaume de Conches, 1123, from Jeauneau, Édouard (2009). &lt;span style=&quot; font-style:italic;&quot;&gt;Rethinking the School of Chartres&lt;/span&gt;. Univ. of Toronto Press. p. 50.&lt;/li&gt;&lt;/ul&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
     </widget>
    </item>
