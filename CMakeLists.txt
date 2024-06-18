@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.22)
 
 project(
     ExaPlot
-    VERSION 0.0.0
+    VERSION 0.9.0
     LANGUAGES CXX
 )
 

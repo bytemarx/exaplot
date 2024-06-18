@@ -1,5 +1,5 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
-  <Package Name="ExaPlot" Manufacturer="bytemarx" Version="0.0.0" UpgradeCode="3b2c80ef-cb27-4d90-8850-a262f07aae0a">
+  <Package Name="ExaPlot" Manufacturer="bytemarx" Version="0.9.0" UpgradeCode="3b2c80ef-cb27-4d90-8850-a262f07aae0a">
     <MajorUpgrade DowngradeErrorMessage="!(loc.DowngradeError)" />
 
 	  <MediaTemplate EmbedCab="yes" />
