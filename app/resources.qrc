@@ -3,5 +3,6 @@
     <file>res/logo.png</file>
     <file>res/checkmark.svg</file>
     <file>res/exclamation.svg</file>
+    <file>res/about.html</file>
   </qresource>
 </RCC>
