@@ -62,23 +62,26 @@
 <dd>
 <p>The <code>plot</code> variable acts as a container for the active plots (or more specifically, a container of the plot handles). A specific plot is accessed by using its plot ID as the index (the ID of each plot can be found within the Plot Editor).</p>
 <p>Data is plotted (and stored to the data file, if enabled) by calling the plot handle directly:</p>
-</dd>
 
 ```python
 exaplot.plot[1](0, 1)
 ```
 
-<dd>
 <p>We can also assign a variable to a plot's handle:</p>
-</dd>
 
 ```python
 plot_1 = exaplot.plot[1]
 plot_1(0, 1)
 ```
 
-<dd>
 <p>The plot handle's signature/overload depends on the plot's active plot type. Each overload has a <em>write</em> keyword argument that can be used to omit the data from being stored in the data file (if the data file is enabled).</p>
+
+<p>To clear a plot of any type, call the plot with no arguments:</p>
+
+```python
+# clear the plot
+exaplot.plot[1]()
+```
 
 <p><h3>2-D plot:</h3></p>
 <p><code><b>plot[</b><em>...</em><b>](</b><em>x, y, *, write=True</em><b>)</b></code></p>

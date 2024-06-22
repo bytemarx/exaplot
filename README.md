@@ -122,3 +122,8 @@ with h5py.File('data.hdf5', 'r') as f:
     dataset = f['dataset1.twodimen']
     ...
 ```
+
+
+## Further Reading
+API documentation can be found [here](docs/API.md) (and similarly in the library's
+[stub file](python/exaplot.pyi)). Several example scripts are also provided as a reference.
