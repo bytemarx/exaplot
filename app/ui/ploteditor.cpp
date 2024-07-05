@@ -12,6 +12,7 @@
 #include <QSvgRenderer>
 
 #include "ploteditor.hpp"
+#include "plotarrangement.hpp"
 
 
 static QPixmap
@@ -141,23 +142,8 @@ PlotEditor::applyArrangement()
 void
 PlotEditor::showArrangement()
 {
-    QString arrangementStr('[');
-    for (const auto& button : this->ui.buttonGrid->arrangement()) {
-        arrangementStr.append('(');
-        arrangementStr.append(QString::number(button.x));
-        arrangementStr.append(',');
-        arrangementStr.append(QString::number(button.dx));
-        arrangementStr.append(',');
-        arrangementStr.append(QString::number(button.y));
-        arrangementStr.append(',');
-        arrangementStr.append(QString::number(button.dy));
-        arrangementStr.append("),");
-    }
-    arrangementStr.back() = QChar(']');
-
-    QMessageBox messageBox;
-    messageBox.setText(arrangementStr);
-    messageBox.exec();
+    PlotArrangement plotArrangement{this, this->ui.buttonGrid->arrangement()};
+    plotArrangement.exec();
 }
 
 
