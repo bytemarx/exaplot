@@ -15,29 +15,19 @@
 #include "plotarrangement.hpp"
 
 
-static QPixmap
-buttonGridStatusPixmap(bool status)
-{
-    QPixmap pixmap(24, 24);
-    pixmap.fill(Qt::transparent);
-    QPainter painter(&pixmap);
-    if (status)
-        QSvgRenderer(QStringLiteral(":/res/checkmark.svg")).render(&painter);
-    else
-        QSvgRenderer(QStringLiteral(":/res/exclamation.svg")).render(&painter);
-    return pixmap;
-}
-
-
 PlotEditor::PlotEditor(QWidget* parent)
     : QDialog{parent, Qt::Window}
 {
     this->ui.setupUi(this);
     this->applyArrangement();
+    this->buttonGridStatusPixmaps = std::make_pair(
+        this->style()->standardIcon(QStyle::SP_DialogApplyButton).pixmap(0.8 * this->ui.label_buttonGridStatus->size()),
+        this->style()->standardIcon(QStyle::SP_MessageBoxWarning).pixmap(0.8 * this->ui.label_buttonGridStatus->size())
+    );
 
     QObject::connect(
         this->ui.buttonGrid, &QButtonGrid::gridChanged,
-        [=] { this->ui.label_buttonGridStatus->setPixmap(buttonGridStatusPixmap(false)); }
+        [=] { this->ui.label_buttonGridStatus->setPixmap(this->buttonGridStatusPixmaps.second); }
     );
     QObject::connect(
         this->ui.pushButton_buttonGridApply, &QPushButton::clicked,
@@ -134,7 +124,7 @@ PlotEditor::done(int r)
 void
 PlotEditor::applyArrangement()
 {
-    this->ui.label_buttonGridStatus->setPixmap(buttonGridStatusPixmap(true));
+    this->ui.label_buttonGridStatus->setPixmap(this->buttonGridStatusPixmaps.first);
     this->setPlotTabs(this->ui.buttonGrid->nButtons());
 }
 

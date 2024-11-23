@@ -12,6 +12,7 @@
 #include "qplottab.hpp"
 #include "qplot.hpp"
 
+#include <utility>
 #include <vector>
 
 
@@ -53,4 +54,5 @@ private:
 
     Ui::PlotDialog ui;
     std::vector<QPlotTab*> plotTabs;
+    std::pair<QPixmap, QPixmap> buttonGridStatusPixmaps;
 };
